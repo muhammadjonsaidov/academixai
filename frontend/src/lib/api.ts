@@ -54,19 +54,10 @@ export const getCourses = () => api.get<Course[]>("/api/courses");
 export const getCourse = (id: number) => api.get<Course>(`/api/courses/${id}`);
 export const getLesson = (courseId: number, lessonId: number) =>
   api.get<Lesson>(`/api/courses/${courseId}/lessons/${lessonId}`);
-export const enrollCourse = (courseId: number) =>
-  api.post<void>(`/api/courses/${courseId}/enroll`, {});
-
 // ── Teacher ───────────────────────────────────────────────────────────────────
 export const getTeacherCourses = () => api.get<Course[]>("/api/teacher/courses");
-export const createCourse = (data: { title: string; subject: string; gradeLevel: string }) =>
-  api.post<Course>("/api/teacher/courses", data);
-export const addLesson = (courseId: number, data: { title: string; contentUz: string; orderIndex: number }) =>
-  api.post<Lesson>(`/api/teacher/courses/${courseId}/lessons`, data);
 export const getCourseAnalytics = (courseId: number) =>
   api.get<{ studentCount: number; avgScore: number; aiInsight: string }>(`/api/teacher/courses/${courseId}/analytics`);
-export const generateLessonDraft = (data: { subject: string; topic: string; gradeLevel: string }) =>
-  api.post<{ draft: string }>("/api/teacher/lesson-draft", data);
 
 // ── Chat ──────────────────────────────────────────────────────────────────────
 export interface ChatMessage {

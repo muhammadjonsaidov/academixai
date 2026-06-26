@@ -1,4 +1,3 @@
-import logoAsset from "@/assets/academixai-logo.svg.asset.json";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
@@ -8,10 +7,10 @@ interface LogoProps {
 }
 
 const sizeMap = {
-  sm: "h-7 w-7",
-  md: "h-9 w-9",
-  lg: "h-12 w-12",
-  xl: "h-16 w-16",
+  sm: "h-7 w-7 text-sm",
+  md: "h-9 w-9 text-base",
+  lg: "h-12 w-12 text-lg",
+  xl: "h-16 w-16 text-2xl",
 };
 
 const textSizeMap = {
@@ -24,12 +23,14 @@ const textSizeMap = {
 export function Logo({ className, showWordmark = false, size = "md" }: LogoProps) {
   return (
     <div className={cn("inline-flex items-center gap-2.5", className)}>
-      <img
-        src={logoAsset.url}
-        alt="AcademiXAI"
-        className={cn(sizeMap[size], "shrink-0 object-contain")}
-        draggable={false}
-      />
+      <div
+        className={cn(
+          "shrink-0 rounded-xl bg-gradient-to-br from-primary to-primary/70 font-display font-bold text-primary-foreground grid place-items-center",
+          sizeMap[size],
+        )}
+      >
+        A
+      </div>
       {showWordmark && (
         <span
           className={cn(

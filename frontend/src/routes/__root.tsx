@@ -7,10 +7,9 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
@@ -42,9 +41,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background bg-app-gradient px-4">
@@ -96,8 +92,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: "AcademiXAI — O'zbekiston uchun AI asosidagi ta'lim platformasi" },
       { name: "description", content: "O'quv Markazi AI, O'zbekiston ta'lim tizimi uchun shaxsiy AI o'qituvchi va boshqaruv tizimi." },
       { name: "twitter:description", content: "O'quv Markazi AI, O'zbekiston ta'lim tizimi uchun shaxsiy AI o'qituvchi va boshqaruv tizimi." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2204d822-050b-4a55-ae2a-9b68d7c2444a/id-preview-54580bd9--fccba868-32f2-495f-86a2-342645334b26.lovable.app-1782468957244.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2204d822-050b-4a55-ae2a-9b68d7c2444a/id-preview-54580bd9--fccba868-32f2-495f-86a2-342645334b26.lovable.app-1782468957244.png" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),

@@ -17,11 +17,6 @@ export function uzDate(input: string | Date, opts: { withYear?: boolean; full?: 
   return `${day}-${month}${year}`;
 }
 
-export function uzDateTime(input: string | Date): string {
-  const d = typeof input === "string" ? new Date(input) : input;
-  return `${uzDate(d)}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
 export function uzTime(input: string | Date): string {
   const d = typeof input === "string" ? new Date(input) : input;
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
