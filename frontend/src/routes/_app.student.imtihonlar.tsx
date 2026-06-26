@@ -1,0 +1,238 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import {
+  AlertCircle, CheckCircle2, Clock, GraduationCap, Loader2, PlayCircle, Sparkles,
+} from "lucide-react";
+
+import { PageHeader } from "@/components/shell/PageHeader";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import { getExamResults, getCourses, type ExamResultDetail } from "@/lib/api";
+import { uzDate } from "@/lib/format/date";
+import { cn } from "@/lib/utils";
+
+export const Route = createFileRoute("/_app/student/imtihonlar")({
+  head: () => ({ meta: [{ title: "Imtihonlar · AcademiXAI" }] }),
+  component: ExamsPage,
+});
+
+function ExamsPage() {
+  const navigate = useNavigate();
+  const [viewing, setViewing] = useState<ExamResultDetail | null>(null);
+
+  const { data: results = [], isLoading: resultsLoading } = useQuery({
+    queryKey: ["exam-results"],
+    queryFn: getExamResults,
+  });
+
+  const { data: courses = [], isLoading: coursesLoading } = useQuery({
+    queryKey: ["courses"],
+    queryFn: getCourses,
+  });
+
+  const isLoading = resultsLoading || coursesLoading;
+
+  // Completed exams from results
+  const completedExamLessonIds = new Set(results.map((r) => r.lessonId).filter(Boolean));
+
+  // Available lessons = enrolled course lessons not yet examined
+  const availableLessons: Array<{ courseId: number; courseTitle: string; lessonId: number; lessonTitle: string }> = [];
+  for (const course of courses) {
+    for (const lesson of course.lessons ?? []) {
+      if (!completedExamLessonIds.has(lesson.id)) {
+        availableLessons.push({
+          courseId: course.id,
+          courseTitle: course.title,
+          lessonId: lesson.id,
+          lessonTitle: (lesson as any).titleUz ?? lesson.title,
+        });
+      }
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="Imtihonlar"
+        description="Mavjud va tugatilgan barcha imtihonlar bu yerda."
+      />
+
+      {/* Available to take */}
+      {availableLessons.length > 0 && (
+        <section>
+          <h2 className="mb-3 font-display text-lg font-semibold">Topshirish mumkin</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            {availableLessons.slice(0, 6).map((l) => (
+              <div
+                key={l.lessonId}
+                className="flex flex-col rounded-2xl border border-border bg-card p-5 shadow-soft hover:shadow-elevated transition-shadow"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                    <GraduationCap className="h-5 w-5" />
+                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-accent/30 px-2.5 py-1 text-xs font-medium text-accent-foreground">
+                    <PlayCircle className="h-3 w-3" />
+                    Boshlash mumkin
+                  </span>
+                </div>
+                <h3 className="mt-3 font-display text-base font-semibold">{l.lessonTitle}</h3>
+                <p className="text-xs text-muted-foreground">{l.courseTitle}</p>
+
+                <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-muted p-3 text-center">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Savollar</p>
+                    <p className="mt-0.5 text-sm font-semibold">5</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Vaqt</p>
+                    <p className="mt-0.5 text-sm font-semibold">5 daq.</p>
+                  </div>
+                </div>
+
+                <Button
+                  className="mt-4"
+                  onClick={() => navigate({ to: `/student/imtihon/${l.lessonId}` as never })}
+                >
+                  Boshlash
+                </Button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Completed exams */}
+      {results.length > 0 && (
+        <section>
+          <h2 className="mb-3 font-display text-lg font-semibold">Tugatilgan imtihonlar</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            {results.map((r) => (
+              <div
+                key={r.id}
+                className="flex flex-col rounded-2xl border border-border bg-card p-5 shadow-soft hover:shadow-elevated transition-shadow"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-success/10 text-success">
+                    <CheckCircle2 className="h-5 w-5" />
+                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-1 text-xs font-medium text-success">
+                    <CheckCircle2 className="h-3 w-3" />
+                    Tugatilgan
+                  </span>
+                </div>
+                <h3 className="mt-3 font-display text-base font-semibold">
+                  {r.lessonTitle ?? "Imtihon"}
+                </h3>
+                <p className="text-xs text-muted-foreground">{r.courseName ?? ""}</p>
+
+                <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-muted p-3 text-center">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Ball</p>
+                    <p
+                      className={cn(
+                        "mt-0.5 text-lg font-bold",
+                        r.score >= 80 ? "text-success" : r.score >= 60 ? "text-warning" : "text-destructive",
+                      )}
+                    >
+                      {r.score}%
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Sana</p>
+                    <p className="mt-0.5 text-sm font-semibold">
+                      {uzDate(new Date(r.takenAt))}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex gap-2">
+                  <Button variant="outline" className="flex-1" onClick={() => setViewing(r)}>
+                    Natijani ko'rish
+                  </Button>
+                  {r.lessonId && (
+                    <Button
+                      variant="ghost"
+                      className="gap-1.5"
+                      onClick={() => navigate({ to: `/student/imtihon/${r.lessonId}` as never })}
+                    >
+                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                      Qayta
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Empty state */}
+      {results.length === 0 && availableLessons.length === 0 && (
+        <div className="flex h-48 flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-card text-center">
+          <GraduationCap className="h-10 w-10 text-muted-foreground/30" />
+          <p className="text-sm text-muted-foreground">Hali hech qanday imtihon topshirilmagan</p>
+          <Button variant="outline" onClick={() => navigate({ to: "/student/kurslar" })}>
+            Kurslarga o'tish
+          </Button>
+        </div>
+      )}
+
+      {/* Result detail dialog */}
+      <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
+        <DialogContent className="max-w-lg">
+          {viewing && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="font-display text-xl">
+                  {viewing.lessonTitle ?? "Imtihon natijasi"}
+                </DialogTitle>
+                <DialogDescription>
+                  Ball: <span className="font-semibold text-foreground">{viewing.score}%</span>
+                  {viewing.courseName && ` · ${viewing.courseName}`}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-2 text-sm">
+                {viewing.feedbackUz ? (
+                  <>
+                    <div className={cn("rounded-xl p-4", viewing.score >= 60 ? "bg-success/10" : "bg-warning/10")}>
+                      <p className={cn("font-medium mb-2", viewing.score >= 60 ? "text-success" : "text-warning")}>
+                        {viewing.score >= 80 ? "A'lo natija!" : viewing.score >= 60 ? "Yaxshi natija" : "Davom eting!"}
+                      </p>
+                      <p className="text-foreground leading-relaxed">{viewing.feedbackUz}</p>
+                    </div>
+                    {viewing.lessonId && (
+                      <Button className="w-full" onClick={() => {
+                        setViewing(null);
+                        navigate({ to: `/student/imtihon/${viewing.lessonId}` as never });
+                      }}>
+                        <Sparkles className="h-4 w-4" />
+                        Qayta topshirish
+                      </Button>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center gap-2 py-6 text-center">
+                    <AlertCircle className="h-8 w-8 text-muted-foreground/40" />
+                    <p className="text-sm text-muted-foreground">AI fikri mavjud emas</p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

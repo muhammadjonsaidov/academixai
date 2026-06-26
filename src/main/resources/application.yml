@@ -1,0 +1,59 @@
+spring:
+  config:
+    import: "optional:file:.env[.properties]"
+  application:
+    name: academix
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/academix
+    username: academix_user
+    password: academix_pass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  sql:
+    init:
+      mode: always
+      continue-on-error: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+
+  ai:
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY:placeholder}
+        chat:
+          options:
+            model: gemini-3.1-flash-lite
+            max-output-tokens: 1024
+            temperature: 0.7
+
+server:
+  port: 8080
+  tomcat:
+    max-http-form-post-size: 2MB
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+jwt:
+  secret: ${JWT_SECRET:academix-super-secret-jwt-key-2026-forkbomb-hackathon-minimum-32-chars}
+  expiration: 86400000
+
+logging:
+  level:
+    uz.forkbomb: DEBUG
+    org.springframework.security: WARN
+    org.springframework.ai: INFO

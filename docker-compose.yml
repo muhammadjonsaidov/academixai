@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: academix_db
+    environment:
+      POSTGRES_DB: academix
+      POSTGRES_USER: academix_user
+      POSTGRES_PASSWORD: academix_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - academix_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U academix_user -d academix"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: academix_redis
+    ports:
+      - "6379:6379"
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  ngrok:
+    image: ngrok/ngrok:alpine
+    container_name: academix_ngrok
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    command: http host.docker.internal:8080
+    ports:
+      - "4040:4040"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    profiles:
+      - tunnel
+
+volumes:
+  academix_data:
