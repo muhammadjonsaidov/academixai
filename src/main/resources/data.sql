@@ -1,3 +1,6 @@
+-- ─── EXTENSIONS ──────────────────────────────────────────────
+CREATE EXTENSION IF NOT EXISTS vector;
+
 -- ─── TABLES ─────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS users (
@@ -78,6 +81,63 @@ CREATE TABLE IF NOT EXISTS attendance (
     date        DATE NOT NULL,
     present     BOOLEAN DEFAULT TRUE,
     UNIQUE(student_id, course_id, date)
+);
+
+CREATE TABLE IF NOT EXISTS teacher_documents (
+    id          BIGSERIAL PRIMARY KEY,
+    teacher_id  BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    file_name   VARCHAR(255) NOT NULL,
+    file_type   VARCHAR(50) DEFAULT 'txt',
+    tag         VARCHAR(100) DEFAULT 'lesson_plan',
+    subject     VARCHAR(255),
+    course_id   BIGINT REFERENCES courses(id) ON DELETE SET NULL,
+    raw_text    TEXT,
+    chunk_count INTEGER DEFAULT 0,
+    created_at  TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS document_chunks (
+    id          BIGSERIAL PRIMARY KEY,
+    document_id BIGINT REFERENCES teacher_documents(id) ON DELETE CASCADE,
+    teacher_id  BIGINT NOT NULL,
+    content     TEXT NOT NULL,
+    chunk_index INTEGER DEFAULT 0,
+    embedding   vector(768),
+    created_at  TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_chunks_teacher ON document_chunks(teacher_id);
+
+CREATE TABLE IF NOT EXISTS sentiment_logs (
+    id              BIGSERIAL PRIMARY KEY,
+    student_id      BIGINT REFERENCES users(id),
+    chat_message_id BIGINT REFERENCES chat_messages(id),
+    sentiment_score DECIMAL(4,3),
+    sentiment_label VARCHAR(50),
+    created_at      TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS progress_snapshots (
+    id               BIGSERIAL PRIMARY KEY,
+    student_id       BIGINT REFERENCES users(id),
+    snapshot_type    VARCHAR(50) DEFAULT 'weekly',
+    avg_score        DECIMAL(5,2),
+    chat_count       INTEGER DEFAULT 0,
+    top_subject      VARCHAR(255),
+    weak_subject     VARCHAR(255),
+    engagement_score DECIMAL(5,2),
+    sentiment_avg    DECIMAL(4,3),
+    ai_narrative     TEXT,
+    snapshot_date    TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+    id          BIGSERIAL PRIMARY KEY,
+    user_id     BIGINT REFERENCES users(id),
+    type        VARCHAR(100) NOT NULL,
+    title       VARCHAR(500),
+    body        TEXT,
+    is_read     BOOLEAN DEFAULT FALSE,
+    created_at  TIMESTAMP DEFAULT NOW()
 );
 
 -- ─── SEED USERS ──────────────────────────────────────────────

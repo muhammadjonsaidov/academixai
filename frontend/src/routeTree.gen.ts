@@ -33,6 +33,7 @@ import { Route as AppStudentKurslarRouteImport } from './routes/_app.student.kur
 import { Route as AppStudentKasbiyYolRouteImport } from './routes/_app.student.kasbiy-yol'
 import { Route as AppStudentImtihonlarRouteImport } from './routes/_app.student.imtihonlar'
 import { Route as AppStudentEslatmalarRouteImport } from './routes/_app.student.eslatmalar'
+import { Route as AppStudentBildirishnomalarRouteImport } from './routes/_app.student.bildirishnomalar'
 import { Route as AppStudentAiUstozRouteImport } from './routes/_app.student.ai-ustoz'
 import { Route as AppStudentImtihonLessonIdRouteImport } from './routes/_app.student.imtihon.$lessonId'
 import { Route as AppStudentKurslarCourseIdDarslarLessonIdRouteImport } from './routes/_app.student.kurslar.$courseId.darslar.$lessonId'
@@ -156,6 +157,12 @@ const AppStudentEslatmalarRoute = AppStudentEslatmalarRouteImport.update({
   path: '/eslatmalar',
   getParentRoute: () => AppStudentRoute,
 } as any)
+const AppStudentBildirishnomalarRoute =
+  AppStudentBildirishnomalarRouteImport.update({
+    id: '/bildirishnomalar',
+    path: '/bildirishnomalar',
+    getParentRoute: () => AppStudentRoute,
+  } as any)
 const AppStudentAiUstozRoute = AppStudentAiUstozRouteImport.update({
   id: '/ai-ustoz',
   path: '/ai-ustoz',
@@ -186,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/auth/register': typeof AuthRegisterRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/student/ai-ustoz': typeof AppStudentAiUstozRoute
+  '/student/bildirishnomalar': typeof AppStudentBildirishnomalarRoute
   '/student/eslatmalar': typeof AppStudentEslatmalarRoute
   '/student/imtihonlar': typeof AppStudentImtihonlarRoute
   '/student/kasbiy-yol': typeof AppStudentKasbiyYolRoute
@@ -210,6 +218,7 @@ export interface FileRoutesByTo {
   '/auth/register': typeof AuthRegisterRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/student/ai-ustoz': typeof AppStudentAiUstozRoute
+  '/student/bildirishnomalar': typeof AppStudentBildirishnomalarRoute
   '/student/eslatmalar': typeof AppStudentEslatmalarRoute
   '/student/imtihonlar': typeof AppStudentImtihonlarRoute
   '/student/kasbiy-yol': typeof AppStudentKasbiyYolRoute
@@ -240,6 +249,7 @@ export interface FileRoutesById {
   '/auth/register': typeof AuthRegisterRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/_app/student/ai-ustoz': typeof AppStudentAiUstozRoute
+  '/_app/student/bildirishnomalar': typeof AppStudentBildirishnomalarRoute
   '/_app/student/eslatmalar': typeof AppStudentEslatmalarRoute
   '/_app/student/imtihonlar': typeof AppStudentImtihonlarRoute
   '/_app/student/kasbiy-yol': typeof AppStudentKasbiyYolRoute
@@ -270,6 +280,7 @@ export interface FileRouteTypes {
     | '/auth/register'
     | '/auth/verify'
     | '/student/ai-ustoz'
+    | '/student/bildirishnomalar'
     | '/student/eslatmalar'
     | '/student/imtihonlar'
     | '/student/kasbiy-yol'
@@ -294,6 +305,7 @@ export interface FileRouteTypes {
     | '/auth/register'
     | '/auth/verify'
     | '/student/ai-ustoz'
+    | '/student/bildirishnomalar'
     | '/student/eslatmalar'
     | '/student/imtihonlar'
     | '/student/kasbiy-yol'
@@ -323,6 +335,7 @@ export interface FileRouteTypes {
     | '/auth/register'
     | '/auth/verify'
     | '/_app/student/ai-ustoz'
+    | '/_app/student/bildirishnomalar'
     | '/_app/student/eslatmalar'
     | '/_app/student/imtihonlar'
     | '/_app/student/kasbiy-yol'
@@ -523,6 +536,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppStudentAiUstozRouteImport
       parentRoute: typeof AppStudentRoute
     }
+    '/_app/student/bildirishnomalar': {
+      id: '/_app/student/bildirishnomalar'
+      path: '/bildirishnomalar'
+      fullPath: '/student/bildirishnomalar'
+      preLoaderRoute: typeof AppStudentBildirishnomalarRouteImport
+      parentRoute: typeof AppStudentRoute
+    }
     '/_app/student/imtihon/$lessonId': {
       id: '/_app/student/imtihon/$lessonId'
       path: '/imtihon/$lessonId'
@@ -578,6 +598,7 @@ const AppStudentKurslarRouteWithChildren =
 
 interface AppStudentRouteChildren {
   AppStudentAiUstozRoute: typeof AppStudentAiUstozRoute
+  AppStudentBildirishnomalarRoute: typeof AppStudentBildirishnomalarRoute
   AppStudentEslatmalarRoute: typeof AppStudentEslatmalarRoute
   AppStudentImtihonlarRoute: typeof AppStudentImtihonlarRoute
   AppStudentKasbiyYolRoute: typeof AppStudentKasbiyYolRoute
@@ -593,6 +614,7 @@ interface AppStudentRouteChildren {
 
 const AppStudentRouteChildren: AppStudentRouteChildren = {
   AppStudentAiUstozRoute: AppStudentAiUstozRoute,
+  AppStudentBildirishnomalarRoute: AppStudentBildirishnomalarRoute,
   AppStudentEslatmalarRoute: AppStudentEslatmalarRoute,
   AppStudentImtihonlarRoute: AppStudentImtihonlarRoute,
   AppStudentKasbiyYolRoute: AppStudentKasbiyYolRoute,

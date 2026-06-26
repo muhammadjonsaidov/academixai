@@ -67,8 +67,13 @@ export interface ChatMessage {
   createdAt?: string;
 }
 
+export interface ChatSource { fileName: string; snippet: string; }
+export interface ChatResponse {
+  reply: string; response: string; timestamp: string;
+  sources?: ChatSource[]; usedKnowledgeBase?: boolean;
+}
 export const sendChat = (message: string, lessonId?: number) =>
-  api.post<{ reply: string; response?: string; timestamp: string }>("/api/chat", { message, lessonId })
+  api.post<ChatResponse>("/api/chat", { message, lessonId })
     .then(r => ({ ...r, response: r.reply ?? r.response ?? "" }));
 export const getChatHistory = () => api.get<ChatMessage[]>("/api/chat/history");
 
@@ -113,17 +118,64 @@ export const gradeExam = (data: { studentId: number; lessonId: number; answers: 
   api.post<{ score: number; feedbackUz: string }>("/api/exam/grade", data);
 export const getExamResults = () => api.get<ExamResultDetail[]>("/api/exam/results");
 
+// ── Notifications ─────────────────────────────────────────────────────────────
+
+export interface AppNotification {
+  id: number; type: string; title: string; body: string; isRead: boolean; createdAt: string;
+}
+export const getNotifications = () =>
+  api.get<{ notifications: AppNotification[]; unreadCount: number }>("/api/student/notifications");
+export const markNotificationRead = (id: number) =>
+  api.put<{ message: string }>(`/api/student/notifications/${id}/read`, {});
+
+// ── Documents (Teacher RAG) ───────────────────────────────────────────────────
+
+export interface TeacherDocument {
+  id: number; fileName: string; fileType: string; tag: string; subject?: string;
+  chunkCount: number; createdAt: string;
+}
+export const getTeacherDocuments = () => api.get<TeacherDocument[]>("/api/teacher/documents");
+export const deleteTeacherDocument = (id: number) =>
+  api.delete<{ message: string }>(`/api/teacher/documents/${id}`);
+
+export async function uploadTeacherDocument(file: File, tag: string, subject?: string): Promise<TeacherDocument> {
+  const { getToken } = await import("./auth");
+  const token = getToken();
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("tag", tag);
+  if (subject) fd.append("subject", subject);
+  const res = await fetch("/api/teacher/documents", {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: fd,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as { error?: string }).error ?? `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
 // ── Parent ────────────────────────────────────────────────────────────────────
 
+export interface SentimentPoint { score: number; label: string; createdAt: string; }
 export interface ChildInfo {
-  hasChild: boolean;
-  child?: { id: number; fullName: string; email: string };
-  avgScore?: number;
-  chatCount?: number;
-  recentExams?: ExamResultDetail[];
-  enrolledCourses?: Array<{ id: number; title: string; subject: string; emoji: string }>;
+  hasChildren: boolean;
+  children: Array<{
+    id: number; fullName: string; email: string;
+    avgScore: number; chatCount: number;
+    recentExams: ExamResultDetail[];
+    enrolledCourses: Array<{ id: number; title: string; subject: string; emoji: string }>;
+    sentimentTrend: SentimentPoint[];
+    latestNarrative?: string;
+  }>;
 }
-export const getChildInfo = () => api.get<ChildInfo>("/api/parent/child");
+export const getChildInfo = () => api.get<ChildInfo>("/api/parent/children");
+export const askAboutChild = (question: string) =>
+  api.post<{ answer: string; childName: string }>("/api/parent/ask", { question });
+export const generateChildReport = (childId: number) =>
+  api.post<{ narrative: string; avgScore: number }>(`/api/parent/children/${childId}/report`, {});
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
 export interface AdminUser {

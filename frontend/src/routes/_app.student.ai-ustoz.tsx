@@ -5,7 +5,7 @@ import { Image, MessageSquare, Mic, Paperclip, Plus, Send, Sparkles } from "luci
 
 import { PageHeader } from "@/components/shell/PageHeader";
 import { Button } from "@/components/ui/button";
-import { getChatHistory, sendChat } from "@/lib/api";
+import { getChatHistory, sendChat, type ChatSource } from "@/lib/api";
 import { uzTime } from "@/lib/format/date";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -15,7 +15,10 @@ export const Route = createFileRoute("/_app/student/ai-ustoz")({
   component: AiTeacherPage,
 });
 
-interface Msg { id: string; role: "user" | "assistant"; content: string; time: string; }
+interface Msg {
+  id: string; role: "user" | "assistant"; content: string; time: string;
+  sources?: ChatSource[]; usedKnowledgeBase?: boolean;
+}
 
 const STARTERS = [
   "Kvadrat tenglamalarni qanday yechish kerak?",
@@ -94,7 +97,14 @@ function AiTeacherPage() {
       const data = await sendChat(text);
       setMessages((m) => [
         ...m,
-        { id: crypto.randomUUID(), role: "assistant", content: data.response, time: uzTime(new Date()) },
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: data.response,
+          time: uzTime(new Date()),
+          sources: data.sources,
+          usedKnowledgeBase: data.usedKnowledgeBase,
+        },
       ]);
     } catch {
       toast.error("Xato yuz berdi, qayta urinib ko'ring");
@@ -195,17 +205,33 @@ function AiTeacherPage() {
                         <Sparkles className="h-4 w-4" />
                       </div>
                     )}
-                    <div
-                      className={cn(
-                        "max-w-[80%] whitespace-pre-line rounded-2xl px-4 py-2.5 text-sm",
-                        m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
-                      )}
-                    >
-                      {m.content}
-                      {m.time && (
-                        <p className={cn("mt-1.5 text-[10px]", m.role === "user" ? "text-primary-foreground/70" : "text-muted-foreground")}>
-                          {m.time}
-                        </p>
+                    <div className="max-w-[80%] flex flex-col gap-1">
+                      <div
+                        className={cn(
+                          "whitespace-pre-line rounded-2xl px-4 py-2.5 text-sm",
+                          m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
+                        )}
+                      >
+                        {m.content}
+                        {m.time && (
+                          <p className={cn("mt-1.5 text-[10px]", m.role === "user" ? "text-primary-foreground/70" : "text-muted-foreground")}>
+                            {m.time}
+                          </p>
+                        )}
+                      </div>
+                      {m.role === "assistant" && m.usedKnowledgeBase && m.sources && m.sources.length > 0 && (
+                        <div className="flex flex-wrap gap-1 ml-1">
+                          {m.sources.map((s, i) => (
+                            <span
+                              key={i}
+                              title={s.snippet}
+                              className="rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-[10px] font-medium text-primary flex items-center gap-1"
+                            >
+                              <Sparkles className="h-2.5 w-2.5" />
+                              {s.fileName}
+                            </span>
+                          ))}
+                        </div>
                       )}
                     </div>
                   </li>

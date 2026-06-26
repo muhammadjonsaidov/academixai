@@ -19,6 +19,7 @@ import {
   Brain,
   HeartHandshake,
   School,
+  Bell,
   type LucideIcon,
 } from "lucide-react";
 
@@ -46,6 +47,7 @@ export const studentNav: NavSection[] = [
       { label: "Eslatmalar", to: "/student/eslatmalar", icon: NotebookPen },
       { label: "Yutuqlar", to: "/student/yutuqlar", icon: Trophy },
       { label: "Kasbiy yo'l", to: "/student/kasbiy-yol", icon: Compass },
+      { label: "Bildirishnomalar", to: "/student/bildirishnomalar", icon: Bell },
     ],
   },
   {

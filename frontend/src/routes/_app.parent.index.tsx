@@ -1,25 +1,55 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import {
-  AlertCircle, BookOpen, GraduationCap, MessageCircle, Sparkles, Trophy, User,
+  BookOpen, GraduationCap, MessageCircle, Send, Sparkles, Trophy, User, TrendingUp, TrendingDown,
 } from "lucide-react";
 
 import { PageHeader } from "@/components/shell/PageHeader";
 import { StatCard } from "@/components/shell/StatCard";
 import { Button } from "@/components/ui/button";
-import { getChildInfo } from "@/lib/api";
+import { Input } from "@/components/ui/input";
+import { getChildInfo, askAboutChild, generateChildReport } from "@/lib/api";
 import { uzDate } from "@/lib/format/date";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/parent/")({
   head: () => ({ meta: [{ title: "Ota-ona paneli · AcademiXAI" }] }),
   component: ParentDashboard,
 });
 
+function SentimentBadge({ score }: { score: number }) {
+  if (score > 0.3) return <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs font-semibold text-success">Ijobiy</span>;
+  if (score < -0.2) return <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-xs font-semibold text-destructive">Xavotirli</span>;
+  return <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">Normal</span>;
+}
+
 function ParentDashboard() {
+  const [question, setQuestion] = useState("");
+  const [aiAnswer, setAiAnswer] = useState("");
+  const [selectedChildIdx, setSelectedChildIdx] = useState(0);
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["child-info"],
     queryFn: getChildInfo,
+  });
+
+  const { mutate: ask, isPending: asking } = useMutation({
+    mutationFn: () => askAboutChild(question),
+    onSuccess: (res) => {
+      setAiAnswer(res.answer);
+      setQuestion("");
+    },
+    onError: () => toast.error("AI javob bermadi. Qayta urining."),
+  });
+
+  const { mutate: genReport, isPending: generatingReport } = useMutation({
+    mutationFn: () => generateChildReport(child?.id ?? 0),
+    onSuccess: (res) => {
+      toast.success("Hisobot yaratildi");
+      setAiAnswer(res.narrative);
+    },
   });
 
   if (isLoading) {
@@ -30,43 +60,54 @@ function ParentDashboard() {
     );
   }
 
-  if (error || !data?.hasChild) {
+  if (error || !data?.hasChildren || data.children.length === 0) {
     return (
       <div className="space-y-6">
-        <PageHeader
-          eyebrow="Ota-ona paneli"
-          title="Farzandingiz ta'limini kuzating"
-          description="Farzandingizning kunlik faolligi, baholari va AI tahlillari shu yerda."
-        />
+        <PageHeader eyebrow="Ota-ona paneli" title="Farzandingiz ta'limini kuzating" description="" />
         <div className="flex h-48 flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-card text-center">
           <User className="h-10 w-10 text-muted-foreground/30" />
-          <p className="font-display text-lg font-semibold">Farzand ma'lumoti topilmadi</p>
-          <p className="max-w-xs text-sm text-muted-foreground">
-            Sizning profilingizga bog'liq farzand topilmadi. Administrator bilan bog'laning.
-          </p>
+          <p className="font-display text-lg font-semibold">Farzand topilmadi</p>
+          <p className="text-sm text-muted-foreground max-w-xs">Profilingizga bog'liq farzand yo'q. Administrator bilan bog'laning.</p>
         </div>
       </div>
     );
   }
 
-  const child = data.child!;
-  const avgScore = data.avgScore ?? 0;
-  const chatCount = data.chatCount ?? 0;
-  const recentExams = data.recentExams ?? [];
-  const courses = data.enrolledCourses ?? [];
-
+  const children = data.children;
+  const child = children[selectedChildIdx] ?? children[0];
   const initials = child.fullName.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
+  const avgSentiment = child.sentimentTrend.length > 0
+    ? child.sentimentTrend.slice(0, 10).reduce((a, b) => a + b.score, 0) / Math.min(10, child.sentimentTrend.length)
+    : 0;
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Ota-ona paneli"
         title="Farzandingiz ta'limi"
-        description="Farzandingizning o'quv natijalari va AI faoliyati haqida to'liq ma'lumot."
+        description="Natijalar, AI tahlil va kayfiyat ko'rsatkichlari."
       />
 
-      {/* Child info card */}
-      <div className="flex items-center gap-4 rounded-2xl border border-border bg-card p-5 shadow-soft">
+      {/* Child selector if multiple */}
+      {children.length > 1 && (
+        <div className="flex gap-2">
+          {children.map((c, i) => (
+            <button
+              key={c.id}
+              onClick={() => setSelectedChildIdx(i)}
+              className={cn(
+                "rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
+                i === selectedChildIdx ? "border-primary bg-primary/10 text-primary" : "border-border bg-card",
+              )}
+            >
+              {c.fullName.split(" ")[0]}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Child card */}
+      <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-border bg-card p-5 shadow-soft">
         <div className="grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 font-display text-xl font-semibold text-primary">
           {initials}
         </div>
@@ -74,40 +115,24 @@ function ParentDashboard() {
           <h2 className="font-display text-xl font-semibold">{child.fullName}</h2>
           <p className="text-sm text-muted-foreground">{child.email}</p>
         </div>
-        <div className="ml-auto flex gap-2">
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <SentimentBadge score={avgSentiment} />
           <span className={cn(
             "rounded-full px-3 py-1 text-xs font-semibold",
-            avgScore >= 80 ? "bg-success/15 text-success" :
-            avgScore >= 60 ? "bg-warning/15 text-warning" :
-            avgScore > 0 ? "bg-destructive/15 text-destructive" : "bg-muted text-muted-foreground"
+            child.avgScore >= 80 ? "bg-success/15 text-success" :
+            child.avgScore >= 60 ? "bg-warning/15 text-warning" :
+            child.avgScore > 0 ? "bg-destructive/15 text-destructive" : "bg-muted text-muted-foreground",
           )}>
-            {avgScore > 0 ? `O'rtacha: ${avgScore}%` : "Imtihon yo'q"}
+            {child.avgScore > 0 ? `O'rtacha: ${child.avgScore}%` : "Imtihon yo'q"}
           </span>
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard
-          label="Yozilgan kurslar"
-          value={courses.length}
-          icon={BookOpen}
-          accent="primary"
-        />
-        <StatCard
-          label="O'rtacha ball"
-          value={avgScore > 0 ? `${avgScore}%` : "—"}
-          icon={Trophy}
-          accent="secondary"
-          hint="Barcha imtihonlar bo'yicha"
-        />
-        <StatCard
-          label="AI muloqotlar"
-          value={chatCount}
-          icon={MessageCircle}
-          accent="accent"
-          hint="AI Ustoz bilan savollar"
-        />
+        <StatCard label="Kurslar" value={child.enrolledCourses.length} icon={BookOpen} accent="primary" />
+        <StatCard label="O'rtacha ball" value={child.avgScore > 0 ? `${child.avgScore}%` : "—"} icon={Trophy} accent="secondary" hint="Barcha imtihonlar" />
+        <StatCard label="AI suhbatlar" value={child.chatCount} icon={MessageCircle} accent="accent" hint="AI Ustoz bilan" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -116,54 +141,58 @@ function ParentDashboard() {
           <header className="border-b border-border px-5 py-4">
             <h2 className="font-display text-lg font-semibold">So'nggi imtihonlar</h2>
           </header>
-          {recentExams.length === 0 ? (
-            <div className="flex h-32 flex-col items-center justify-center gap-2 text-center px-4">
-              <GraduationCap className="h-8 w-8 text-muted-foreground/30" />
+          {child.recentExams.length === 0 ? (
+            <div className="flex h-32 items-center justify-center">
               <p className="text-sm text-muted-foreground">Hali imtihon topshirilmagan</p>
             </div>
           ) : (
             <ul className="divide-y divide-border">
-              {recentExams.map((r) => (
+              {child.recentExams.map((r) => (
                 <li key={r.id} className="flex items-center gap-4 px-5 py-3.5">
                   <div className={cn(
                     "grid h-10 w-10 shrink-0 place-items-center rounded-xl text-sm font-bold",
                     r.score >= 80 ? "bg-success/15 text-success" :
-                    r.score >= 60 ? "bg-warning/15 text-warning" : "bg-destructive/15 text-destructive"
+                    r.score >= 60 ? "bg-warning/15 text-warning" : "bg-destructive/15 text-destructive",
                   )}>
                     {r.score}%
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-foreground">{r.lessonTitle ?? "Imtihon"}</p>
-                    <p className="truncate text-xs text-muted-foreground">{r.courseName ?? ""}</p>
+                    <p className="truncate font-medium">{r.lessonTitle ?? "Imtihon"}</p>
+                    <p className="truncate text-xs text-muted-foreground">{r.courseName}</p>
                   </div>
-                  <span className="shrink-0 text-xs text-muted-foreground">
-                    {r.takenAt ? uzDate(new Date(r.takenAt)) : ""}
-                  </span>
+                  <span className="text-xs text-muted-foreground">{r.takenAt ? uzDate(r.takenAt) : ""}</span>
                 </li>
               ))}
             </ul>
           )}
         </section>
 
-        {/* Enrolled courses */}
+        {/* Sentiment trend */}
         <section className="rounded-2xl border border-border bg-card shadow-soft">
           <header className="border-b border-border px-5 py-4">
-            <h2 className="font-display text-lg font-semibold">O'qiyotgan kurslar</h2>
+            <h2 className="font-display text-lg font-semibold">Kayfiyat tahlili</h2>
+            <p className="text-xs text-muted-foreground">AI bilan suhbatlar asosida</p>
           </header>
-          {courses.length === 0 ? (
-            <div className="flex h-32 flex-col items-center justify-center gap-2 text-center px-4">
-              <BookOpen className="h-8 w-8 text-muted-foreground/30" />
-              <p className="text-sm text-muted-foreground">Hali kurslarga yozilmagan</p>
+          {child.sentimentTrend.length === 0 ? (
+            <div className="flex h-32 items-center justify-center">
+              <p className="text-sm text-muted-foreground">Hali suhbat ma'lumoti yo'q</p>
             </div>
           ) : (
-            <ul className="divide-y divide-border">
-              {courses.map((c) => (
-                <li key={c.id} className="flex items-center gap-4 px-5 py-3.5">
-                  <span className="text-2xl">{c.emoji ?? "📚"}</span>
-                  <div className="min-w-0">
-                    <p className="truncate font-medium text-foreground">{c.title}</p>
-                    <p className="truncate text-xs text-muted-foreground">{c.subject}</p>
-                  </div>
+            <ul className="divide-y divide-border max-h-56 overflow-y-auto">
+              {child.sentimentTrend.slice(0, 8).map((s, i) => (
+                <li key={i} className="flex items-center gap-3 px-5 py-2.5">
+                  {s.score > 0.2
+                    ? <TrendingUp className="h-4 w-4 text-success shrink-0" />
+                    : s.score < -0.1
+                    ? <TrendingDown className="h-4 w-4 text-destructive shrink-0" />
+                    : <div className="h-4 w-4 shrink-0" />}
+                  <span className={cn(
+                    "rounded-full px-2 py-0.5 text-xs font-medium capitalize",
+                    s.label === "curious" || s.label === "confident" ? "bg-success/10 text-success" :
+                    s.label === "frustrated" || s.label === "anxious" ? "bg-destructive/10 text-destructive" :
+                    "bg-muted text-muted-foreground",
+                  )}>{s.label}</span>
+                  <span className="text-xs text-muted-foreground ml-auto">{uzDate(s.createdAt)}</span>
                 </li>
               ))}
             </ul>
@@ -171,26 +200,107 @@ function ParentDashboard() {
         </section>
       </div>
 
-      {/* AI insight */}
-      {recentExams.length > 0 && (
+      {/* Enrolled courses */}
+      {child.enrolledCourses.length > 0 && (
+        <section className="rounded-2xl border border-border bg-card p-5 shadow-soft">
+          <h2 className="font-display text-lg font-semibold mb-4">O'qiyotgan kurslar</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {child.enrolledCourses.map((c) => (
+              <div key={c.id} className="flex items-center gap-3 rounded-xl border border-border bg-background p-3">
+                <span className="text-2xl">{c.emoji ?? "📚"}</span>
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-sm">{c.title}</p>
+                  <p className="truncate text-xs text-muted-foreground">{c.subject}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* AI narrative */}
+      {child.latestNarrative && (
         <section className="rounded-2xl border border-primary/20 bg-primary/5 p-5 shadow-soft">
           <div className="flex items-start gap-3">
             <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
               <Sparkles className="h-5 w-5" />
             </div>
-            <div className="flex-1">
-              <p className="font-semibold">AI tahlil</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {avgScore >= 80
-                  ? `${child.fullName.split(" ")[0]} ajoyib natijalar ko'rsatmoqda! O'rtacha ball ${avgScore}% — zo'r ishlayapti.`
-                  : avgScore >= 60
-                  ? `${child.fullName.split(" ")[0]} yaxshi natijalar ko'rsatmoqda, lekin ${100 - avgScore}% yaxshilash imkoni bor. AI Ustoz bilan ko'proq mashq qilish tavsiya etiladi.`
-                  : `${child.fullName.split(" ")[0]} qo'shimcha yordam va mashqqa muhtoj. AI Ustoz bilan kundalik suhbatni oshirish tavsiya etiladi.`}
-              </p>
+            <div>
+              <p className="font-semibold">AI hisobot</p>
+              <p className="mt-1 text-sm text-muted-foreground">{child.latestNarrative}</p>
             </div>
           </div>
         </section>
       )}
+
+      {/* Parent AI chat */}
+      <section className="rounded-2xl border border-border bg-card shadow-soft">
+        <header className="border-b border-border px-5 py-4">
+          <h2 className="font-display text-lg font-semibold flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            AI dan so'rang
+          </h2>
+          <p className="text-xs text-muted-foreground">Farzandingiz haqida istalgan savolni bering</p>
+        </header>
+        <div className="p-5 space-y-4">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input
+              placeholder="Masalan: Farzandim matematikada qanday?"
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && !asking && question.trim() && ask()}
+              className="flex-1"
+            />
+            <Button onClick={() => ask()} disabled={asking || !question.trim()} className="shrink-0">
+              {asking ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              {asking ? "So'ramoqda..." : "So'rash"}
+            </Button>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {[
+              "Farzandim matematikada qanday?",
+              "Bu hafta qanday imtihon topshirdi?",
+              "Kayfiyati qanday?",
+              "Nima qiynalmoqda?",
+            ].map((q) => (
+              <button
+                key={q}
+                onClick={() => setQuestion(q)}
+                className="rounded-full border border-border bg-muted px-3 py-1 text-xs text-foreground hover:border-primary/40 transition-colors"
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+
+          {aiAnswer && (
+            <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 text-sm text-foreground">
+              <p className="font-semibold text-primary text-xs mb-1 uppercase tracking-wide">AI javobi</p>
+              {aiAnswer}
+            </div>
+          )}
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => genReport()}
+            disabled={generatingReport}
+            className="w-full"
+          >
+            {generatingReport ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
+            ) : (
+              <GraduationCap className="h-4 w-4" />
+            )}
+            {generatingReport ? "Hisobot yaratilmoqda..." : "AI hisobot yaratish"}
+          </Button>
+        </div>
+      </section>
     </div>
   );
 }
