@@ -1,145 +1,3 @@
--- ─── EXTENSIONS ──────────────────────────────────────────────
-CREATE EXTENSION IF NOT EXISTS vector;
-
--- ─── TABLES ─────────────────────────────────────────────────
-
-CREATE TABLE IF NOT EXISTS users (
-    id          BIGSERIAL PRIMARY KEY,
-    full_name   VARCHAR(255) NOT NULL,
-    email       VARCHAR(255) UNIQUE NOT NULL,
-    password    VARCHAR(255) NOT NULL,
-    role        VARCHAR(50)  NOT NULL DEFAULT 'STUDENT',
-    subscription_tier VARCHAR(50) NOT NULL DEFAULT 'FREE',
-    parent_id   BIGINT,
-    school_id   BIGINT,
-    created_at  TIMESTAMP DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS courses (
-    id            BIGSERIAL PRIMARY KEY,
-    title_uz      VARCHAR(255) NOT NULL,
-    title_en      VARCHAR(255),
-    subject       VARCHAR(255) NOT NULL,
-    grade_level   INTEGER,
-    description_uz TEXT,
-    cover_emoji   VARCHAR(10) DEFAULT '📚',
-    teacher_id    BIGINT REFERENCES users(id),
-    school_id     BIGINT,
-    created_at    TIMESTAMP DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS lessons (
-    id          BIGSERIAL PRIMARY KEY,
-    course_id   BIGINT REFERENCES courses(id) ON DELETE CASCADE,
-    title_uz    VARCHAR(255) NOT NULL,
-    content_uz  TEXT,
-    phet_url    VARCHAR(500),
-    video_url   VARCHAR(500),
-    order_num   INTEGER DEFAULT 0,
-    created_at  TIMESTAMP DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS enrollments (
-    id          BIGSERIAL PRIMARY KEY,
-    student_id  BIGINT REFERENCES users(id),
-    course_id   BIGINT REFERENCES courses(id),
-    enrolled_at TIMESTAMP DEFAULT NOW(),
-    UNIQUE(student_id, course_id)
-);
-
-CREATE TABLE IF NOT EXISTS chat_messages (
-    id          BIGSERIAL PRIMARY KEY,
-    user_id     BIGINT REFERENCES users(id),
-    message     TEXT NOT NULL,
-    response    TEXT NOT NULL,
-    lesson_id   BIGINT REFERENCES lessons(id),
-    created_at  TIMESTAMP DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS exam_results (
-    id           BIGSERIAL PRIMARY KEY,
-    student_id   BIGINT REFERENCES users(id),
-    lesson_id    BIGINT REFERENCES lessons(id),
-    score        INTEGER,
-    feedback_uz  TEXT,
-    answers_json TEXT,
-    taken_at     TIMESTAMP DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS notes (
-    id          BIGSERIAL PRIMARY KEY,
-    student_id  BIGINT REFERENCES users(id),
-    lesson_id   BIGINT REFERENCES lessons(id),
-    content     TEXT NOT NULL,
-    created_at  TIMESTAMP DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS attendance (
-    id          BIGSERIAL PRIMARY KEY,
-    student_id  BIGINT REFERENCES users(id),
-    course_id   BIGINT REFERENCES courses(id),
-    date        DATE NOT NULL,
-    present     BOOLEAN DEFAULT TRUE,
-    UNIQUE(student_id, course_id, date)
-);
-
-CREATE TABLE IF NOT EXISTS teacher_documents (
-    id          BIGSERIAL PRIMARY KEY,
-    teacher_id  BIGINT REFERENCES users(id) ON DELETE CASCADE,
-    file_name   VARCHAR(255) NOT NULL,
-    file_type   VARCHAR(50) DEFAULT 'txt',
-    tag         VARCHAR(100) DEFAULT 'lesson_plan',
-    subject     VARCHAR(255),
-    course_id   BIGINT REFERENCES courses(id) ON DELETE SET NULL,
-    raw_text    TEXT,
-    chunk_count INTEGER DEFAULT 0,
-    created_at  TIMESTAMP DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS document_chunks (
-    id          BIGSERIAL PRIMARY KEY,
-    document_id BIGINT REFERENCES teacher_documents(id) ON DELETE CASCADE,
-    teacher_id  BIGINT NOT NULL,
-    content     TEXT NOT NULL,
-    chunk_index INTEGER DEFAULT 0,
-    embedding   vector(768),
-    created_at  TIMESTAMP DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_chunks_teacher ON document_chunks(teacher_id);
-
-CREATE TABLE IF NOT EXISTS sentiment_logs (
-    id              BIGSERIAL PRIMARY KEY,
-    student_id      BIGINT REFERENCES users(id),
-    chat_message_id BIGINT REFERENCES chat_messages(id),
-    sentiment_score DECIMAL(4,3),
-    sentiment_label VARCHAR(50),
-    created_at      TIMESTAMP DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS progress_snapshots (
-    id               BIGSERIAL PRIMARY KEY,
-    student_id       BIGINT REFERENCES users(id),
-    snapshot_type    VARCHAR(50) DEFAULT 'weekly',
-    avg_score        DECIMAL(5,2),
-    chat_count       INTEGER DEFAULT 0,
-    top_subject      VARCHAR(255),
-    weak_subject     VARCHAR(255),
-    engagement_score DECIMAL(5,2),
-    sentiment_avg    DECIMAL(4,3),
-    ai_narrative     TEXT,
-    snapshot_date    TIMESTAMP DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS notifications (
-    id          BIGSERIAL PRIMARY KEY,
-    user_id     BIGINT REFERENCES users(id),
-    type        VARCHAR(100) NOT NULL,
-    title       VARCHAR(500),
-    body        TEXT,
-    is_read     BOOLEAN DEFAULT FALSE,
-    created_at  TIMESTAMP DEFAULT NOW()
-);
-
 -- ─── SEED USERS ──────────────────────────────────────────────
 -- password for all: AcademiX2026!  (BCrypt)
 
@@ -249,43 +107,47 @@ SELECT u.id, c.id FROM users u, courses c
 WHERE u.email IN ('jasur@academixai.uz', 'malika@academixai.uz', 'bobur@academixai.uz')
 ON CONFLICT DO NOTHING;
 
--- ─── SEED EXAM RESULTS (sample) ──────────────────────────────
+-- ─── SEED EXAM RESULTS ───────────────────────────────────────
 
 INSERT INTO exam_results (student_id, lesson_id, score, feedback_uz)
 SELECT u.id, l.id, 85,
 'Yaxshi natija! Chiziqli tenglamalarni tushundingiz. Tekshirish qismini yanada mustahkamlang.'
 FROM users u, lessons l
 WHERE u.email='jasur@academixai.uz' AND l.title_uz='Chiziqli tenglamalar'
-ON CONFLICT DO NOTHING;
+AND NOT EXISTS (SELECT 1 FROM exam_results WHERE student_id=u.id AND lesson_id=l.id);
 
 INSERT INTO exam_results (student_id, lesson_id, score, feedback_uz)
 SELECT u.id, l.id, 72,
 'O''rtacha natija. Diskriminant formulasini takrorlang, ayniqsa D < 0 holati.'
 FROM users u, lessons l
 WHERE u.email='jasur@academixai.uz' AND l.title_uz='Kvadrat tenglamalar'
-ON CONFLICT DO NOTHING;
+AND NOT EXISTS (SELECT 1 FROM exam_results WHERE student_id=u.id AND lesson_id=l.id);
 
 INSERT INTO exam_results (student_id, lesson_id, score, feedback_uz)
 SELECT u.id, l.id, 94,
 'A''lo natija! Birinchi Newton qonunini mukammal bilasiz. Davom eting!'
 FROM users u, lessons l
 WHERE u.email='bobur@academixai.uz' AND l.title_uz='Birinchi Newton qonuni'
-ON CONFLICT DO NOTHING;
+AND NOT EXISTS (SELECT 1 FROM exam_results WHERE student_id=u.id AND lesson_id=l.id);
 
--- ─── SEED ATTENDANCE (last 5 days) ───────────────────────────
+-- ─── SEED ATTENDANCE ─────────────────────────────────────────
 
 INSERT INTO attendance (student_id, course_id, date, present)
 SELECT u.id, c.id, CURRENT_DATE - interval '4 days', true
-FROM users u, courses c WHERE u.email='jasur@academixai.uz' AND c.title_uz='Algebra asoslari' ON CONFLICT DO NOTHING;
+FROM users u, courses c WHERE u.email='jasur@academixai.uz' AND c.title_uz='Algebra asoslari'
+ON CONFLICT DO NOTHING;
 
 INSERT INTO attendance (student_id, course_id, date, present)
 SELECT u.id, c.id, CURRENT_DATE - interval '3 days', true
-FROM users u, courses c WHERE u.email='jasur@academixai.uz' AND c.title_uz='Algebra asoslari' ON CONFLICT DO NOTHING;
+FROM users u, courses c WHERE u.email='jasur@academixai.uz' AND c.title_uz='Algebra asoslari'
+ON CONFLICT DO NOTHING;
 
 INSERT INTO attendance (student_id, course_id, date, present)
 SELECT u.id, c.id, CURRENT_DATE - interval '2 days', false
-FROM users u, courses c WHERE u.email='jasur@academixai.uz' AND c.title_uz='Algebra asoslari' ON CONFLICT DO NOTHING;
+FROM users u, courses c WHERE u.email='jasur@academixai.uz' AND c.title_uz='Algebra asoslari'
+ON CONFLICT DO NOTHING;
 
 INSERT INTO attendance (student_id, course_id, date, present)
 SELECT u.id, c.id, CURRENT_DATE - interval '1 day', true
-FROM users u, courses c WHERE u.email='jasur@academixai.uz' AND c.title_uz='Algebra asoslari' ON CONFLICT DO NOTHING;
+FROM users u, courses c WHERE u.email='jasur@academixai.uz' AND c.title_uz='Algebra asoslari'
+ON CONFLICT DO NOTHING;
