@@ -33,7 +33,6 @@ export function useNavigation(): { sections: Record<UserRole, NavSection[]>; rol
       },
       { label: account, items: [
         { label: n.profile, to: "/student/profile", icon: User },
-        { label: n.settings, to: "/student/settings", icon: Settings },
       ]},
     ],
     parent: [
@@ -47,7 +46,7 @@ export function useNavigation(): { sections: Record<UserRole, NavSection[]>; rol
           { label: n.messages, to: "/parent/messages", icon: MessageSquare },
         ],
       },
-      { label: account, items: [{ label: n.settings, to: "/parent/settings", icon: Settings }] },
+      { label: account, items: [{ label: n.profile, to: "/parent/profile", icon: User }] },
     ],
     teacher: [
       {
@@ -64,7 +63,7 @@ export function useNavigation(): { sections: Record<UserRole, NavSection[]>; rol
           { label: n.calendar, to: "/teacher/calendar", icon: Calendar },
         ],
       },
-      { label: account, items: [{ label: n.settings, to: "/teacher/settings", icon: Settings }] },
+      { label: account, items: [{ label: n.profile, to: "/teacher/profile", icon: User }] },
     ],
     admin: [
       {
@@ -80,7 +79,7 @@ export function useNavigation(): { sections: Record<UserRole, NavSection[]>; rol
           { label: n.announcements, to: "/admin/announcements", icon: Megaphone },
         ],
       },
-      { label: account, items: [{ label: n.settings, to: "/admin/settings", icon: Settings }] },
+      { label: account, items: [{ label: n.profile, to: "/admin/profile", icon: User }] },
     ],
   };
 

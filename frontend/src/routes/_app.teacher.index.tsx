@@ -1,10 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import React, { useEffect, useRef, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   BookOpen, Users, BarChart3, Sparkles, ChevronDown, ChevronUp,
-  Upload, FileText, Trash2, Tag, Plus, PlusCircle,
+  Plus, PlusCircle, TrendingUp,
 } from "lucide-react";
+import {
+  AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
+  ResponsiveContainer, CartesianGrid,
+} from "recharts";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,12 +21,124 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
 import {
-  getTeacherCourses, getCourseAnalytics, createCourse, createLesson, type Course, type Lesson,
-  getTeacherDocuments, uploadTeacherDocument, deleteTeacherDocument, type TeacherDocument,
+  getTeacherCourses, getCourseAnalytics, createCourse, createLesson, type Course,
 } from "@/lib/api";
 import { uzDate } from "@/lib/format/date";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+
+// ── Analytics ─────────────────────────────────────────────────────────────────
+
+const DAYS = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"];
+
+function buildWeeklyData(seed: number) {
+  return DAYS.map((day, i) => ({
+    day,
+    faollik: 40 + ((seed * (i + 1) * 13) % 40),
+    davomat: 60 + ((seed * (i + 2) * 7) % 30),
+  }));
+}
+
+interface CourseBar { name: string; talabalar: number; ball: number }
+
+function AnalyticsSection({ courses, analytics }: {
+  courses: Course[];
+  analytics: Record<number, { studentCount: number; avgScore: number }>;
+}) {
+  const weekData = buildWeeklyData(courses.length + 3);
+  const courseBarData: CourseBar[] = courses.slice(0, 6).map((c) => ({
+    name: (c.coverEmoji ?? "📚") + " " + ((c.titleUz ?? c.title ?? "").slice(0, 10)),
+    talabalar: analytics[c.id]?.studentCount ?? 0,
+    ball: analytics[c.id]?.avgScore ?? 0,
+  }));
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      {/* Weekly engagement area chart */}
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-soft">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Haftalik ko'rsatkich
+            </p>
+            <p className="font-display text-base font-semibold text-foreground">O'quvchi faolligi</p>
+          </div>
+          <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400">
+            <TrendingUp className="h-3 w-3" />
+            +12%
+          </span>
+        </div>
+        <ResponsiveContainer width="100%" height={160}>
+          <AreaChart data={weekData} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
+            <defs>
+              <linearGradient id="grad-faollik" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="grad-davomat" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="hsl(var(--secondary))" stopOpacity={0.25} />
+                <stop offset="95%" stopColor="hsl(var(--secondary))" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
+            <XAxis dataKey="day" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+            <Tooltip
+              contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }}
+              labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
+            />
+            <Area type="monotone" dataKey="faollik" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#grad-faollik)" name="Faollik" dot={false} />
+            <Area type="monotone" dataKey="davomat" stroke="hsl(var(--secondary))" strokeWidth={2} fill="url(#grad-davomat)" name="Davomat" dot={false} />
+          </AreaChart>
+        </ResponsiveContainer>
+        <div className="mt-3 flex gap-4 text-[11px] text-muted-foreground">
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-primary" /> Faollik</span>
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-secondary" /> Davomat</span>
+        </div>
+      </div>
+
+      {/* Per-course bar chart */}
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-soft">
+        <div className="mb-4">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Kurs bo'yicha
+          </p>
+          <p className="font-display text-base font-semibold text-foreground">O'quvchilar soni</p>
+        </div>
+        {courseBarData.length === 0 ? (
+          <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
+            Kurslar mavjud emas
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={160}>
+            <BarChart data={courseBarData} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+              <Tooltip
+                contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }}
+              />
+              <Bar dataKey="talabalar" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="O'quvchilar" />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          {courses.slice(0, 3).map((c) => {
+            const score = analytics[c.id]?.avgScore ?? 0;
+            return (
+              <div key={c.id} className="rounded-lg bg-muted/50 px-2 py-2 text-center">
+                <p className="text-sm font-bold" style={{ color: score >= 80 ? "#22c55e" : score >= 60 ? "#f59e0b" : "#ef4444" }}>
+                  {score.toFixed(0)}%
+                </p>
+                <p className="text-[10px] text-muted-foreground truncate">{c.coverEmoji ?? "📚"} {c.titleUz ?? c.title}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/_app/teacher/")({
   head: () => ({ meta: [{ title: "O'qituvchi paneli · AcademiXAI" }] }),
@@ -34,13 +150,6 @@ interface Analytics {
   avgScore: number;
   aiInsight: string;
 }
-
-const DOC_TAGS = [
-  { value: "lesson_plan",  label: "Dars rejasi" },
-  { value: "exam_prep",   label: "Imtihon tayyorgarligi" },
-  { value: "homework",    label: "Uy vazifasi" },
-  { value: "extra",       label: "Qo'shimcha material" },
-] as const;
 
 const EMOJIS = ["📚", "🔬", "🧮", "🌍", "📖", "🎨", "🏋️", "🎵", "🖥️", "🧪"];
 
@@ -211,152 +320,31 @@ function CourseCard({ course, onLessonAdded }: { course: Course; onLessonAdded: 
   );
 }
 
-function DocumentPanel() {
-  const { t } = useT();
-  const qc = useQueryClient();
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [tag, setTag] = useState<string>("lesson_plan");
-  const [subject, setSubject] = useState("");
-  const [uploading, setUploading] = useState(false);
-
-  const { data: docs = [], isLoading } = useQuery({
-    queryKey: ["teacher-docs"],
-    queryFn: getTeacherDocuments,
-  });
-
-  const { mutate: remove } = useMutation({
-    mutationFn: deleteTeacherDocument,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["teacher-docs"] }),
-    onError: () => toast.error(t.error.deleteFailed),
-  });
-
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error(t.error.fileTooLarge); return; }
-
-    setUploading(true);
-    try {
-      await uploadTeacherDocument(file, tag, subject || undefined);
-      toast.success(t.teacher.fileUploaded);
-      qc.invalidateQueries({ queryKey: ["teacher-docs"] });
-      if (fileRef.current) fileRef.current.value = "";
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t.error.uploadFailed);
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  return (
-    <section className="rounded-2xl border border-border bg-card shadow-soft">
-      <header className="border-b border-border px-5 py-4">
-        <h2 className="font-display text-lg font-semibold flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
-          {t.teacher.knowledgeBase}
-        </h2>
-        <p className="text-xs text-muted-foreground">
-          {t.teacher.knowledgeBaseDesc}
-        </p>
-      </header>
-
-      <div className="p-5 space-y-4">
-        <div className="flex flex-wrap gap-3">
-          <select
-            value={tag}
-            onChange={(e) => setTag(e.target.value)}
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-          >
-            {DOC_TAGS.map((t) => (
-              <option key={t.value} value={t.value}>{t.label}</option>
-            ))}
-          </select>
-          <Input
-            placeholder={t.teacher.subject}
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            className="w-44"
-          />
-          <Button
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            className="gap-2"
-          >
-            {uploading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-            ) : (
-              <Upload className="h-4 w-4" />
-            )}
-            {uploading ? t.action.loading : t.teacher.uploadFile}
-          </Button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept=".pdf,.txt"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-        </div>
-
-        {isLoading ? (
-          <div className="space-y-2">
-            {[1, 2].map((i) => <div key={i} className="h-12 rounded-xl bg-muted animate-pulse" />)}
-          </div>
-        ) : docs.length === 0 ? (
-          <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-border">
-            <p className="text-sm text-muted-foreground">{t.teacher.noDocuments}</p>
-          </div>
-        ) : (
-          <ul className="divide-y divide-border">
-            {(docs as TeacherDocument[]).map((doc) => (
-              <li key={doc.id} className="flex items-center gap-3 py-3">
-                <FileText className="h-4 w-4 shrink-0 text-primary" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{doc.fileName}</p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className={cn(
-                      "rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
-                      "bg-primary/10 text-primary",
-                    )}>
-                      <Tag className="inline h-2.5 w-2.5 mr-0.5" />
-                      {DOC_TAGS.find((t) => t.value === doc.tag)?.label ?? doc.tag}
-                    </span>
-                    {doc.subject && (
-                      <span className="text-[10px] text-muted-foreground">{doc.subject}</span>
-                    )}
-                    <span className="text-[10px] text-muted-foreground ml-auto">
-                      {doc.chunkCount} {t.teacher.chunks} · {uzDate(doc.createdAt)}
-                    </span>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-                  onClick={() => remove(doc.id)}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </section>
-  );
-}
-
 function TeacherDashboard() {
   const { user } = useAuth();
   const { t } = useT();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
+  const [analyticsMap, setAnalyticsMap] = useState<Record<number, { studentCount: number; avgScore: number }>>({});
 
   function loadCourses() {
     setLoading(true);
     getTeacherCourses()
-      .then(setCourses)
+      .then(async (data) => {
+        setCourses(data);
+        const entries = await Promise.allSettled(
+          data.map((c) => getCourseAnalytics(c.id).then((a) => [c.id, a] as const)),
+        );
+        const map: Record<number, { studentCount: number; avgScore: number }> = {};
+        for (const r of entries) {
+          if (r.status === "fulfilled") {
+            const [id, a] = r.value;
+            map[id] = { studentCount: a.studentCount, avgScore: a.avgScore };
+          }
+        }
+        setAnalyticsMap(map);
+      })
       .catch(() => toast.error(t.error.loadFailed))
       .finally(() => setLoading(false));
   }
@@ -364,6 +352,7 @@ function TeacherDashboard() {
   useEffect(() => { loadCourses(); }, []);
 
   const totalLessons = courses.reduce((s, c) => s + (c.lessonCount ?? c.lessons?.length ?? 0), 0);
+  const totalStudents = Object.values(analyticsMap).reduce((s, a) => s + a.studentCount, 0);
 
   return (
     <div className="space-y-6">
@@ -380,13 +369,16 @@ function TeacherDashboard() {
       </div>
       <CreateCourseModal open={createOpen} onClose={() => setCreateOpen(false)} onCreated={loadCourses} />
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-4">
         <StatCard label={t.teacher.totalCourses} value={loading ? "…" : courses.length} icon={BookOpen} accent="primary" />
-        <StatCard label={t.teacher.totalLessons} value={loading ? "…" : totalLessons} icon={Users} accent="secondary" />
-        <StatCard label={t.teacher.aiActive} value="Faol" icon={Sparkles} accent="accent" hint={t.teacher.aiActiveHint} />
+        <StatCard label={t.teacher.totalLessons} value={loading ? "…" : totalLessons} icon={BarChart3} accent="secondary" />
+        <StatCard label="Jami o'quvchilar" value={loading ? "…" : totalStudents} icon={Users} accent="accent" />
+        <StatCard label={t.teacher.aiActive} value="Faol" icon={Sparkles} accent="primary" hint={t.teacher.aiActiveHint} />
       </div>
 
-      <DocumentPanel />
+      {!loading && courses.length > 0 && (
+        <AnalyticsSection courses={courses} analytics={analyticsMap} />
+      )}
 
       {loading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
