@@ -17,9 +17,10 @@ import { Badge } from "@/components/ui/badge";
 import { getLesson, sendChat, type Lesson } from "@/lib/api";
 import { uzTime } from "@/lib/format/date";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute(
-  "/_app/student/kurslar/$courseId/darslar/$lessonId",
+  "/_app/student/courses/$courseId/lessons/$lessonId",
 )({
   head: () => ({ meta: [{ title: "Dars · AcademiXAI" }] }),
   component: LessonDetailPage,
@@ -34,17 +35,18 @@ interface ChatMsg {
 
 // ── PhET iframe modal ────────────────────────────────────────────────────────
 function PhetModal({ url, title, onClose }: { url: string; title: string; onClose: () => void }) {
+  const { t } = useT();
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
       <div className="flex h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xl">
         <header className="flex items-center gap-3 border-b border-border px-5 py-3 shrink-0">
           <FlaskConical className="h-4 w-4 text-primary" />
           <span className="font-semibold">{title}</span>
-          <Badge variant="secondary" className="text-[11px]">PhET Simulatsiyasi</Badge>
+          <Badge variant="secondary" className="text-[11px]">{t.courses.interactive}</Badge>
           <button
             onClick={onClose}
             className="ml-auto rounded-lg p-1.5 hover:bg-muted transition-colors"
-            aria-label="Yopish"
+            aria-label={t.action.close}
           >
             <X className="h-4 w-4 text-muted-foreground" />
           </button>
@@ -63,6 +65,7 @@ function PhetModal({ url, title, onClose }: { url: string; title: string; onClos
 
 // ── AI Chat sidebar ──────────────────────────────────────────────────────────
 function AiChatSidebar({ lessonId, lessonTitle }: { lessonId: number; lessonTitle: string }) {
+  const { t } = useT();
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -92,7 +95,7 @@ function AiChatSidebar({ lessonId, lessonTitle }: { lessonId: number; lessonTitl
       ]);
       setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
     } catch {
-      toast.error("AI javob bermadi, qayta urinib ko'ring");
+      toast.error(t.error.aiError);
     } finally {
       setSending(false);
     }
@@ -106,8 +109,8 @@ function AiChatSidebar({ lessonId, lessonTitle }: { lessonId: number; lessonTitl
           <Sparkles className="h-4 w-4" />
         </div>
         <div>
-          <p className="text-sm font-semibold">Ustoz Amir</p>
-          <p className="text-[11px] text-muted-foreground">AI o'qituvchi • doim tayyor</p>
+          <p className="text-sm font-semibold">{t.aiTutor.title}</p>
+          <p className="text-[11px] text-muted-foreground">{t.aiTutor.onlineStatus}</p>
         </div>
       </div>
 
@@ -118,7 +121,7 @@ function AiChatSidebar({ lessonId, lessonTitle }: { lessonId: number; lessonTitl
             <div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary">
               <Sparkles className="h-5 w-5" />
             </div>
-            <p className="text-sm font-semibold">Savol bering!</p>
+            <p className="text-sm font-semibold">{t.aiTutor.startPrompt}</p>
             <p className="text-xs text-muted-foreground px-2">
               "{lessonTitle}" mavzusi bo'yicha har qanday savolga javob beraman
             </p>
@@ -199,7 +202,7 @@ function AiChatSidebar({ lessonId, lessonTitle }: { lessonId: number; lessonTitl
                 send();
               }
             }}
-            placeholder="Savolingizni yozing..."
+            placeholder={t.aiTutor.placeholder}
             className="max-h-24 min-h-[2rem] flex-1 resize-none bg-transparent px-1 py-1 text-xs outline-none placeholder:text-muted-foreground"
           />
           <Button
@@ -207,7 +210,7 @@ function AiChatSidebar({ lessonId, lessonTitle }: { lessonId: number; lessonTitl
             size="icon"
             className="h-8 w-8 shrink-0"
             disabled={!input.trim() || sending}
-            aria-label="Yuborish"
+            aria-label={t.action.send}
           >
             <Send className="h-3.5 w-3.5" />
           </Button>
@@ -219,6 +222,7 @@ function AiChatSidebar({ lessonId, lessonTitle }: { lessonId: number; lessonTitl
 
 // ── Main page ────────────────────────────────────────────────────────────────
 function LessonDetailPage() {
+  const { t } = useT();
   const { courseId, lessonId } = Route.useParams();
   const navigate = useNavigate();
   const [phet, setPhet] = useState<{ url: string; title: string } | null>(null);
@@ -244,13 +248,13 @@ function LessonDetailPage() {
     return (
       <div className="space-y-4">
         <button
-          onClick={() => navigate({ to: "/student/kurslar" })}
+          onClick={() => navigate({ to: "/student/courses" })}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" /> Kurslarga qaytish
         </button>
         <div className="rounded-2xl border border-border bg-card p-8 text-center">
-          <p className="text-muted-foreground">Dars topilmadi yoki yuklanishda xato.</p>
+          <p className="text-muted-foreground">{t.error.generic}</p>
         </div>
       </div>
     );
@@ -263,7 +267,7 @@ function LessonDetailPage() {
     <div className="space-y-4">
       {/* Back nav */}
       <button
-        onClick={() => navigate({ to: "/student/kurslar" })}
+        onClick={() => navigate({ to: "/student/courses" })}
         className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-4 w-4" /> Kurslarga qaytish
@@ -283,7 +287,7 @@ function LessonDetailPage() {
                   <h1 className="font-display text-2xl font-semibold text-foreground">
                     {lessonTitle}
                   </h1>
-                  <p className="mt-1 text-sm text-muted-foreground">Dars #{(lesson.orderNum ?? lesson.orderIndex ?? 0)}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{t.courses.lesson} #{(lesson.orderNum ?? lesson.orderIndex ?? 0)}</p>
                 </div>
               </div>
               <div className="flex gap-2 shrink-0">
@@ -303,7 +307,7 @@ function LessonDetailPage() {
                   className="gap-1.5"
                   onClick={() =>
                     navigate({
-                      to: `/student/imtihonlar` as never,
+                      to: `/student/exams` as never,
                     })
                   }
                 >
@@ -326,10 +330,10 @@ function LessonDetailPage() {
               <div className="flex flex-col items-center gap-3 py-12 text-center">
                 <BookOpen className="h-10 w-10 text-muted-foreground/40" />
                 <p className="text-sm text-muted-foreground">
-                  Dars matni hali qo'shilmagan.
+                  {t.courses.noContent}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  AI Ustoz dan bu mavzu bo'yicha savol berishingiz mumkin →
+                  {t.student.askAI} →
                 </p>
               </div>
             )}

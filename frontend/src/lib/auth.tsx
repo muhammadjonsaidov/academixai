@@ -16,8 +16,8 @@ interface AuthContextValue {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<AuthUser>;
-  register: (data: { fullName: string; email: string; password: string }) => Promise<AuthUser>;
+  login: (email: string, password: string, remember?: boolean) => Promise<AuthUser>;
+  register: (data: { fullName: string; email: string; password: string; role?: string }) => Promise<AuthUser>;
   logout: () => void;
 }
 
@@ -37,7 +37,8 @@ function mapRole(backendRole: string): UserRole {
 }
 
 export function getToken(): string | null {
-  return typeof window !== "undefined" ? window.localStorage.getItem(TOKEN_KEY) : null;
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem(TOKEN_KEY) ?? window.sessionStorage.getItem(TOKEN_KEY);
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -46,7 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const raw = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
+      if (typeof window === "undefined") { setIsLoading(false); return; }
+      const raw = window.localStorage.getItem(STORAGE_KEY) ?? window.sessionStorage.getItem(STORAGE_KEY);
       if (raw) setUser(JSON.parse(raw) as AuthUser);
     } catch {
       // ignore
@@ -54,19 +56,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const persist = useCallback((next: AuthUser | null, token?: string) => {
+  const persist = useCallback((next: AuthUser | null, token?: string, remember = true) => {
     setUser(next);
     if (typeof window === "undefined") return;
+    const storage = remember ? window.localStorage : window.sessionStorage;
+    const other = remember ? window.sessionStorage : window.localStorage;
     if (next) {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      if (token) window.localStorage.setItem(TOKEN_KEY, token);
+      storage.setItem(STORAGE_KEY, JSON.stringify(next));
+      if (token) storage.setItem(TOKEN_KEY, token);
+      other.removeItem(STORAGE_KEY);
+      other.removeItem(TOKEN_KEY);
     } else {
       window.localStorage.removeItem(STORAGE_KEY);
       window.localStorage.removeItem(TOKEN_KEY);
+      window.sessionStorage.removeItem(STORAGE_KEY);
+      window.sessionStorage.removeItem(TOKEN_KEY);
     }
   }, []);
 
-  const login = useCallback<AuthContextValue["login"]>(async (email, password) => {
+  const login = useCallback<AuthContextValue["login"]>(async (email, password, remember = true) => {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -89,15 +97,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       fullName: data.fullName,
       role: mapRole(data.role),
     };
-    persist(next, data.token);
+    persist(next, data.token, remember);
     return next;
   }, [persist]);
 
-  const register = useCallback<AuthContextValue["register"]>(async ({ fullName, email, password }) => {
+  const register = useCallback<AuthContextValue["register"]>(async ({ fullName, email, password, role = "SCHOOL_ADMIN" }) => {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fullName, email, password }),
+      body: JSON.stringify({ fullName, email, password, role }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));

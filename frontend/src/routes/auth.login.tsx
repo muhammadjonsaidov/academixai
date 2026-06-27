@@ -8,13 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth, dashboardPathForRole } from "@/lib/auth";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/auth/login")({
   head: () => ({
-    meta: [
-      { title: "Tizimga kirish · AcademiXAI" },
-      { name: "description", content: "AcademiXAI hisobingizga kiring va shaxsiy AI ustozingiz bilan o'qishni davom ettiring." },
-    ],
+    meta: [{ title: "Kirish · AcademiXAI" }],
   }),
   component: LoginPage,
 });
@@ -22,6 +20,7 @@ export const Route = createFileRoute("/auth/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const { login, user, isAuthenticated } = useAuth();
+  const { t } = useT();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -36,17 +35,14 @@ function LoginPage() {
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!email || !password) {
-      toast.error("Iltimos, elektron pochta va parolni kiriting");
-      return;
-    }
+    if (!email || !password) return;
     setLoading(true);
     try {
-      const u = await login(email, password);
-      toast.success(`Xush kelibsiz, ${u.fullName}!`);
+      const u = await login(email, password, remember);
+      toast.success(`${t.auth.welcomeBack}, ${u.fullName}!`);
       navigate({ to: dashboardPathForRole(u.role) });
-    } catch {
-      toast.error("Kirish amalga oshmadi. Iltimos, qayta urinib ko'ring.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t.auth.loginError);
     } finally {
       setLoading(false);
     }
@@ -56,22 +52,20 @@ function LoginPage() {
     <div className="animate-fade-in">
       <div className="mb-8 text-center">
         <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">
-          Hisobingizga kiring
+          {t.auth.loginTitle}
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Shaxsiy AI ustozingiz va o'quv jarayoningiz sizni kutmoqda.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{t.auth.loginSubtitle}</p>
       </div>
 
       <div className="rounded-2xl border border-border/70 bg-card p-6 shadow-soft sm:p-8">
         <form onSubmit={onSubmit} className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="email">Elektron pochta</Label>
+            <Label htmlFor="email">{t.auth.email}</Label>
             <Input
               id="email"
               type="email"
               autoComplete="email"
-              placeholder="ism.familiya@maktab.uz"
+              placeholder={t.auth.emailPlaceholder}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -81,12 +75,9 @@ function LoginPage() {
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password">Parol</Label>
-              <Link
-                to="/auth/forgot"
-                className="text-xs font-medium text-primary hover:underline"
-              >
-                Parolni unutdingizmi?
+              <Label htmlFor="password">{t.auth.password}</Label>
+              <Link to="/auth/forgot" className="text-xs font-medium text-primary hover:underline">
+                {t.auth.forgotPassword}
               </Link>
             </div>
             <div className="relative">
@@ -94,7 +85,7 @@ function LoginPage() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
-                placeholder="Kamida 8 ta belgi"
+                placeholder={t.auth.passwordPlaceholder}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -103,7 +94,7 @@ function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? "Parolni yashirish" : "Parolni ko'rsatish"}
+                aria-label={showPassword ? t.auth.hidePassword : t.auth.showPassword}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -118,7 +109,7 @@ function LoginPage() {
               onCheckedChange={(v) => setRemember(!!v)}
             />
             <Label htmlFor="remember" className="text-sm font-normal text-muted-foreground">
-              Meni eslab qol
+              {t.auth.rememberMe}
             </Label>
           </div>
 
@@ -128,28 +119,15 @@ function LoginPage() {
             ) : (
               <>
                 <LogIn className="h-4 w-4" />
-                Kirish
+                {t.auth.login}
               </>
             )}
           </Button>
         </form>
-
-        <div className="mt-6 rounded-xl bg-muted/60 p-3 text-xs text-muted-foreground">
-          <p className="font-medium text-foreground">Demo hisoblar — parol: <span className="font-mono">AcademiX2026!</span></p>
-          <ul className="mt-1.5 space-y-0.5">
-            <li>• <span className="font-mono">jasur@academixai.uz</span> — O'quvchi</li>
-            <li>• <span className="font-mono">nozima@academixai.uz</span> — Ota-ona</li>
-            <li>• <span className="font-mono">sardor@academixai.uz</span> — O'qituvchi</li>
-            <li>• <span className="font-mono">dilshod@academixai.uz</span> — Maktab admini</li>
-          </ul>
-        </div>
       </div>
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        AcademiXAI'da hisobingiz yo'qmi?{" "}
-        <Link to="/auth/register" className="font-medium text-primary hover:underline">
-          Ro'yxatdan o'tish
-        </Link>
+        {t.auth.contactAdmin}
       </p>
     </div>
   );

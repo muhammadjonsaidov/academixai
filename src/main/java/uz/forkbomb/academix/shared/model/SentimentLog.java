@@ -20,7 +20,7 @@ public class SentimentLog {
     @Column(name = "chat_message_id")
     private Long chatMessageId;
 
-    @Column(name = "sentiment_score")
+    @Column(name = "sentiment_score", columnDefinition = "numeric(4,3)")
     private Double sentimentScore; // -1.0 (frustrated) to 1.0 (confident)
 
     @Column(name = "sentiment_label")

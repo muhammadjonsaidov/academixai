@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   BookOpen,
@@ -15,11 +15,13 @@ import { PageHeader } from "@/components/shell/PageHeader";
 import { EmptyState } from "@/components/shell/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getCourses, getCourse, type Course, type Lesson } from "@/lib/api";
+import { getCourses, getCourse, enrollCourse, type Course, type Lesson } from "@/lib/api";
+import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
-export const Route = createFileRoute("/_app/student/kurslar")({
+export const Route = createFileRoute("/_app/student/courses")({
   head: () => ({ meta: [{ title: "Kurslarim · AcademiXAI" }] }),
   component: CoursesPage,
 });
@@ -55,6 +57,7 @@ function PhetModal({ url, title, onClose }: { url: string; title: string; onClos
 
 // ── Course detail panel ──────────────────────────────────────────────────────
 function CourseDetail({ courseId, onBack }: { courseId: number; onBack: () => void }) {
+  const { t } = useT();
   const [phet, setPhet] = useState<{ url: string; title: string } | null>(null);
   const navigate = useNavigate();
 
@@ -79,7 +82,7 @@ function CourseDetail({ courseId, onBack }: { courseId: number; onBack: () => vo
         onClick={onBack}
         className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
-        ← Orqaga
+        ← {t.action.back}
       </button>
 
       <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
@@ -101,17 +104,17 @@ function CourseDetail({ courseId, onBack }: { courseId: number; onBack: () => vo
 
       <section>
         <h2 className="font-display text-lg font-semibold mb-4">
-          Darslar{" "}
+          {t.courses.lessons}{" "}
           <span className="text-sm font-normal text-muted-foreground">
-            ({course.lessons?.length ?? 0} ta)
+            ({course.lessons?.length ?? 0})
           </span>
         </h2>
 
         {!course.lessons || course.lessons.length === 0 ? (
           <EmptyState
             icon={BookOpen}
-            title="Hali darslar qo'shilmagan"
-            description="O'qituvchi darslarni qo'shgandan keyin bu yerda ko'rinadi"
+            title={t.courses.noCourses}
+            description={t.courses.noContent}
           />
         ) : (
           <ul className="space-y-3">
@@ -130,7 +133,7 @@ function CourseDetail({ courseId, onBack }: { courseId: number; onBack: () => vo
                   {lesson.phetUrl && (
                     <p className="flex items-center gap-1 text-[11px] text-primary mt-0.5">
                       <FlaskConical className="h-3 w-3" />
-                      PhET simulatsiyasi mavjud
+                      {t.courses.interactive}
                     </p>
                   )}
                 </div>
@@ -143,16 +146,16 @@ function CourseDetail({ courseId, onBack }: { courseId: number; onBack: () => vo
                       onClick={() => setPhet({ url: lesson.phetUrl!, title: (lesson as any).titleUz ?? lesson.title })}
                     >
                       <FlaskConical className="h-3.5 w-3.5" />
-                      Lab
+                      {t.courses.interactive}
                     </Button>
                   )}
                   <Button
                     size="sm"
                     className="gap-1.5"
-                    onClick={() => navigate({ to: `/student/kurslar/${courseId}/darslar/${lesson.id}` as never })}
+                    onClick={() => navigate({ to: `/student/courses/${courseId}/lessons/${lesson.id}` as never })}
                   >
                     <PlayCircle className="h-3.5 w-3.5" />
-                    O'qish
+                    {t.courses.startLesson}
                   </Button>
                 </div>
               </li>
@@ -170,12 +173,23 @@ function CourseDetail({ courseId, onBack }: { courseId: number; onBack: () => vo
 
 // ── Main page ────────────────────────────────────────────────────────────────
 function CoursesPage() {
+  const { t } = useT();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const { user } = useAuth();
+  const qc = useQueryClient();
 
   const { data: courses = [], isLoading } = useQuery({
     queryKey: ["student-courses"],
     queryFn: getCourses,
+  });
+
+  const { mutate: enroll, isPending: enrolling } = useMutation({
+    mutationFn: enrollCourse,
+    onSuccess: () => {
+      toast.success(t.courses.startLesson);
+      qc.invalidateQueries({ queryKey: ["student-courses"] });
+    },
+    onError: () => toast.error(t.error.saveFailed),
   });
 
   if (selectedId !== null) {
@@ -185,9 +199,9 @@ function CoursesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Kurslar"
-        title="Mening kurslarim"
-        description="Ro'yxatdan o'tgan barcha kurslaringiz va darslar to'plami"
+        eyebrow={t.nav.courses}
+        title={t.courses.title}
+        description={t.courses.description}
       />
 
       {isLoading ? (
@@ -197,8 +211,8 @@ function CoursesPage() {
       ) : courses.length === 0 ? (
         <EmptyState
           icon={BookOpen}
-          title="Hali kurslar yo'q"
-          description="O'qituvchi sizni kursga qo'shganidan keyin bu yerda ko'rinadi"
+          title={t.courses.noCourses}
+          description={t.courses.noCoursesDesc}
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -223,12 +237,23 @@ function CoursesPage() {
               <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <BookOpen className="h-3.5 w-3.5" />
-                  {(course as any).lessonCount ?? course.lessons?.length ?? 0} ta dars
+                  {(course as any).lessonCount ?? course.lessons?.length ?? 0} {t.courses.lessons}
                 </span>
-                <span className="flex items-center gap-1.5 text-primary font-medium group-hover:underline">
-                  Ochish
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 px-2 text-xs border-primary/30 text-primary"
+                    disabled={enrolling}
+                    onClick={(e) => { e.stopPropagation(); enroll(course.id); }}
+                  >
+                    + {t.action.add}
+                  </Button>
+                  <span className="flex items-center gap-1.5 text-primary font-medium group-hover:underline">
+                    {t.action.view}
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </span>
+                </div>
               </div>
             </button>
           ))}

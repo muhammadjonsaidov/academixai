@@ -6,17 +6,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import uz.forkbomb.academix.rag.ParentInsightService;
 import uz.forkbomb.academix.rag.ProgressService;
 import uz.forkbomb.academix.shared.model.*;
 import uz.forkbomb.academix.shared.repository.*;
+import uz.forkbomb.academix.shared.repository.NotificationRepository;
 
 import java.util.*;
 
 @RestController
 @RequestMapping("/api/parent")
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Tag(name = "Parent", description = "Monitor children progress")
 @SecurityRequirement(name = "Bearer")
 public class ParentController {
@@ -28,6 +31,7 @@ public class ParentController {
     private final ParentInsightService insightService;
     private final ProgressService progressService;
     private final ProgressSnapshotRepository snapshotRepository;
+    private final NotificationRepository notificationRepository;
 
     @GetMapping("/children")
     public ResponseEntity<?> getChildrenInfo(@AuthenticationPrincipal UserDetails ud) {
@@ -135,5 +139,24 @@ public class ParentController {
         User child = userRepository.findById(childId).orElseThrow();
         ProgressSnapshot snap = progressService.buildAndSaveSnapshot(child, "weekly");
         return ResponseEntity.ok(Map.of("narrative", snap.getAiNarrative(), "avgScore", snap.getAvgScore()));
+    }
+
+    @GetMapping("/notifications")
+    public ResponseEntity<?> getNotifications(@AuthenticationPrincipal UserDetails ud) {
+        User parent = userRepository.findByEmail(ud.getUsername()).orElseThrow();
+        List<Map<String, Object>> result = notificationRepository
+                .findByUserIdOrderByCreatedAtDesc(parent.getId()).stream()
+                .map(n -> {
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("id", n.getId());
+                    m.put("type", n.getType());
+                    m.put("title", n.getTitle());
+                    m.put("body", n.getBody());
+                    m.put("isRead", n.getIsRead());
+                    m.put("createdAt", n.getCreatedAt().toString());
+                    return m;
+                }).toList();
+        long unread = notificationRepository.countByUserIdAndIsReadFalse(parent.getId());
+        return ResponseEntity.ok(Map.of("notifications", result, "unreadCount", unread));
     }
 }

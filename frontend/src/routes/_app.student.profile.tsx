@@ -12,8 +12,9 @@ import { useAuth } from "@/lib/auth";
 import { getProfile, updateProfile, getDashboard } from "@/lib/api";
 import { roleLabel } from "@/lib/navigation";
 import { uzDate } from "@/lib/format/date";
+import { useT } from "@/lib/i18n";
 
-export const Route = createFileRoute("/_app/student/profil")({
+export const Route = createFileRoute("/_app/student/profile")({
   head: () => ({ meta: [{ title: "Profil · AcademiXAI" }] }),
   component: ProfilePage,
 });
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/_app/student/profil")({
 function ProfilePage() {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const { t } = useT();
 
   const { data: profile } = useQuery({
     queryKey: ["profile"],
@@ -42,9 +44,9 @@ function ProfilePage() {
     mutationFn: () => updateProfile(fullName.trim()),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["profile"] });
-      toast.success("Profil saqlandi");
+      toast.success(t.student.profileSaved);
     },
-    onError: () => toast.error("Saqlashda xato"),
+    onError: () => toast.error(t.error.saveFailed),
   });
 
   const displayUser = profile ?? user;
@@ -55,7 +57,7 @@ function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Mening profilim" description="Shaxsiy ma'lumotlaringizni boshqaring." />
+      <PageHeader title={t.student.myProfile} description={t.student.profileDesc} />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
         {/* Sidebar */}
@@ -116,15 +118,15 @@ function ProfilePage() {
 
         {/* Edit form */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-soft">
-          <h3 className="font-display text-lg font-semibold">Shaxsiy ma'lumotlar</h3>
-          <p className="mt-1 text-sm text-muted-foreground">Ism-sharifingizni yangilashingiz mumkin.</p>
+          <h3 className="font-display text-lg font-semibold">{t.settings.profileData}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">{t.student.editName}</p>
 
           <form
             className="mt-5 space-y-4"
             onSubmit={(e) => { e.preventDefault(); updateMutation.mutate(); }}
           >
             <div className="space-y-1.5">
-              <Label htmlFor="fullName">To'liq ism-sharif</Label>
+              <Label htmlFor="fullName">{t.profile.fullName}</Label>
               <Input
                 id="fullName"
                 value={fullName}
@@ -134,7 +136,7 @@ function ProfilePage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="email">Elektron pochta</Label>
+              <Label htmlFor="email">{t.profile.email}</Label>
               <Input
                 id="email"
                 type="email"
@@ -142,12 +144,12 @@ function ProfilePage() {
                 disabled
                 className="h-10 max-w-md bg-muted/50"
               />
-              <p className="text-xs text-muted-foreground">Elektron pochta o'zgartirish mumkin emas</p>
+              <p className="text-xs text-muted-foreground">{t.settings.emailChangeContact}</p>
             </div>
 
             {profile?.role && (
               <div className="space-y-1.5">
-                <Label>Rol</Label>
+                <Label>{t.settings.roleLabel}</Label>
                 <div className="flex h-10 max-w-md items-center rounded-md border border-border bg-muted/50 px-3 text-sm text-muted-foreground">
                   {roleLabel(user?.role ?? "student")}
                 </div>
@@ -160,7 +162,7 @@ function ProfilePage() {
                 variant="outline"
                 onClick={() => setFullName(profile?.fullName ?? user?.fullName ?? "")}
               >
-                Bekor qilish
+                {t.action.cancel}
               </Button>
               <Button type="submit" disabled={updateMutation.isPending || !fullName.trim()}>
                 {updateMutation.isPending ? (
@@ -168,7 +170,7 @@ function ProfilePage() {
                 ) : (
                   <Save className="h-4 w-4" />
                 )}
-                Saqlash
+                {t.action.save}
               </Button>
             </div>
 

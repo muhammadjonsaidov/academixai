@@ -2,8 +2,10 @@ package uz.forkbomb.academix.shared.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import uz.forkbomb.academix.shared.config.JsonbConverter;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
 @Table(name = "courses")
@@ -31,6 +33,15 @@ public class Course {
 
     @Column(name = "cover_emoji")
     private String coverEmoji = "📚";
+
+    /** JSONB: {"uz":"...","en":"...","ru":"..."} */
+    @Convert(converter = JsonbConverter.class)
+    @Column(name = "title_i18n", columnDefinition = "jsonb")
+    private Map<String, String> titleI18n;
+
+    @Convert(converter = JsonbConverter.class)
+    @Column(name = "description_i18n", columnDefinition = "jsonb")
+    private Map<String, String> descriptionI18n;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id")

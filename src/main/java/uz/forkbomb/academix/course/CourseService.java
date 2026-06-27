@@ -2,6 +2,7 @@ package uz.forkbomb.academix.course;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.forkbomb.academix.course.dto.*;
 import uz.forkbomb.academix.shared.exception.ForbiddenException;
 import uz.forkbomb.academix.shared.exception.ResourceNotFoundException;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CourseService {
 
     private final CourseRepository courseRepository;
@@ -59,16 +61,23 @@ public class CourseService {
                 .build();
     }
 
-    // FIX: enrollment check — STUDENT must be enrolled to access lesson content
     public LessonResponse getLesson(Long courseId, Long lessonId, Long userId, Role role) {
         if (role == Role.STUDENT && !enrollmentRepository.existsByStudentIdAndCourseId(userId, courseId)) {
             throw new ForbiddenException("Kursga yozilmagansiz");
+        }
+        if (role == Role.TEACHER) {
+            Course course = courseRepository.findById(courseId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Course", courseId));
+            if (!course.getTeacher().getId().equals(userId)) {
+                throw new ForbiddenException("Bu kurs sizga tegishli emas");
+            }
         }
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson", lessonId));
         return toLessonResponse(lesson);
     }
 
+    @Transactional
     public CourseResponse createCourse(CreateCourseRequest request, Long teacherId) {
         User teacher = userRepository.findById(teacherId)
                 .orElseThrow(() -> new ResourceNotFoundException("Teacher", teacherId));
@@ -87,6 +96,7 @@ public class CourseService {
         return toCourseResponse(courseRepository.save(course));
     }
 
+    @Transactional
     public LessonResponse addLesson(Long courseId, CreateLessonRequest request) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course", courseId));
@@ -103,6 +113,7 @@ public class CourseService {
         return toLessonResponse(lessonRepository.save(lesson));
     }
 
+    @Transactional
     public void enrollStudent(Long studentId, Long courseId) {
         if (enrollmentRepository.existsByStudentIdAndCourseId(studentId, courseId)) return;
 
@@ -132,6 +143,8 @@ public class CourseService {
                 .teacherName(c.getTeacher() != null ? c.getTeacher().getFullName() : null)
                 .lessonCount(lessonRepository.countByCourseId(c.getId()))
                 .studentCount(enrollmentRepository.countByCourseId(c.getId()))
+                .titleI18n(c.getTitleI18n())
+                .descriptionI18n(c.getDescriptionI18n())
                 .build();
     }
 

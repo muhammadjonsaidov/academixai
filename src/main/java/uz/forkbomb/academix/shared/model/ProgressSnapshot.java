@@ -20,7 +20,7 @@ public class ProgressSnapshot {
     @Column(name = "snapshot_type")
     private String snapshotType; // weekly, monthly
 
-    @Column(name = "avg_score")
+    @Column(name = "avg_score", columnDefinition = "numeric(5,2)")
     private Double avgScore;
 
     @Column(name = "chat_count")
@@ -32,10 +32,10 @@ public class ProgressSnapshot {
     @Column(name = "weak_subject")
     private String weakSubject;
 
-    @Column(name = "engagement_score")
+    @Column(name = "engagement_score", columnDefinition = "numeric(5,2)")
     private Double engagementScore;
 
-    @Column(name = "sentiment_avg")
+    @Column(name = "sentiment_avg", columnDefinition = "numeric(4,3)")
     private Double sentimentAvg;
 
     @Column(name = "ai_narrative", columnDefinition = "TEXT")

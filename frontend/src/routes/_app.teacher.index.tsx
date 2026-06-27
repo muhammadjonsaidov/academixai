@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   BookOpen, Users, BarChart3, Sparkles, ChevronDown, ChevronUp,
-  Upload, FileText, Trash2, Tag,
+  Upload, FileText, Trash2, Tag, Plus, PlusCircle,
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 import { PageHeader } from "@/components/shell/PageHeader";
 import { StatCard } from "@/components/shell/StatCard";
@@ -12,8 +15,9 @@ import { EmptyState } from "@/components/shell/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
+import { useT } from "@/lib/i18n";
 import {
-  getTeacherCourses, getCourseAnalytics, type Course,
+  getTeacherCourses, getCourseAnalytics, createCourse, createLesson, type Course, type Lesson,
   getTeacherDocuments, uploadTeacherDocument, deleteTeacherDocument, type TeacherDocument,
 } from "@/lib/api";
 import { uzDate } from "@/lib/format/date";
@@ -38,10 +42,111 @@ const DOC_TAGS = [
   { value: "extra",       label: "Qo'shimcha material" },
 ] as const;
 
-function CourseCard({ course }: { course: Course }) {
+const EMOJIS = ["📚", "🔬", "🧮", "🌍", "📖", "🎨", "🏋️", "🎵", "🖥️", "🧪"];
+
+function CreateCourseModal({ open, onClose, onCreated }: { open: boolean; onClose: () => void; onCreated: () => void }) {
+  const { t } = useT();
+  const [form, setForm] = useState({ titleUz: "", subject: "", gradeLevel: 5, descriptionUz: "", coverEmoji: "📚" });
+  const { mutate, isPending } = useMutation({
+    mutationFn: () => createCourse(form),
+    onSuccess: () => { toast.success(t.teacher.courseCreated); onCreated(); onClose(); setForm({ titleUz: "", subject: "", gradeLevel: 5, descriptionUz: "", coverEmoji: "📚" }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle>{t.teacher.createCourse}</DialogTitle></DialogHeader>
+        <div className="space-y-4 pt-2">
+          <div className="space-y-1.5">
+            <Label>Emoji</Label>
+            <div className="flex flex-wrap gap-2">
+              {EMOJIS.map((e) => (
+                <button key={e} type="button" onClick={() => setForm(f => ({ ...f, coverEmoji: e }))}
+                  className={`h-9 w-9 rounded-lg text-xl transition-all ${form.coverEmoji === e ? "ring-2 ring-primary bg-primary/10" : "bg-muted hover:bg-muted/80"}`}>
+                  {e}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>{t.teacher.courseName} *</Label>
+            <Input value={form.titleUz} onChange={(e) => setForm(f => ({ ...f, titleUz: e.target.value }))} placeholder="Masalan: Algebra asoslari" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>{t.teacher.subject} *</Label>
+              <Input value={form.subject} onChange={(e) => setForm(f => ({ ...f, subject: e.target.value }))} placeholder="Matematika" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t.teacher.gradeLevel} *</Label>
+              <Input type="number" min={1} max={12} value={form.gradeLevel} onChange={(e) => setForm(f => ({ ...f, gradeLevel: Number(e.target.value) }))} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>{t.courses.description}</Label>
+            <Textarea value={form.descriptionUz} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm(f => ({ ...f, descriptionUz: e.target.value }))} placeholder="Kurs haqida qisqacha..." rows={3} />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onClose}>{t.action.cancel}</Button>
+            <Button onClick={() => mutate()} disabled={isPending || !form.titleUz || !form.subject}>
+              {isPending ? t.action.generating : t.action.add}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function AddLessonModal({ courseId, open, onClose, onAdded }: { courseId: number; open: boolean; onClose: () => void; onAdded: () => void }) {
+  const { t } = useT();
+  const [form, setForm] = useState({ titleUz: "", contentUz: "", phetUrl: "", videoUrl: "", orderNum: 0 });
+  const { mutate, isPending } = useMutation({
+    mutationFn: () => createLesson(courseId, { ...form, phetUrl: form.phetUrl || undefined, videoUrl: form.videoUrl || undefined }),
+    onSuccess: () => { toast.success(t.teacher.lessonAdded); onAdded(); onClose(); setForm({ titleUz: "", contentUz: "", phetUrl: "", videoUrl: "", orderNum: 0 }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle>{t.teacher.addLesson}</DialogTitle></DialogHeader>
+        <div className="space-y-4 pt-2">
+          <div className="space-y-1.5">
+            <Label>{t.teacher.lessonName} *</Label>
+            <Input value={form.titleUz} onChange={(e) => setForm(f => ({ ...f, titleUz: e.target.value }))} placeholder="Masalan: Kvadrat tenglamalar" />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{t.teacher.lessonContent}</Label>
+            <Textarea value={form.contentUz} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm(f => ({ ...f, contentUz: e.target.value }))} rows={4} placeholder="Dars mazmuní..." />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>PhET URL</Label>
+              <Input value={form.phetUrl} onChange={(e) => setForm(f => ({ ...f, phetUrl: e.target.value }))} placeholder="https://phet.colorado.edu/..." />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Video URL</Label>
+              <Input value={form.videoUrl} onChange={(e) => setForm(f => ({ ...f, videoUrl: e.target.value }))} placeholder="https://youtube.com/..." />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onClose}>{t.action.cancel}</Button>
+            <Button onClick={() => mutate()} disabled={isPending || !form.titleUz}>
+              {isPending ? t.action.loading : t.action.add}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CourseCard({ course, onLessonAdded }: { course: Course; onLessonAdded: () => void }) {
+  const { t } = useT();
   const [open, setOpen] = useState(false);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(false);
+  const [addLesson, setAddLesson] = useState(false);
 
   async function toggleAnalytics() {
     if (open) { setOpen(false); return; }
@@ -52,7 +157,7 @@ function CourseCard({ course }: { course: Course }) {
       setAnalytics(data);
       setOpen(true);
     } catch {
-      toast.error("Analitika yuklanmadi");
+      toast.error(t.error.loadFailed);
     } finally {
       setLoading(false);
     }
@@ -74,10 +179,11 @@ function CourseCard({ course }: { course: Course }) {
         <Button
           variant="outline"
           size="sm"
-          className="flex-1"
-          onClick={() => toast.info("Kurs tafsilotlari — tez orada")}
+          className="flex-1 gap-1"
+          onClick={() => setAddLesson(true)}
         >
-          Ko'rish
+          <PlusCircle className="h-3.5 w-3.5" />
+          {t.teacher.addLesson}
         </Button>
         <Button
           variant="ghost"
@@ -87,23 +193,26 @@ function CourseCard({ course }: { course: Course }) {
           disabled={loading}
         >
           <BarChart3 className="h-3.5 w-3.5" />
-          {loading ? "..." : "Analitika"}
+          {loading ? "..." : t.teacher.analytics}
           {open ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
         </Button>
       </div>
 
       {open && analytics && (
         <div className="rounded-xl bg-muted p-3 text-sm space-y-1">
-          <p className="font-medium">{analytics.studentCount} o'quvchi</p>
-          <p className="text-muted-foreground">O'rtacha ball: <span className="font-semibold text-foreground">{analytics.avgScore.toFixed(1)}</span></p>
+          <p className="font-medium">{analytics.studentCount} {t.teacher.students}</p>
+          <p className="text-muted-foreground">{t.teacher.avgScore}: <span className="font-semibold text-foreground">{analytics.avgScore.toFixed(1)}</span></p>
           <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{analytics.aiInsight.slice(0, 200)}</p>
         </div>
       )}
+
+      <AddLessonModal courseId={course.id} open={addLesson} onClose={() => setAddLesson(false)} onAdded={onLessonAdded} />
     </div>
   );
 }
 
 function DocumentPanel() {
+  const { t } = useT();
   const qc = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [tag, setTag] = useState<string>("lesson_plan");
@@ -118,22 +227,22 @@ function DocumentPanel() {
   const { mutate: remove } = useMutation({
     mutationFn: deleteTeacherDocument,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["teacher-docs"] }),
-    onError: () => toast.error("O'chirishda xato"),
+    onError: () => toast.error(t.error.deleteFailed),
   });
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error("Fayl 5 MB dan katta"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error(t.error.fileTooLarge); return; }
 
     setUploading(true);
     try {
       await uploadTeacherDocument(file, tag, subject || undefined);
-      toast.success(`"${file.name}" yuklandi va AI baza yangilandi`);
+      toast.success(t.teacher.fileUploaded);
       qc.invalidateQueries({ queryKey: ["teacher-docs"] });
       if (fileRef.current) fileRef.current.value = "";
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Yuklashda xato");
+      toast.error(err instanceof Error ? err.message : t.error.uploadFailed);
     } finally {
       setUploading(false);
     }
@@ -144,10 +253,10 @@ function DocumentPanel() {
       <header className="border-b border-border px-5 py-4">
         <h2 className="font-display text-lg font-semibold flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
-          AI Bilim bazasi
+          {t.teacher.knowledgeBase}
         </h2>
         <p className="text-xs text-muted-foreground">
-          PDF yoki TXT fayl yuklang — o'quvchi AI ustozi ulardan foydalanadi
+          {t.teacher.knowledgeBaseDesc}
         </p>
       </header>
 
@@ -163,7 +272,7 @@ function DocumentPanel() {
             ))}
           </select>
           <Input
-            placeholder="Fan (masalan: Matematika)"
+            placeholder={t.teacher.subject}
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             className="w-44"
@@ -178,7 +287,7 @@ function DocumentPanel() {
             ) : (
               <Upload className="h-4 w-4" />
             )}
-            {uploading ? "Yuklanmoqda..." : "Fayl yuklash"}
+            {uploading ? t.action.loading : t.teacher.uploadFile}
           </Button>
           <input
             ref={fileRef}
@@ -195,7 +304,7 @@ function DocumentPanel() {
           </div>
         ) : docs.length === 0 ? (
           <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-border">
-            <p className="text-sm text-muted-foreground">Hali hujjat yuklanmagan</p>
+            <p className="text-sm text-muted-foreground">{t.teacher.noDocuments}</p>
           </div>
         ) : (
           <ul className="divide-y divide-border">
@@ -216,7 +325,7 @@ function DocumentPanel() {
                       <span className="text-[10px] text-muted-foreground">{doc.subject}</span>
                     )}
                     <span className="text-[10px] text-muted-foreground ml-auto">
-                      {doc.chunkCount} bo'lak · {uzDate(doc.createdAt)}
+                      {doc.chunkCount} {t.teacher.chunks} · {uzDate(doc.createdAt)}
                     </span>
                   </div>
                 </div>
@@ -239,30 +348,42 @@ function DocumentPanel() {
 
 function TeacherDashboard() {
   const { user } = useAuth();
+  const { t } = useT();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [createOpen, setCreateOpen] = useState(false);
 
-  useEffect(() => {
+  function loadCourses() {
+    setLoading(true);
     getTeacherCourses()
       .then(setCourses)
-      .catch(() => toast.error("Ma'lumotlar yuklanmadi"))
+      .catch(() => toast.error(t.error.loadFailed))
       .finally(() => setLoading(false));
-  }, []);
+  }
+
+  useEffect(() => { loadCourses(); }, []);
 
   const totalLessons = courses.reduce((s, c) => s + (c.lessons?.length ?? 0), 0);
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow="O'qituvchi paneli"
-        title={`Xush kelibsiz, ${user?.fullName.split(" ")[0]}!`}
-        description="Kurslaringiz, o'quvchilar, AI tahlil va bilim bazangiz."
-      />
+      <div className="flex items-start justify-between gap-4">
+        <PageHeader
+          eyebrow={t.teacher.dashboard}
+          title={t.teacher.welcomeBack(user?.fullName.split(" ")[0] ?? "")}
+          description={t.teacher.dashboardDesc}
+        />
+        <Button onClick={() => setCreateOpen(true)} className="shrink-0 gap-2 mt-1">
+          <Plus className="h-4 w-4" />
+          {t.teacher.createCourse}
+        </Button>
+      </div>
+      <CreateCourseModal open={createOpen} onClose={() => setCreateOpen(false)} onCreated={loadCourses} />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Jami kurslar" value={loading ? "…" : courses.length} icon={BookOpen} accent="primary" />
-        <StatCard label="Jami darslar" value={loading ? "…" : totalLessons} icon={Users} accent="secondary" />
-        <StatCard label="AI tahlil" value="Faol" icon={Sparkles} accent="accent" hint="Gemini AI yoqilgan" />
+        <StatCard label={t.teacher.totalCourses} value={loading ? "…" : courses.length} icon={BookOpen} accent="primary" />
+        <StatCard label={t.teacher.totalLessons} value={loading ? "…" : totalLessons} icon={Users} accent="secondary" />
+        <StatCard label={t.teacher.aiActive} value="Faol" icon={Sparkles} accent="accent" hint={t.teacher.aiActiveHint} />
       </div>
 
       <DocumentPanel />
@@ -276,12 +397,12 @@ function TeacherDashboard() {
       ) : courses.length === 0 ? (
         <EmptyState
           icon={BookOpen}
-          title="Hali kurs qo'shilmagan"
-          description="Kurslar bo'limida yangi kurs yarating."
+          title={t.teacher.noCourses}
+          description={t.teacher.noCoursesDesc}
         />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {courses.map((c) => <CourseCard key={c.id} course={c} />)}
+          {courses.map((c) => <CourseCard key={c.id} course={c} onLessonAdded={loadCourses} />)}
         </div>
       )}
     </div>

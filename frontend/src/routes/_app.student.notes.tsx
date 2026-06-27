@@ -10,14 +10,16 @@ import { getNotes, createNote, deleteNote } from "@/lib/api";
 import { uzDate } from "@/lib/format/date";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
-export const Route = createFileRoute("/_app/student/eslatmalar")({
+export const Route = createFileRoute("/_app/student/notes")({
   head: () => ({ meta: [{ title: "Eslatmalar · AcademiXAI" }] }),
   component: NotesPage,
 });
 
 function NotesPage() {
   const qc = useQueryClient();
+  const { t } = useT();
   const [query, setQuery] = useState("");
   const [creating, setCreating] = useState(false);
   const [draft, setDraft] = useState("");
@@ -33,18 +35,18 @@ function NotesPage() {
       qc.invalidateQueries({ queryKey: ["notes"] });
       setDraft("");
       setCreating(false);
-      toast.success("Eslatma qo'shildi");
+      toast.success(t.notes.saved);
     },
-    onError: () => toast.error("Qo'shishda xato"),
+    onError: () => toast.error(t.error.generic),
   });
 
   const deleteMutation = useMutation({
     mutationFn: deleteNote,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["notes"] });
-      toast.success("Eslatma o'chirildi");
+      toast.success(t.notes.delete);
     },
-    onError: () => toast.error("O'chirishda xato"),
+    onError: () => toast.error(t.error.deleteFailed),
   });
 
   const filtered = notes.filter((n) =>
@@ -55,12 +57,12 @@ function NotesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Eslatmalar"
-        description="Darslar bo'yicha yozib qoldirilgan shaxsiy eslatmalar."
+        title={t.notes.title}
+        description={t.notes.description}
         actions={
           <Button onClick={() => setCreating(true)}>
             <Plus className="h-4 w-4" />
-            Yangi eslatma
+            {t.notes.add}
           </Button>
         }
       />
@@ -79,16 +81,16 @@ function NotesPage() {
             rows={4}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="Eslatma matnini kiriting..."
+            placeholder={t.notes.placeholder}
             className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary placeholder:text-muted-foreground"
           />
           <div className="mt-2 flex justify-end gap-2">
             <Button variant="outline" size="sm" onClick={() => { setCreating(false); setDraft(""); }}>
-              Bekor
+              {t.action.cancel}
             </Button>
             <Button size="sm" disabled={!draft.trim() || addMutation.isPending} onClick={() => addMutation.mutate()}>
               <BookMarked className="h-3.5 w-3.5" />
-              Saqlash
+              {t.action.save}
             </Button>
           </div>
         </div>
@@ -114,7 +116,7 @@ function NotesPage() {
         <div className="flex h-48 flex-col items-center justify-center gap-3 text-center rounded-2xl border border-border bg-card">
           <NotebookPen className="h-10 w-10 text-muted-foreground/30" />
           <p className="text-sm text-muted-foreground">
-            {notes.length === 0 ? "Hali hech qanday eslatma yo'q" : "Qidiruv natijalari topilmadi"}
+            {notes.length === 0 ? t.notes.noNotes : t.action.search}
           </p>
           {notes.length === 0 && (
             <Button size="sm" variant="outline" onClick={() => setCreating(true)}>

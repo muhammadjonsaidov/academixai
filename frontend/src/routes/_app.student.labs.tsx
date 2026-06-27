@@ -15,6 +15,7 @@ import { PageHeader } from "@/components/shell/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_app/student/labs")({
   head: () => ({ meta: [{ title: "Laboratoriya · AcademiXAI" }] }),
@@ -138,12 +139,13 @@ function PhetModal({ lab, onClose }: { lab: Lab; onClose: () => void }) {
 }
 
 function LabsPage() {
+  const { t } = useT();
   const [activeLab, setActiveLab] = useState<Lab | null>(null);
 
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Virtual Laboratoriya"
+        eyebrow={t.nav.labs}
         title="PhET interaktiv simulatsiyalar"
         description="Colorado universiteti PhET loyihasi — 100 milliondan ortiq o'quvchi foydalanadi. O'zbek tilida."
       />

@@ -7,29 +7,35 @@ import { Button } from "@/components/ui/button";
 import { getNotifications, markNotificationRead, type AppNotification } from "@/lib/api";
 import { uzDate } from "@/lib/format/date";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
-export const Route = createFileRoute("/_app/student/bildirishnomalar")({
+export const Route = createFileRoute("/_app/student/notifications")({
   head: () => ({ meta: [{ title: "Bildirishnomalar · AcademiXAI" }] }),
   component: NotificationsPage,
 });
 
-const typeConfig: Record<string, { icon: typeof Bell; color: string; label: string }> = {
-  weekly_report:  { icon: Sparkles, color: "text-primary", label: "Haftalik hisobot" },
-  monthly_report: { icon: Sparkles, color: "text-secondary", label: "Oylik hisobot" },
-  exam_result:    { icon: GraduationCap, color: "text-success", label: "Imtihon natijasi" },
-  milestone:      { icon: Trophy, color: "text-amber-500", label: "Yutuq" },
-  alert:          { icon: AlertTriangle, color: "text-warning", label: "Ogohlantirish" },
-  parent_report:  { icon: Bell, color: "text-muted-foreground", label: "Hisobot" },
-};
+function useTypeConfig() {
+  const { t } = useT();
+  return {
+    weekly_report:  { icon: Sparkles,      color: "text-primary",          label: t.notifications.types.weekly_report },
+    monthly_report: { icon: Sparkles,      color: "text-secondary",        label: t.notifications.types.monthly_report },
+    exam_result:    { icon: GraduationCap, color: "text-success",          label: t.notifications.types.exam_result },
+    milestone:      { icon: Trophy,        color: "text-amber-500",        label: t.notifications.types.milestone },
+    alert:          { icon: AlertTriangle, color: "text-warning",          label: t.notifications.types.alert },
+    parent_report:  { icon: Bell,          color: "text-muted-foreground", label: t.notifications.types.parent_report },
+  };
+}
 
 function NotificationCard({ n }: { n: AppNotification }) {
   const qc = useQueryClient();
+  const { t } = useT();
+  const typeConfig = useTypeConfig();
   const { mutate: markRead } = useMutation({
     mutationFn: () => markNotificationRead(n.id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
   });
 
-  const cfg = typeConfig[n.type] ?? typeConfig.alert;
+  const cfg = typeConfig[n.type as keyof typeof typeConfig] ?? typeConfig.alert;
   const Icon = cfg.icon;
 
   return (
@@ -61,7 +67,7 @@ function NotificationCard({ n }: { n: AppNotification }) {
             onClick={() => markRead()}
           >
             <CheckCheck className="h-3.5 w-3.5" />
-            O'qildi deb belgilash
+            {t.action.markRead}
           </Button>
         )}
       </div>
@@ -73,6 +79,7 @@ function NotificationCard({ n }: { n: AppNotification }) {
 }
 
 function NotificationsPage() {
+  const { t } = useT();
   const { data, isLoading } = useQuery({
     queryKey: ["notifications"],
     queryFn: getNotifications,
@@ -84,9 +91,9 @@ function NotificationsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Bildirishnomalar"
-        title={unread > 0 ? `${unread} ta yangi xabar` : "Bildirishnomalar"}
-        description="Haftalik hisobotlar, imtihon natijalari va AI tizim xabarlari."
+        eyebrow={t.notifications.title}
+        title={unread > 0 ? t.notifications.unread(unread) : t.notifications.title}
+        description={t.notifications.description}
       />
 
       {isLoading ? (
@@ -96,9 +103,9 @@ function NotificationsPage() {
       ) : notifications.length === 0 ? (
         <div className="flex h-48 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border bg-card text-center">
           <BellRing className="h-10 w-10 text-muted-foreground/30" />
-          <p className="font-display text-lg font-semibold">Bildirishnoma yo'q</p>
+          <p className="font-display text-lg font-semibold">{t.notifications.noNotifications}</p>
           <p className="text-sm text-muted-foreground max-w-xs">
-            Imtihon topshirsangiz yoki haftalik hisobot tayyor bo'lsa bu yerda ko'rinadi.
+            {t.notifications.noNotificationsDesc}
           </p>
         </div>
       ) : (

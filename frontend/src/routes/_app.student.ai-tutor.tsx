@@ -5,12 +5,14 @@ import { Image, MessageSquare, Mic, Paperclip, Plus, Send, Sparkles } from "luci
 
 import { PageHeader } from "@/components/shell/PageHeader";
 import { Button } from "@/components/ui/button";
+import { Markdown } from "@/components/ui/Markdown";
 import { getChatHistory, sendChat, type ChatSource } from "@/lib/api";
 import { uzTime } from "@/lib/format/date";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
-export const Route = createFileRoute("/_app/student/ai-ustoz")({
+export const Route = createFileRoute("/_app/student/ai-tutor")({
   head: () => ({ meta: [{ title: "AI Ustoz · AcademiXAI" }] }),
   component: AiTeacherPage,
 });
@@ -28,6 +30,7 @@ const STARTERS = [
 ];
 
 function AiTeacherPage() {
+  const { t } = useT();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -82,7 +85,7 @@ function AiTeacherPage() {
   function newChat() {
     setMessages([]);
     setInput("");
-    toast.success("Yangi suhbat boshlandi");
+    toast.success(t.action.newChat);
   }
 
   async function send(e?: FormEvent) {
@@ -107,7 +110,7 @@ function AiTeacherPage() {
         },
       ]);
     } catch {
-      toast.error("Xato yuz berdi, qayta urinib ko'ring");
+      toast.error(t.error.aiError);
     } finally {
       setSending(false);
     }
@@ -116,13 +119,13 @@ function AiTeacherPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="AI Ustoz"
-        title="24/7 shaxsiy ustozingiz"
-        description="Har qanday fan bo'yicha savol bering — AI Ustoz Amir javob beradi."
+        eyebrow={t.aiTutor.title}
+        title={t.aiTutor.subtitle}
+        description={t.aiTutor.description}
         actions={
           <Button onClick={newChat} variant="outline" className="h-10">
             <Plus className="h-4 w-4" />
-            Yangi chat
+            {t.action.newChat}
           </Button>
         }
       />
@@ -132,7 +135,7 @@ function AiTeacherPage() {
         <aside className="rounded-2xl border border-border bg-card shadow-soft">
           <div className="border-b border-border px-4 py-3">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Chat tarixi
+              {t.aiTutor.history}
             </p>
           </div>
           <div className="p-4">
@@ -154,7 +157,7 @@ function AiTeacherPage() {
             ) : (
               <div className="flex flex-col items-center gap-2 py-6 text-center">
                 <MessageSquare className="h-8 w-8 text-muted-foreground/30" />
-                <p className="text-xs text-muted-foreground">Hali suhbat yo'q</p>
+                <p className="text-xs text-muted-foreground">{t.aiTutor.noHistory}</p>
               </div>
             )}
           </div>
@@ -169,7 +172,7 @@ function AiTeacherPage() {
               </div>
               <div>
                 <p className="text-sm font-semibold">AI Ustoz Amir</p>
-                <p className="text-[11px] text-muted-foreground">doim tayyor • barcha fanlar</p>
+                <p className="text-[11px] text-muted-foreground">{t.aiTutor.onlineStatus}</p>
               </div>
             </div>
           </header>
@@ -180,9 +183,9 @@ function AiTeacherPage() {
                 <div className="grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
                   <Sparkles className="h-6 w-6" />
                 </div>
-                <h3 className="mt-4 font-display text-lg font-semibold">Suhbatni boshlang</h3>
+                <h3 className="mt-4 font-display text-lg font-semibold">{t.aiTutor.startPrompt}</h3>
                 <p className="mt-1 max-w-md text-sm text-muted-foreground">
-                  Quyidagi savollardan birini tanlang yoki o'z savolingizni yozing.
+                  {t.aiTutor.startDescription}
                 </p>
                 <div className="mt-5 grid w-full max-w-lg gap-2 sm:grid-cols-2">
                   {STARTERS.map((p) => (
@@ -208,11 +211,13 @@ function AiTeacherPage() {
                     <div className="max-w-[80%] flex flex-col gap-1">
                       <div
                         className={cn(
-                          "whitespace-pre-line rounded-2xl px-4 py-2.5 text-sm",
-                          m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
+                          "rounded-2xl px-4 py-2.5 text-sm",
+                          m.role === "user" ? "bg-primary text-primary-foreground whitespace-pre-line" : "bg-muted text-foreground",
                         )}
                       >
-                        {m.content}
+                        {m.role === "assistant" ? (
+                          <Markdown>{m.content}</Markdown>
+                        ) : m.content}
                         {m.time && (
                           <p className={cn("mt-1.5 text-[10px]", m.role === "user" ? "text-primary-foreground/70" : "text-muted-foreground")}>
                             {m.time}
@@ -270,7 +275,7 @@ function AiTeacherPage() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-                placeholder="Savolingizni yozing..."
+                placeholder={t.aiTutor.placeholder}
                 className="max-h-32 min-h-[2.25rem] flex-1 resize-none bg-transparent px-2 py-1.5 text-sm outline-none placeholder:text-muted-foreground"
               />
               <Button type="submit" size="icon" className="h-9 w-9 shrink-0" disabled={!input.trim() || sending}>
@@ -278,7 +283,7 @@ function AiTeacherPage() {
               </Button>
             </div>
             <p className="mt-2 text-center text-[11px] text-muted-foreground">
-              AI ba'zan xato qilishi mumkin — muhim ma'lumotlarni tekshiring.
+              {t.aiTutor.disclaimer}
             </p>
           </form>
         </section>

@@ -18,8 +18,9 @@ import { Button } from "@/components/ui/button";
 import { generateExam, gradeExam, type ExamQuestion } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
-export const Route = createFileRoute("/_app/student/imtihon/$lessonId")({
+export const Route = createFileRoute("/_app/student/exam/$lessonId")({
   head: () => ({ meta: [{ title: "Imtihon · AcademiXAI" }] }),
   component: ExamTakingPage,
 });
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/_app/student/imtihon/$lessonId")({
 type Screen = "generating" | "quiz" | "result";
 
 function ExamTakingPage() {
+  const { t } = useT();
   const { lessonId } = Route.useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -50,8 +52,8 @@ function ExamTakingPage() {
         setScreen("quiz");
       })
       .catch(() => {
-        toast.error("Savollar yaratilmadi. Qayta urinib ko'ring.");
-        navigate({ to: "/student/imtihonlar" });
+        toast.error(t.error.aiError);
+        navigate({ to: "/student/exams" });
       });
   }, [lId]);
 
@@ -77,16 +79,16 @@ function ExamTakingPage() {
           : "Javob berilmadi"
       );
       const res = await gradeExam({
-        studentId: user?.userId ?? 0,
+        studentId: Number(user?.id ?? 0),
         lessonId: lId,
         answers: answerStrings,
       });
       setResult(res);
       setScreen("result");
     } catch {
-      toast.error("Baholashda xato. Natijalar saqlanmadi.");
+      toast.error(t.error.saveFailed);
       setScreen("result");
-      setResult({ score: 0, feedbackUz: "Texnik xato yuz berdi." });
+      setResult({ score: 0, feedbackUz: t.error.generic });
     } finally {
       setSubmitting(false);
     }
@@ -103,8 +105,8 @@ function ExamTakingPage() {
         <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary/10 text-primary">
           <Sparkles className="h-7 w-7 animate-pulse" />
         </div>
-        <h2 className="font-display text-xl font-semibold">AI savollar tayyorlamoqda…</h2>
-        <p className="text-sm text-muted-foreground">Ustoz Amir siz uchun 5 ta savol yaratmoqda</p>
+        <h2 className="font-display text-xl font-semibold">{t.exams.generating}</h2>
+        <p className="text-sm text-muted-foreground">{t.aiTutor.subtitle}</p>
         <Loader2 className="h-5 w-5 animate-spin text-primary" />
       </div>
     );
@@ -116,9 +118,9 @@ function ExamTakingPage() {
     return (
       <div className="mx-auto max-w-2xl space-y-6">
         <PageHeader
-          eyebrow="Imtihon natijasi"
-          title={passed ? "Tabriklaymiz! 🎉" : "Davom eting!"}
-          description="AI Ustoz natijangizni tahlil qildi."
+          eyebrow={t.exams.result}
+          title={passed ? t.exams.excellentResult : t.exams.keepGoing}
+          description={t.exams.feedback}
         />
 
         <div className={cn(
@@ -132,26 +134,26 @@ function ExamTakingPage() {
           </div>
           <p className="font-display text-5xl font-bold text-foreground">{result.score}%</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            {answered}/{questions.length} savol javoblandi
+            {answered}/{questions.length} {t.exams.questions}
           </p>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-5 shadow-soft">
           <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
             <Sparkles className="h-4 w-4 text-primary" />
-            AI Ustoz fikri
+            {t.exams.feedback}
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed">{result.feedbackUz}</p>
         </div>
 
         <div className="flex gap-3">
-          <Button variant="outline" className="flex-1" onClick={() => navigate({ to: "/student/imtihonlar" })}>
+          <Button variant="outline" className="flex-1" onClick={() => navigate({ to: "/student/exams" })}>
             <ArrowLeft className="h-4 w-4" />
-            Imtihonlarga qaytish
+            {t.exams.goCourses}
           </Button>
-          <Button className="flex-1" onClick={() => navigate({ to: "/student/ai-ustoz" })}>
+          <Button className="flex-1" onClick={() => navigate({ to: "/student/ai-tutor" })}>
             <Sparkles className="h-4 w-4" />
-            AI bilan mashq qilish
+            {t.student.askAI}
           </Button>
         </div>
       </div>
@@ -168,7 +170,7 @@ function ExamTakingPage() {
       <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-5 py-3 shadow-soft">
         <div className="flex items-center gap-2 text-sm font-medium">
           <GraduationCap className="h-4 w-4 text-primary" />
-          Savol {current + 1}/{questions.length}
+          {t.exams.question} {current + 1}/{questions.length}
         </div>
         <div className={cn(
           "flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold",
@@ -178,7 +180,7 @@ function ExamTakingPage() {
           {mins}:{secs.toString().padStart(2, "0")}
         </div>
         <div className="text-xs text-muted-foreground">
-          {answered} javoblandi
+          {answered} {t.exams.result}
         </div>
       </div>
 
@@ -235,7 +237,7 @@ function ExamTakingPage() {
           disabled={current === 0}
           className="flex-1"
         >
-          ← Oldingi
+          ← {t.action.prev}
         </Button>
 
         {current < questions.length - 1 ? (
@@ -244,7 +246,7 @@ function ExamTakingPage() {
             className="flex-1"
             disabled={answers[current] < 0}
           >
-            Keyingi →
+            {t.action.next} →
           </Button>
         ) : (
           <Button
@@ -253,7 +255,7 @@ function ExamTakingPage() {
             className="flex-1 bg-success hover:bg-success/90"
           >
             {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-            Yakunlash
+            {t.action.submit}
           </Button>
         )}
       </div>

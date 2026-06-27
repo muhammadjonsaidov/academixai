@@ -6,8 +6,9 @@ import { PageHeader } from "@/components/shell/PageHeader";
 import { Button } from "@/components/ui/button";
 import { getCourses, getDashboard } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
-export const Route = createFileRoute("/_app/student/kasbiy-yol")({
+export const Route = createFileRoute("/_app/student/career")({
   head: () => ({ meta: [{ title: "Kasbiy yo'l · AcademiXAI" }] }),
   component: CareerPage,
 });
@@ -81,6 +82,7 @@ function suggestCareers(subjects: string[], avgScore: number) {
 }
 
 function CareerPage() {
+  const { t } = useT();
   const { data: courses = [] } = useQuery({ queryKey: ["courses"], queryFn: getCourses });
   const { data: stats } = useQuery({ queryKey: ["student-dashboard"], queryFn: getDashboard });
 
@@ -91,12 +93,12 @@ function CareerPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Kelajak rejasi"
-        title="Sizga mos kasbiy yo'nalishlar"
-        description="Kurs yo'nalishlaringiz va natijalaringiz asosida AI tahlil qilindi."
+        eyebrow={t.career.title}
+        title={t.career.title}
+        description={t.career.description}
         actions={
           <Button asChild variant="outline">
-            <Link to="/student/ai-ustoz">
+            <Link to="/student/ai-tutor">
               <Sparkles className="h-4 w-4" />
               AI bilan chuqurroq muhokama
             </Link>
@@ -155,13 +157,13 @@ function CareerPage() {
 
             <div className="mt-5 flex gap-2 border-t border-border pt-4">
               <Button asChild size="sm">
-                <Link to="/student/ai-ustoz">
+                <Link to="/student/ai-tutor">
                   <Sparkles className="h-3.5 w-3.5" />
                   AI bilan suhbatlashish
                 </Link>
               </Button>
               <Button asChild size="sm" variant="outline">
-                <Link to="/student/kurslar">Kurslarni ko'rish</Link>
+                <Link to="/student/courses">Kurslarni ko'rish</Link>
               </Button>
             </div>
           </article>

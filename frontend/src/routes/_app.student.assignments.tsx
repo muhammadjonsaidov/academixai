@@ -4,37 +4,39 @@ import { ClipboardList, GraduationCap, Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shell/EmptyState";
+import { useT } from "@/lib/i18n";
 
-export const Route = createFileRoute("/_app/student/topshiriqlar")({
+export const Route = createFileRoute("/_app/student/assignments")({
   head: () => ({ meta: [{ title: "Topshiriqlar · AcademiXAI" }] }),
   component: AssignmentsPage,
 });
 
 function AssignmentsPage() {
+  const { t } = useT();
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Topshiriqlar"
-        description="O'qituvchilar tomonidan berilgan uy vazifalari va topshiriqlar."
+        title={t.assignments.title}
+        description={t.assignments.description}
       />
 
       <div className="rounded-2xl border border-border bg-card shadow-soft">
         <EmptyState
           icon={ClipboardList}
-          title="Topshiriqlar tez orada"
-          description="O'qituvchi tomonidan berilgan topshiriqlar bu yerda ko'rinadi. Hozircha AI imtihonlari orqali bilimingizni sinab ko'ring."
+          title={t.assignments.comingSoon}
+          description={t.assignments.noAssignments}
           action={
             <div className="flex gap-2">
               <Button asChild variant="outline">
-                <Link to="/student/imtihonlar">
+                <Link to="/student/exams">
                   <GraduationCap className="h-4 w-4" />
-                  Imtihonlar
+                  {t.nav.exams}
                 </Link>
               </Button>
               <Button asChild>
-                <Link to="/student/ai-ustoz">
+                <Link to="/student/ai-tutor">
                   <Sparkles className="h-4 w-4" />
-                  AI Ustoz bilan mashq
+                  {t.student.askAI}
                 </Link>
               </Button>
             </div>

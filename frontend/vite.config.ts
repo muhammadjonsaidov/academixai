@@ -11,6 +11,9 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
+    resolve: {
+      tsconfigPaths: true,
+    },
     server: {
       port: 3000,
       proxy: {

@@ -24,11 +24,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final StringRedisTemplate redis;
 
     private static final Map<String, Integer> LIMITS = Map.of(
-            "/api/chat",          15,
-            "/api/exam/generate", 10,
-            "/api/exam/grade",    10,
-            "/api/auth/register",  5,
-            "/api/auth/login",    10
+            "/api/chat",                    15,
+            "/api/exam/generate",           10,
+            "/api/exam/grade",              10,
+            "/api/auth/register",            5,
+            "/api/auth/login",              10,
+            "/api/auth/forgot-password",     3,
+            "/api/auth/reset-password",      5
     );
 
     @Override

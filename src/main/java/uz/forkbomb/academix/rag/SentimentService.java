@@ -8,9 +8,11 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.forkbomb.academix.shared.model.SentimentLog;
 import uz.forkbomb.academix.shared.repository.SentimentLogRepository;
 
+@Transactional(readOnly = true)
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -21,6 +23,7 @@ public class SentimentService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Async
+    @Transactional
     public void analyzeAndSave(String message, Long studentId, Long chatMessageId) {
         try {
             String prompt = String.format("""

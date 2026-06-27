@@ -2,8 +2,6 @@ package uz.forkbomb.academix.chat;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import uz.forkbomb.academix.chat.dto.ChatHistoryResponse;
@@ -11,6 +9,7 @@ import uz.forkbomb.academix.chat.dto.ChatRequest;
 import uz.forkbomb.academix.chat.dto.ChatResponse;
 import uz.forkbomb.academix.rag.RAGService;
 import uz.forkbomb.academix.rag.SentimentService;
+import uz.forkbomb.academix.shared.ai.AIService;
 import uz.forkbomb.academix.shared.exception.ResourceNotFoundException;
 import uz.forkbomb.academix.shared.model.ChatMessage;
 import uz.forkbomb.academix.shared.model.Lesson;
@@ -27,7 +26,7 @@ import java.util.List;
 public class ChatService {
 
     private final InputSanitizer sanitizer;
-    private final ChatModel chatModel;
+    private final AIService aiService;
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
     private final LessonRepository lessonRepository;
@@ -116,12 +115,7 @@ public class ChatService {
                 ? "Mavzu: " + lessonContext + "\n\nSavol: " + message
                 : message;
 
-        return ChatClient.builder(chatModel).build()
-                .prompt()
-                .system(systemPrompt.toString())
-                .user(userMsg)
-                .call()
-                .content();
+        return aiService.chatWithSystem(systemPrompt.toString(), userMsg);
     }
 
     private List<Long> getTeacherIdsForStudent(Long studentId) {

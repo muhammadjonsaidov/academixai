@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.forkbomb.academix.exam.dto.ExamGradeRequest;
 import uz.forkbomb.academix.exam.dto.ExamGenerateRequest;
+import uz.forkbomb.academix.rag.NotificationService;
 import uz.forkbomb.academix.shared.ai.AIService;
 import uz.forkbomb.academix.shared.exception.ResourceNotFoundException;
 import uz.forkbomb.academix.shared.model.ExamResult;
@@ -18,6 +20,7 @@ import uz.forkbomb.academix.shared.repository.UserRepository;
 import java.util.List;
 import java.util.Map;
 
+@Transactional(readOnly = true)
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -28,11 +31,13 @@ public class ExamService {
     private final UserRepository userRepository;
     private final LessonRepository lessonRepository;
     private final ObjectMapper objectMapper;
+    private final NotificationService notificationService;
 
     public String generateQuestions(ExamGenerateRequest request) {
         return aiService.generateExamQuestions(request.getTopic(), request.getSubject(), request.getCount());
     }
 
+    @Transactional
     @SuppressWarnings("unchecked")
     public Map<String, Object> gradeAndSave(ExamGradeRequest request, Long studentId) {
         String gradeJson = aiService.gradeExam(request.getQuestionsJson(),
@@ -46,7 +51,7 @@ public class ExamService {
             throw new IllegalStateException("AI baholash natijasini qayta ishlashda xatolik. Qayta urinib ko'ring.");
         }
 
-        int score = (int) result.getOrDefault("score", 0);
+        int score = ((Number) result.getOrDefault("score", 0)).intValue();
         String feedback = (String) result.getOrDefault("feedbackUz", "");
 
         User student = userRepository.findById(studentId)
@@ -62,6 +67,15 @@ public class ExamService {
                 .feedbackUz(feedback)
                 .answersJson(request.getQuestionsJson())
                 .build());
+
+        notificationService.create(studentId, "exam_result",
+                "Imtihon natijasi: " + score + "%",
+                feedback.isBlank() ? "Ball: " + score + "%" : feedback);
+        notificationService.sendEmailIfEnabled(student,
+                "AcademiXAI — Imtihon natijasi",
+                "Salom " + student.getFullName() + ",\n\nImtihon natijangiz: " + score + "%\n\n" +
+                (feedback.isBlank() ? "" : "Mulohaza: " + feedback + "\n\n") +
+                "Platformaga kirish: https://academixai.uz");
 
         return result;
     }

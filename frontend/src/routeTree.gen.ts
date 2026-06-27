@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthVerifyRouteImport } from './routes/auth.verify'
+import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AuthRegisterRouteImport } from './routes/auth.register'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthForgotRouteImport } from './routes/auth.forgot'
@@ -24,19 +25,44 @@ import { Route as AppTeacherIndexRouteImport } from './routes/_app.teacher.index
 import { Route as AppStudentIndexRouteImport } from './routes/_app.student.index'
 import { Route as AppParentIndexRouteImport } from './routes/_app.parent.index'
 import { Route as AppAdminIndexRouteImport } from './routes/_app.admin.index'
-import { Route as AppStudentYutuqlarRouteImport } from './routes/_app.student.yutuqlar'
-import { Route as AppStudentTopshiriqlarRouteImport } from './routes/_app.student.topshiriqlar'
-import { Route as AppStudentSozlamalarRouteImport } from './routes/_app.student.sozlamalar'
-import { Route as AppStudentProfilRouteImport } from './routes/_app.student.profil'
+import { Route as AppTeacherStudentsRouteImport } from './routes/_app.teacher.students'
+import { Route as AppTeacherSettingsRouteImport } from './routes/_app.teacher.settings'
+import { Route as AppTeacherReportsRouteImport } from './routes/_app.teacher.reports'
+import { Route as AppTeacherMessagesRouteImport } from './routes/_app.teacher.messages'
+import { Route as AppTeacherLessonDraftRouteImport } from './routes/_app.teacher.lesson-draft'
+import { Route as AppTeacherExamsRouteImport } from './routes/_app.teacher.exams'
+import { Route as AppTeacherCalendarRouteImport } from './routes/_app.teacher.calendar'
+import { Route as AppTeacherAttendanceRouteImport } from './routes/_app.teacher.attendance'
+import { Route as AppTeacherAssignmentsRouteImport } from './routes/_app.teacher.assignments'
+import { Route as AppTeacherAiAssistantRouteImport } from './routes/_app.teacher.ai-assistant'
+import { Route as AppStudentSettingsRouteImport } from './routes/_app.student.settings'
+import { Route as AppStudentProfileRouteImport } from './routes/_app.student.profile'
+import { Route as AppStudentNotificationsRouteImport } from './routes/_app.student.notifications'
+import { Route as AppStudentNotesRouteImport } from './routes/_app.student.notes'
 import { Route as AppStudentLabsRouteImport } from './routes/_app.student.labs'
-import { Route as AppStudentKurslarRouteImport } from './routes/_app.student.kurslar'
-import { Route as AppStudentKasbiyYolRouteImport } from './routes/_app.student.kasbiy-yol'
-import { Route as AppStudentImtihonlarRouteImport } from './routes/_app.student.imtihonlar'
-import { Route as AppStudentEslatmalarRouteImport } from './routes/_app.student.eslatmalar'
-import { Route as AppStudentBildirishnomalarRouteImport } from './routes/_app.student.bildirishnomalar'
-import { Route as AppStudentAiUstozRouteImport } from './routes/_app.student.ai-ustoz'
-import { Route as AppStudentImtihonLessonIdRouteImport } from './routes/_app.student.imtihon.$lessonId'
-import { Route as AppStudentKurslarCourseIdDarslarLessonIdRouteImport } from './routes/_app.student.kurslar.$courseId.darslar.$lessonId'
+import { Route as AppStudentExamsRouteImport } from './routes/_app.student.exams'
+import { Route as AppStudentCoursesRouteImport } from './routes/_app.student.courses'
+import { Route as AppStudentCareerRouteImport } from './routes/_app.student.career'
+import { Route as AppStudentAssignmentsRouteImport } from './routes/_app.student.assignments'
+import { Route as AppStudentAiTutorRouteImport } from './routes/_app.student.ai-tutor'
+import { Route as AppStudentAchievementsRouteImport } from './routes/_app.student.achievements'
+import { Route as AppParentSettingsRouteImport } from './routes/_app.parent.settings'
+import { Route as AppParentProgressRouteImport } from './routes/_app.parent.progress'
+import { Route as AppParentMessagesRouteImport } from './routes/_app.parent.messages'
+import { Route as AppParentChildRouteImport } from './routes/_app.parent.child'
+import { Route as AppParentAiSuggestionsRouteImport } from './routes/_app.parent.ai-suggestions'
+import { Route as AppParentAiReportRouteImport } from './routes/_app.parent.ai-report'
+import { Route as AppAdminTeachersRouteImport } from './routes/_app.admin.teachers'
+import { Route as AppAdminStudentsRouteImport } from './routes/_app.admin.students'
+import { Route as AppAdminSettingsRouteImport } from './routes/_app.admin.settings'
+import { Route as AppAdminReportsRouteImport } from './routes/_app.admin.reports'
+import { Route as AppAdminParentsRouteImport } from './routes/_app.admin.parents'
+import { Route as AppAdminClassesRouteImport } from './routes/_app.admin.classes'
+import { Route as AppAdminAttendanceRouteImport } from './routes/_app.admin.attendance'
+import { Route as AppAdminAnnouncementsRouteImport } from './routes/_app.admin.announcements'
+import { Route as AppAdminAnalyticsRouteImport } from './routes/_app.admin.analytics'
+import { Route as AppStudentExamLessonIdRouteImport } from './routes/_app.student.exam.$lessonId'
+import { Route as AppStudentCoursesCourseIdLessonsLessonIdRouteImport } from './routes/_app.student.courses.$courseId.lessons.$lessonId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -55,6 +81,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthVerifyRoute = AuthVerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthResetRoute = AuthResetRouteImport.update({
+  id: '/reset',
+  path: '/reset',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
@@ -112,24 +143,74 @@ const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppAdminRoute,
 } as any)
-const AppStudentYutuqlarRoute = AppStudentYutuqlarRouteImport.update({
-  id: '/yutuqlar',
-  path: '/yutuqlar',
+const AppTeacherStudentsRoute = AppTeacherStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => AppTeacherRoute,
+} as any)
+const AppTeacherSettingsRoute = AppTeacherSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppTeacherRoute,
+} as any)
+const AppTeacherReportsRoute = AppTeacherReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AppTeacherRoute,
+} as any)
+const AppTeacherMessagesRoute = AppTeacherMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AppTeacherRoute,
+} as any)
+const AppTeacherLessonDraftRoute = AppTeacherLessonDraftRouteImport.update({
+  id: '/lesson-draft',
+  path: '/lesson-draft',
+  getParentRoute: () => AppTeacherRoute,
+} as any)
+const AppTeacherExamsRoute = AppTeacherExamsRouteImport.update({
+  id: '/exams',
+  path: '/exams',
+  getParentRoute: () => AppTeacherRoute,
+} as any)
+const AppTeacherCalendarRoute = AppTeacherCalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => AppTeacherRoute,
+} as any)
+const AppTeacherAttendanceRoute = AppTeacherAttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
+  getParentRoute: () => AppTeacherRoute,
+} as any)
+const AppTeacherAssignmentsRoute = AppTeacherAssignmentsRouteImport.update({
+  id: '/assignments',
+  path: '/assignments',
+  getParentRoute: () => AppTeacherRoute,
+} as any)
+const AppTeacherAiAssistantRoute = AppTeacherAiAssistantRouteImport.update({
+  id: '/ai-assistant',
+  path: '/ai-assistant',
+  getParentRoute: () => AppTeacherRoute,
+} as any)
+const AppStudentSettingsRoute = AppStudentSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AppStudentRoute,
 } as any)
-const AppStudentTopshiriqlarRoute = AppStudentTopshiriqlarRouteImport.update({
-  id: '/topshiriqlar',
-  path: '/topshiriqlar',
+const AppStudentProfileRoute = AppStudentProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => AppStudentRoute,
 } as any)
-const AppStudentSozlamalarRoute = AppStudentSozlamalarRouteImport.update({
-  id: '/sozlamalar',
-  path: '/sozlamalar',
+const AppStudentNotificationsRoute = AppStudentNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => AppStudentRoute,
 } as any)
-const AppStudentProfilRoute = AppStudentProfilRouteImport.update({
-  id: '/profil',
-  path: '/profil',
+const AppStudentNotesRoute = AppStudentNotesRouteImport.update({
+  id: '/notes',
+  path: '/notes',
   getParentRoute: () => AppStudentRoute,
 } as any)
 const AppStudentLabsRoute = AppStudentLabsRouteImport.update({
@@ -137,48 +218,121 @@ const AppStudentLabsRoute = AppStudentLabsRouteImport.update({
   path: '/labs',
   getParentRoute: () => AppStudentRoute,
 } as any)
-const AppStudentKurslarRoute = AppStudentKurslarRouteImport.update({
-  id: '/kurslar',
-  path: '/kurslar',
+const AppStudentExamsRoute = AppStudentExamsRouteImport.update({
+  id: '/exams',
+  path: '/exams',
   getParentRoute: () => AppStudentRoute,
 } as any)
-const AppStudentKasbiyYolRoute = AppStudentKasbiyYolRouteImport.update({
-  id: '/kasbiy-yol',
-  path: '/kasbiy-yol',
+const AppStudentCoursesRoute = AppStudentCoursesRouteImport.update({
+  id: '/courses',
+  path: '/courses',
   getParentRoute: () => AppStudentRoute,
 } as any)
-const AppStudentImtihonlarRoute = AppStudentImtihonlarRouteImport.update({
-  id: '/imtihonlar',
-  path: '/imtihonlar',
+const AppStudentCareerRoute = AppStudentCareerRouteImport.update({
+  id: '/career',
+  path: '/career',
   getParentRoute: () => AppStudentRoute,
 } as any)
-const AppStudentEslatmalarRoute = AppStudentEslatmalarRouteImport.update({
-  id: '/eslatmalar',
-  path: '/eslatmalar',
+const AppStudentAssignmentsRoute = AppStudentAssignmentsRouteImport.update({
+  id: '/assignments',
+  path: '/assignments',
   getParentRoute: () => AppStudentRoute,
 } as any)
-const AppStudentBildirishnomalarRoute =
-  AppStudentBildirishnomalarRouteImport.update({
-    id: '/bildirishnomalar',
-    path: '/bildirishnomalar',
-    getParentRoute: () => AppStudentRoute,
-  } as any)
-const AppStudentAiUstozRoute = AppStudentAiUstozRouteImport.update({
-  id: '/ai-ustoz',
-  path: '/ai-ustoz',
+const AppStudentAiTutorRoute = AppStudentAiTutorRouteImport.update({
+  id: '/ai-tutor',
+  path: '/ai-tutor',
   getParentRoute: () => AppStudentRoute,
 } as any)
-const AppStudentImtihonLessonIdRoute =
-  AppStudentImtihonLessonIdRouteImport.update({
-    id: '/imtihon/$lessonId',
-    path: '/imtihon/$lessonId',
-    getParentRoute: () => AppStudentRoute,
-  } as any)
-const AppStudentKurslarCourseIdDarslarLessonIdRoute =
-  AppStudentKurslarCourseIdDarslarLessonIdRouteImport.update({
-    id: '/$courseId/darslar/$lessonId',
-    path: '/$courseId/darslar/$lessonId',
-    getParentRoute: () => AppStudentKurslarRoute,
+const AppStudentAchievementsRoute = AppStudentAchievementsRouteImport.update({
+  id: '/achievements',
+  path: '/achievements',
+  getParentRoute: () => AppStudentRoute,
+} as any)
+const AppParentSettingsRoute = AppParentSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppParentRoute,
+} as any)
+const AppParentProgressRoute = AppParentProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
+  getParentRoute: () => AppParentRoute,
+} as any)
+const AppParentMessagesRoute = AppParentMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AppParentRoute,
+} as any)
+const AppParentChildRoute = AppParentChildRouteImport.update({
+  id: '/child',
+  path: '/child',
+  getParentRoute: () => AppParentRoute,
+} as any)
+const AppParentAiSuggestionsRoute = AppParentAiSuggestionsRouteImport.update({
+  id: '/ai-suggestions',
+  path: '/ai-suggestions',
+  getParentRoute: () => AppParentRoute,
+} as any)
+const AppParentAiReportRoute = AppParentAiReportRouteImport.update({
+  id: '/ai-report',
+  path: '/ai-report',
+  getParentRoute: () => AppParentRoute,
+} as any)
+const AppAdminTeachersRoute = AppAdminTeachersRouteImport.update({
+  id: '/teachers',
+  path: '/teachers',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminStudentsRoute = AppAdminStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminSettingsRoute = AppAdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminReportsRoute = AppAdminReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminParentsRoute = AppAdminParentsRouteImport.update({
+  id: '/parents',
+  path: '/parents',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminClassesRoute = AppAdminClassesRouteImport.update({
+  id: '/classes',
+  path: '/classes',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminAttendanceRoute = AppAdminAttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminAnnouncementsRoute = AppAdminAnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminAnalyticsRoute = AppAdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppStudentExamLessonIdRoute = AppStudentExamLessonIdRouteImport.update({
+  id: '/exam/$lessonId',
+  path: '/exam/$lessonId',
+  getParentRoute: () => AppStudentRoute,
+} as any)
+const AppStudentCoursesCourseIdLessonsLessonIdRoute =
+  AppStudentCoursesCourseIdLessonsLessonIdRouteImport.update({
+    id: '/$courseId/lessons/$lessonId',
+    path: '/$courseId/lessons/$lessonId',
+    getParentRoute: () => AppStudentCoursesRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -191,24 +345,50 @@ export interface FileRoutesByFullPath {
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
-  '/student/ai-ustoz': typeof AppStudentAiUstozRoute
-  '/student/bildirishnomalar': typeof AppStudentBildirishnomalarRoute
-  '/student/eslatmalar': typeof AppStudentEslatmalarRoute
-  '/student/imtihonlar': typeof AppStudentImtihonlarRoute
-  '/student/kasbiy-yol': typeof AppStudentKasbiyYolRoute
-  '/student/kurslar': typeof AppStudentKurslarRouteWithChildren
+  '/admin/analytics': typeof AppAdminAnalyticsRoute
+  '/admin/announcements': typeof AppAdminAnnouncementsRoute
+  '/admin/attendance': typeof AppAdminAttendanceRoute
+  '/admin/classes': typeof AppAdminClassesRoute
+  '/admin/parents': typeof AppAdminParentsRoute
+  '/admin/reports': typeof AppAdminReportsRoute
+  '/admin/settings': typeof AppAdminSettingsRoute
+  '/admin/students': typeof AppAdminStudentsRoute
+  '/admin/teachers': typeof AppAdminTeachersRoute
+  '/parent/ai-report': typeof AppParentAiReportRoute
+  '/parent/ai-suggestions': typeof AppParentAiSuggestionsRoute
+  '/parent/child': typeof AppParentChildRoute
+  '/parent/messages': typeof AppParentMessagesRoute
+  '/parent/progress': typeof AppParentProgressRoute
+  '/parent/settings': typeof AppParentSettingsRoute
+  '/student/achievements': typeof AppStudentAchievementsRoute
+  '/student/ai-tutor': typeof AppStudentAiTutorRoute
+  '/student/assignments': typeof AppStudentAssignmentsRoute
+  '/student/career': typeof AppStudentCareerRoute
+  '/student/courses': typeof AppStudentCoursesRouteWithChildren
+  '/student/exams': typeof AppStudentExamsRoute
   '/student/labs': typeof AppStudentLabsRoute
-  '/student/profil': typeof AppStudentProfilRoute
-  '/student/sozlamalar': typeof AppStudentSozlamalarRoute
-  '/student/topshiriqlar': typeof AppStudentTopshiriqlarRoute
-  '/student/yutuqlar': typeof AppStudentYutuqlarRoute
+  '/student/notes': typeof AppStudentNotesRoute
+  '/student/notifications': typeof AppStudentNotificationsRoute
+  '/student/profile': typeof AppStudentProfileRoute
+  '/student/settings': typeof AppStudentSettingsRoute
+  '/teacher/ai-assistant': typeof AppTeacherAiAssistantRoute
+  '/teacher/assignments': typeof AppTeacherAssignmentsRoute
+  '/teacher/attendance': typeof AppTeacherAttendanceRoute
+  '/teacher/calendar': typeof AppTeacherCalendarRoute
+  '/teacher/exams': typeof AppTeacherExamsRoute
+  '/teacher/lesson-draft': typeof AppTeacherLessonDraftRoute
+  '/teacher/messages': typeof AppTeacherMessagesRoute
+  '/teacher/reports': typeof AppTeacherReportsRoute
+  '/teacher/settings': typeof AppTeacherSettingsRoute
+  '/teacher/students': typeof AppTeacherStudentsRoute
   '/admin/': typeof AppAdminIndexRoute
   '/parent/': typeof AppParentIndexRoute
   '/student/': typeof AppStudentIndexRoute
   '/teacher/': typeof AppTeacherIndexRoute
-  '/student/imtihon/$lessonId': typeof AppStudentImtihonLessonIdRoute
-  '/student/kurslar/$courseId/darslar/$lessonId': typeof AppStudentKurslarCourseIdDarslarLessonIdRoute
+  '/student/exam/$lessonId': typeof AppStudentExamLessonIdRoute
+  '/student/courses/$courseId/lessons/$lessonId': typeof AppStudentCoursesCourseIdLessonsLessonIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -216,24 +396,50 @@ export interface FileRoutesByTo {
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
-  '/student/ai-ustoz': typeof AppStudentAiUstozRoute
-  '/student/bildirishnomalar': typeof AppStudentBildirishnomalarRoute
-  '/student/eslatmalar': typeof AppStudentEslatmalarRoute
-  '/student/imtihonlar': typeof AppStudentImtihonlarRoute
-  '/student/kasbiy-yol': typeof AppStudentKasbiyYolRoute
-  '/student/kurslar': typeof AppStudentKurslarRouteWithChildren
+  '/admin/analytics': typeof AppAdminAnalyticsRoute
+  '/admin/announcements': typeof AppAdminAnnouncementsRoute
+  '/admin/attendance': typeof AppAdminAttendanceRoute
+  '/admin/classes': typeof AppAdminClassesRoute
+  '/admin/parents': typeof AppAdminParentsRoute
+  '/admin/reports': typeof AppAdminReportsRoute
+  '/admin/settings': typeof AppAdminSettingsRoute
+  '/admin/students': typeof AppAdminStudentsRoute
+  '/admin/teachers': typeof AppAdminTeachersRoute
+  '/parent/ai-report': typeof AppParentAiReportRoute
+  '/parent/ai-suggestions': typeof AppParentAiSuggestionsRoute
+  '/parent/child': typeof AppParentChildRoute
+  '/parent/messages': typeof AppParentMessagesRoute
+  '/parent/progress': typeof AppParentProgressRoute
+  '/parent/settings': typeof AppParentSettingsRoute
+  '/student/achievements': typeof AppStudentAchievementsRoute
+  '/student/ai-tutor': typeof AppStudentAiTutorRoute
+  '/student/assignments': typeof AppStudentAssignmentsRoute
+  '/student/career': typeof AppStudentCareerRoute
+  '/student/courses': typeof AppStudentCoursesRouteWithChildren
+  '/student/exams': typeof AppStudentExamsRoute
   '/student/labs': typeof AppStudentLabsRoute
-  '/student/profil': typeof AppStudentProfilRoute
-  '/student/sozlamalar': typeof AppStudentSozlamalarRoute
-  '/student/topshiriqlar': typeof AppStudentTopshiriqlarRoute
-  '/student/yutuqlar': typeof AppStudentYutuqlarRoute
+  '/student/notes': typeof AppStudentNotesRoute
+  '/student/notifications': typeof AppStudentNotificationsRoute
+  '/student/profile': typeof AppStudentProfileRoute
+  '/student/settings': typeof AppStudentSettingsRoute
+  '/teacher/ai-assistant': typeof AppTeacherAiAssistantRoute
+  '/teacher/assignments': typeof AppTeacherAssignmentsRoute
+  '/teacher/attendance': typeof AppTeacherAttendanceRoute
+  '/teacher/calendar': typeof AppTeacherCalendarRoute
+  '/teacher/exams': typeof AppTeacherExamsRoute
+  '/teacher/lesson-draft': typeof AppTeacherLessonDraftRoute
+  '/teacher/messages': typeof AppTeacherMessagesRoute
+  '/teacher/reports': typeof AppTeacherReportsRoute
+  '/teacher/settings': typeof AppTeacherSettingsRoute
+  '/teacher/students': typeof AppTeacherStudentsRoute
   '/admin': typeof AppAdminIndexRoute
   '/parent': typeof AppParentIndexRoute
   '/student': typeof AppStudentIndexRoute
   '/teacher': typeof AppTeacherIndexRoute
-  '/student/imtihon/$lessonId': typeof AppStudentImtihonLessonIdRoute
-  '/student/kurslar/$courseId/darslar/$lessonId': typeof AppStudentKurslarCourseIdDarslarLessonIdRoute
+  '/student/exam/$lessonId': typeof AppStudentExamLessonIdRoute
+  '/student/courses/$courseId/lessons/$lessonId': typeof AppStudentCoursesCourseIdLessonsLessonIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -247,24 +453,50 @@ export interface FileRoutesById {
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
-  '/_app/student/ai-ustoz': typeof AppStudentAiUstozRoute
-  '/_app/student/bildirishnomalar': typeof AppStudentBildirishnomalarRoute
-  '/_app/student/eslatmalar': typeof AppStudentEslatmalarRoute
-  '/_app/student/imtihonlar': typeof AppStudentImtihonlarRoute
-  '/_app/student/kasbiy-yol': typeof AppStudentKasbiyYolRoute
-  '/_app/student/kurslar': typeof AppStudentKurslarRouteWithChildren
+  '/_app/admin/analytics': typeof AppAdminAnalyticsRoute
+  '/_app/admin/announcements': typeof AppAdminAnnouncementsRoute
+  '/_app/admin/attendance': typeof AppAdminAttendanceRoute
+  '/_app/admin/classes': typeof AppAdminClassesRoute
+  '/_app/admin/parents': typeof AppAdminParentsRoute
+  '/_app/admin/reports': typeof AppAdminReportsRoute
+  '/_app/admin/settings': typeof AppAdminSettingsRoute
+  '/_app/admin/students': typeof AppAdminStudentsRoute
+  '/_app/admin/teachers': typeof AppAdminTeachersRoute
+  '/_app/parent/ai-report': typeof AppParentAiReportRoute
+  '/_app/parent/ai-suggestions': typeof AppParentAiSuggestionsRoute
+  '/_app/parent/child': typeof AppParentChildRoute
+  '/_app/parent/messages': typeof AppParentMessagesRoute
+  '/_app/parent/progress': typeof AppParentProgressRoute
+  '/_app/parent/settings': typeof AppParentSettingsRoute
+  '/_app/student/achievements': typeof AppStudentAchievementsRoute
+  '/_app/student/ai-tutor': typeof AppStudentAiTutorRoute
+  '/_app/student/assignments': typeof AppStudentAssignmentsRoute
+  '/_app/student/career': typeof AppStudentCareerRoute
+  '/_app/student/courses': typeof AppStudentCoursesRouteWithChildren
+  '/_app/student/exams': typeof AppStudentExamsRoute
   '/_app/student/labs': typeof AppStudentLabsRoute
-  '/_app/student/profil': typeof AppStudentProfilRoute
-  '/_app/student/sozlamalar': typeof AppStudentSozlamalarRoute
-  '/_app/student/topshiriqlar': typeof AppStudentTopshiriqlarRoute
-  '/_app/student/yutuqlar': typeof AppStudentYutuqlarRoute
+  '/_app/student/notes': typeof AppStudentNotesRoute
+  '/_app/student/notifications': typeof AppStudentNotificationsRoute
+  '/_app/student/profile': typeof AppStudentProfileRoute
+  '/_app/student/settings': typeof AppStudentSettingsRoute
+  '/_app/teacher/ai-assistant': typeof AppTeacherAiAssistantRoute
+  '/_app/teacher/assignments': typeof AppTeacherAssignmentsRoute
+  '/_app/teacher/attendance': typeof AppTeacherAttendanceRoute
+  '/_app/teacher/calendar': typeof AppTeacherCalendarRoute
+  '/_app/teacher/exams': typeof AppTeacherExamsRoute
+  '/_app/teacher/lesson-draft': typeof AppTeacherLessonDraftRoute
+  '/_app/teacher/messages': typeof AppTeacherMessagesRoute
+  '/_app/teacher/reports': typeof AppTeacherReportsRoute
+  '/_app/teacher/settings': typeof AppTeacherSettingsRoute
+  '/_app/teacher/students': typeof AppTeacherStudentsRoute
   '/_app/admin/': typeof AppAdminIndexRoute
   '/_app/parent/': typeof AppParentIndexRoute
   '/_app/student/': typeof AppStudentIndexRoute
   '/_app/teacher/': typeof AppTeacherIndexRoute
-  '/_app/student/imtihon/$lessonId': typeof AppStudentImtihonLessonIdRoute
-  '/_app/student/kurslar/$courseId/darslar/$lessonId': typeof AppStudentKurslarCourseIdDarslarLessonIdRoute
+  '/_app/student/exam/$lessonId': typeof AppStudentExamLessonIdRoute
+  '/_app/student/courses/$courseId/lessons/$lessonId': typeof AppStudentCoursesCourseIdLessonsLessonIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -278,24 +510,50 @@ export interface FileRouteTypes {
     | '/auth/forgot'
     | '/auth/login'
     | '/auth/register'
+    | '/auth/reset'
     | '/auth/verify'
-    | '/student/ai-ustoz'
-    | '/student/bildirishnomalar'
-    | '/student/eslatmalar'
-    | '/student/imtihonlar'
-    | '/student/kasbiy-yol'
-    | '/student/kurslar'
+    | '/admin/analytics'
+    | '/admin/announcements'
+    | '/admin/attendance'
+    | '/admin/classes'
+    | '/admin/parents'
+    | '/admin/reports'
+    | '/admin/settings'
+    | '/admin/students'
+    | '/admin/teachers'
+    | '/parent/ai-report'
+    | '/parent/ai-suggestions'
+    | '/parent/child'
+    | '/parent/messages'
+    | '/parent/progress'
+    | '/parent/settings'
+    | '/student/achievements'
+    | '/student/ai-tutor'
+    | '/student/assignments'
+    | '/student/career'
+    | '/student/courses'
+    | '/student/exams'
     | '/student/labs'
-    | '/student/profil'
-    | '/student/sozlamalar'
-    | '/student/topshiriqlar'
-    | '/student/yutuqlar'
+    | '/student/notes'
+    | '/student/notifications'
+    | '/student/profile'
+    | '/student/settings'
+    | '/teacher/ai-assistant'
+    | '/teacher/assignments'
+    | '/teacher/attendance'
+    | '/teacher/calendar'
+    | '/teacher/exams'
+    | '/teacher/lesson-draft'
+    | '/teacher/messages'
+    | '/teacher/reports'
+    | '/teacher/settings'
+    | '/teacher/students'
     | '/admin/'
     | '/parent/'
     | '/student/'
     | '/teacher/'
-    | '/student/imtihon/$lessonId'
-    | '/student/kurslar/$courseId/darslar/$lessonId'
+    | '/student/exam/$lessonId'
+    | '/student/courses/$courseId/lessons/$lessonId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -303,24 +561,50 @@ export interface FileRouteTypes {
     | '/auth/forgot'
     | '/auth/login'
     | '/auth/register'
+    | '/auth/reset'
     | '/auth/verify'
-    | '/student/ai-ustoz'
-    | '/student/bildirishnomalar'
-    | '/student/eslatmalar'
-    | '/student/imtihonlar'
-    | '/student/kasbiy-yol'
-    | '/student/kurslar'
+    | '/admin/analytics'
+    | '/admin/announcements'
+    | '/admin/attendance'
+    | '/admin/classes'
+    | '/admin/parents'
+    | '/admin/reports'
+    | '/admin/settings'
+    | '/admin/students'
+    | '/admin/teachers'
+    | '/parent/ai-report'
+    | '/parent/ai-suggestions'
+    | '/parent/child'
+    | '/parent/messages'
+    | '/parent/progress'
+    | '/parent/settings'
+    | '/student/achievements'
+    | '/student/ai-tutor'
+    | '/student/assignments'
+    | '/student/career'
+    | '/student/courses'
+    | '/student/exams'
     | '/student/labs'
-    | '/student/profil'
-    | '/student/sozlamalar'
-    | '/student/topshiriqlar'
-    | '/student/yutuqlar'
+    | '/student/notes'
+    | '/student/notifications'
+    | '/student/profile'
+    | '/student/settings'
+    | '/teacher/ai-assistant'
+    | '/teacher/assignments'
+    | '/teacher/attendance'
+    | '/teacher/calendar'
+    | '/teacher/exams'
+    | '/teacher/lesson-draft'
+    | '/teacher/messages'
+    | '/teacher/reports'
+    | '/teacher/settings'
+    | '/teacher/students'
     | '/admin'
     | '/parent'
     | '/student'
     | '/teacher'
-    | '/student/imtihon/$lessonId'
-    | '/student/kurslar/$courseId/darslar/$lessonId'
+    | '/student/exam/$lessonId'
+    | '/student/courses/$courseId/lessons/$lessonId'
   id:
     | '__root__'
     | '/'
@@ -333,24 +617,50 @@ export interface FileRouteTypes {
     | '/auth/forgot'
     | '/auth/login'
     | '/auth/register'
+    | '/auth/reset'
     | '/auth/verify'
-    | '/_app/student/ai-ustoz'
-    | '/_app/student/bildirishnomalar'
-    | '/_app/student/eslatmalar'
-    | '/_app/student/imtihonlar'
-    | '/_app/student/kasbiy-yol'
-    | '/_app/student/kurslar'
+    | '/_app/admin/analytics'
+    | '/_app/admin/announcements'
+    | '/_app/admin/attendance'
+    | '/_app/admin/classes'
+    | '/_app/admin/parents'
+    | '/_app/admin/reports'
+    | '/_app/admin/settings'
+    | '/_app/admin/students'
+    | '/_app/admin/teachers'
+    | '/_app/parent/ai-report'
+    | '/_app/parent/ai-suggestions'
+    | '/_app/parent/child'
+    | '/_app/parent/messages'
+    | '/_app/parent/progress'
+    | '/_app/parent/settings'
+    | '/_app/student/achievements'
+    | '/_app/student/ai-tutor'
+    | '/_app/student/assignments'
+    | '/_app/student/career'
+    | '/_app/student/courses'
+    | '/_app/student/exams'
     | '/_app/student/labs'
-    | '/_app/student/profil'
-    | '/_app/student/sozlamalar'
-    | '/_app/student/topshiriqlar'
-    | '/_app/student/yutuqlar'
+    | '/_app/student/notes'
+    | '/_app/student/notifications'
+    | '/_app/student/profile'
+    | '/_app/student/settings'
+    | '/_app/teacher/ai-assistant'
+    | '/_app/teacher/assignments'
+    | '/_app/teacher/attendance'
+    | '/_app/teacher/calendar'
+    | '/_app/teacher/exams'
+    | '/_app/teacher/lesson-draft'
+    | '/_app/teacher/messages'
+    | '/_app/teacher/reports'
+    | '/_app/teacher/settings'
+    | '/_app/teacher/students'
     | '/_app/admin/'
     | '/_app/parent/'
     | '/_app/student/'
     | '/_app/teacher/'
-    | '/_app/student/imtihon/$lessonId'
-    | '/_app/student/kurslar/$courseId/darslar/$lessonId'
+    | '/_app/student/exam/$lessonId'
+    | '/_app/student/courses/$courseId/lessons/$lessonId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -387,6 +697,13 @@ declare module '@tanstack/react-router' {
       path: '/verify'
       fullPath: '/auth/verify'
       preLoaderRoute: typeof AuthVerifyRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/reset': {
+      id: '/auth/reset'
+      path: '/reset'
+      fullPath: '/auth/reset'
+      preLoaderRoute: typeof AuthResetRouteImport
       parentRoute: typeof AuthRoute
     }
     '/auth/register': {
@@ -466,32 +783,102 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminIndexRouteImport
       parentRoute: typeof AppAdminRoute
     }
-    '/_app/student/yutuqlar': {
-      id: '/_app/student/yutuqlar'
-      path: '/yutuqlar'
-      fullPath: '/student/yutuqlar'
-      preLoaderRoute: typeof AppStudentYutuqlarRouteImport
+    '/_app/teacher/students': {
+      id: '/_app/teacher/students'
+      path: '/students'
+      fullPath: '/teacher/students'
+      preLoaderRoute: typeof AppTeacherStudentsRouteImport
+      parentRoute: typeof AppTeacherRoute
+    }
+    '/_app/teacher/settings': {
+      id: '/_app/teacher/settings'
+      path: '/settings'
+      fullPath: '/teacher/settings'
+      preLoaderRoute: typeof AppTeacherSettingsRouteImport
+      parentRoute: typeof AppTeacherRoute
+    }
+    '/_app/teacher/reports': {
+      id: '/_app/teacher/reports'
+      path: '/reports'
+      fullPath: '/teacher/reports'
+      preLoaderRoute: typeof AppTeacherReportsRouteImport
+      parentRoute: typeof AppTeacherRoute
+    }
+    '/_app/teacher/messages': {
+      id: '/_app/teacher/messages'
+      path: '/messages'
+      fullPath: '/teacher/messages'
+      preLoaderRoute: typeof AppTeacherMessagesRouteImport
+      parentRoute: typeof AppTeacherRoute
+    }
+    '/_app/teacher/lesson-draft': {
+      id: '/_app/teacher/lesson-draft'
+      path: '/lesson-draft'
+      fullPath: '/teacher/lesson-draft'
+      preLoaderRoute: typeof AppTeacherLessonDraftRouteImport
+      parentRoute: typeof AppTeacherRoute
+    }
+    '/_app/teacher/exams': {
+      id: '/_app/teacher/exams'
+      path: '/exams'
+      fullPath: '/teacher/exams'
+      preLoaderRoute: typeof AppTeacherExamsRouteImport
+      parentRoute: typeof AppTeacherRoute
+    }
+    '/_app/teacher/calendar': {
+      id: '/_app/teacher/calendar'
+      path: '/calendar'
+      fullPath: '/teacher/calendar'
+      preLoaderRoute: typeof AppTeacherCalendarRouteImport
+      parentRoute: typeof AppTeacherRoute
+    }
+    '/_app/teacher/attendance': {
+      id: '/_app/teacher/attendance'
+      path: '/attendance'
+      fullPath: '/teacher/attendance'
+      preLoaderRoute: typeof AppTeacherAttendanceRouteImport
+      parentRoute: typeof AppTeacherRoute
+    }
+    '/_app/teacher/assignments': {
+      id: '/_app/teacher/assignments'
+      path: '/assignments'
+      fullPath: '/teacher/assignments'
+      preLoaderRoute: typeof AppTeacherAssignmentsRouteImport
+      parentRoute: typeof AppTeacherRoute
+    }
+    '/_app/teacher/ai-assistant': {
+      id: '/_app/teacher/ai-assistant'
+      path: '/ai-assistant'
+      fullPath: '/teacher/ai-assistant'
+      preLoaderRoute: typeof AppTeacherAiAssistantRouteImport
+      parentRoute: typeof AppTeacherRoute
+    }
+    '/_app/student/settings': {
+      id: '/_app/student/settings'
+      path: '/settings'
+      fullPath: '/student/settings'
+      preLoaderRoute: typeof AppStudentSettingsRouteImport
       parentRoute: typeof AppStudentRoute
     }
-    '/_app/student/topshiriqlar': {
-      id: '/_app/student/topshiriqlar'
-      path: '/topshiriqlar'
-      fullPath: '/student/topshiriqlar'
-      preLoaderRoute: typeof AppStudentTopshiriqlarRouteImport
+    '/_app/student/profile': {
+      id: '/_app/student/profile'
+      path: '/profile'
+      fullPath: '/student/profile'
+      preLoaderRoute: typeof AppStudentProfileRouteImport
       parentRoute: typeof AppStudentRoute
     }
-    '/_app/student/sozlamalar': {
-      id: '/_app/student/sozlamalar'
-      path: '/sozlamalar'
-      fullPath: '/student/sozlamalar'
-      preLoaderRoute: typeof AppStudentSozlamalarRouteImport
+    '/_app/student/notifications': {
+      id: '/_app/student/notifications'
+      path: '/notifications'
+      fullPath: '/student/notifications'
+      preLoaderRoute: typeof AppStudentNotificationsRouteImport
       parentRoute: typeof AppStudentRoute
     }
-    '/_app/student/profil': {
-      id: '/_app/student/profil'
-      path: '/profil'
-      fullPath: '/student/profil'
-      preLoaderRoute: typeof AppStudentProfilRouteImport
+    '/_app/student/notes': {
+      id: '/_app/student/notes'
+      path: '/notes'
+      fullPath: '/student/notes'
+      preLoaderRoute: typeof AppStudentNotesRouteImport
       parentRoute: typeof AppStudentRoute
     }
     '/_app/student/labs': {
@@ -501,70 +888,193 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppStudentLabsRouteImport
       parentRoute: typeof AppStudentRoute
     }
-    '/_app/student/kurslar': {
-      id: '/_app/student/kurslar'
-      path: '/kurslar'
-      fullPath: '/student/kurslar'
-      preLoaderRoute: typeof AppStudentKurslarRouteImport
+    '/_app/student/exams': {
+      id: '/_app/student/exams'
+      path: '/exams'
+      fullPath: '/student/exams'
+      preLoaderRoute: typeof AppStudentExamsRouteImport
       parentRoute: typeof AppStudentRoute
     }
-    '/_app/student/kasbiy-yol': {
-      id: '/_app/student/kasbiy-yol'
-      path: '/kasbiy-yol'
-      fullPath: '/student/kasbiy-yol'
-      preLoaderRoute: typeof AppStudentKasbiyYolRouteImport
+    '/_app/student/courses': {
+      id: '/_app/student/courses'
+      path: '/courses'
+      fullPath: '/student/courses'
+      preLoaderRoute: typeof AppStudentCoursesRouteImport
       parentRoute: typeof AppStudentRoute
     }
-    '/_app/student/imtihonlar': {
-      id: '/_app/student/imtihonlar'
-      path: '/imtihonlar'
-      fullPath: '/student/imtihonlar'
-      preLoaderRoute: typeof AppStudentImtihonlarRouteImport
+    '/_app/student/career': {
+      id: '/_app/student/career'
+      path: '/career'
+      fullPath: '/student/career'
+      preLoaderRoute: typeof AppStudentCareerRouteImport
       parentRoute: typeof AppStudentRoute
     }
-    '/_app/student/eslatmalar': {
-      id: '/_app/student/eslatmalar'
-      path: '/eslatmalar'
-      fullPath: '/student/eslatmalar'
-      preLoaderRoute: typeof AppStudentEslatmalarRouteImport
+    '/_app/student/assignments': {
+      id: '/_app/student/assignments'
+      path: '/assignments'
+      fullPath: '/student/assignments'
+      preLoaderRoute: typeof AppStudentAssignmentsRouteImport
       parentRoute: typeof AppStudentRoute
     }
-    '/_app/student/ai-ustoz': {
-      id: '/_app/student/ai-ustoz'
-      path: '/ai-ustoz'
-      fullPath: '/student/ai-ustoz'
-      preLoaderRoute: typeof AppStudentAiUstozRouteImport
+    '/_app/student/ai-tutor': {
+      id: '/_app/student/ai-tutor'
+      path: '/ai-tutor'
+      fullPath: '/student/ai-tutor'
+      preLoaderRoute: typeof AppStudentAiTutorRouteImport
       parentRoute: typeof AppStudentRoute
     }
-    '/_app/student/bildirishnomalar': {
-      id: '/_app/student/bildirishnomalar'
-      path: '/bildirishnomalar'
-      fullPath: '/student/bildirishnomalar'
-      preLoaderRoute: typeof AppStudentBildirishnomalarRouteImport
+    '/_app/student/achievements': {
+      id: '/_app/student/achievements'
+      path: '/achievements'
+      fullPath: '/student/achievements'
+      preLoaderRoute: typeof AppStudentAchievementsRouteImport
       parentRoute: typeof AppStudentRoute
     }
-    '/_app/student/imtihon/$lessonId': {
-      id: '/_app/student/imtihon/$lessonId'
-      path: '/imtihon/$lessonId'
-      fullPath: '/student/imtihon/$lessonId'
-      preLoaderRoute: typeof AppStudentImtihonLessonIdRouteImport
+    '/_app/parent/settings': {
+      id: '/_app/parent/settings'
+      path: '/settings'
+      fullPath: '/parent/settings'
+      preLoaderRoute: typeof AppParentSettingsRouteImport
+      parentRoute: typeof AppParentRoute
+    }
+    '/_app/parent/progress': {
+      id: '/_app/parent/progress'
+      path: '/progress'
+      fullPath: '/parent/progress'
+      preLoaderRoute: typeof AppParentProgressRouteImport
+      parentRoute: typeof AppParentRoute
+    }
+    '/_app/parent/messages': {
+      id: '/_app/parent/messages'
+      path: '/messages'
+      fullPath: '/parent/messages'
+      preLoaderRoute: typeof AppParentMessagesRouteImport
+      parentRoute: typeof AppParentRoute
+    }
+    '/_app/parent/child': {
+      id: '/_app/parent/child'
+      path: '/child'
+      fullPath: '/parent/child'
+      preLoaderRoute: typeof AppParentChildRouteImport
+      parentRoute: typeof AppParentRoute
+    }
+    '/_app/parent/ai-suggestions': {
+      id: '/_app/parent/ai-suggestions'
+      path: '/ai-suggestions'
+      fullPath: '/parent/ai-suggestions'
+      preLoaderRoute: typeof AppParentAiSuggestionsRouteImport
+      parentRoute: typeof AppParentRoute
+    }
+    '/_app/parent/ai-report': {
+      id: '/_app/parent/ai-report'
+      path: '/ai-report'
+      fullPath: '/parent/ai-report'
+      preLoaderRoute: typeof AppParentAiReportRouteImport
+      parentRoute: typeof AppParentRoute
+    }
+    '/_app/admin/teachers': {
+      id: '/_app/admin/teachers'
+      path: '/teachers'
+      fullPath: '/admin/teachers'
+      preLoaderRoute: typeof AppAdminTeachersRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/students': {
+      id: '/_app/admin/students'
+      path: '/students'
+      fullPath: '/admin/students'
+      preLoaderRoute: typeof AppAdminStudentsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/settings': {
+      id: '/_app/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AppAdminSettingsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/reports': {
+      id: '/_app/admin/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AppAdminReportsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/parents': {
+      id: '/_app/admin/parents'
+      path: '/parents'
+      fullPath: '/admin/parents'
+      preLoaderRoute: typeof AppAdminParentsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/classes': {
+      id: '/_app/admin/classes'
+      path: '/classes'
+      fullPath: '/admin/classes'
+      preLoaderRoute: typeof AppAdminClassesRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/attendance': {
+      id: '/_app/admin/attendance'
+      path: '/attendance'
+      fullPath: '/admin/attendance'
+      preLoaderRoute: typeof AppAdminAttendanceRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/announcements': {
+      id: '/_app/admin/announcements'
+      path: '/announcements'
+      fullPath: '/admin/announcements'
+      preLoaderRoute: typeof AppAdminAnnouncementsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/analytics': {
+      id: '/_app/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AppAdminAnalyticsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/student/exam/$lessonId': {
+      id: '/_app/student/exam/$lessonId'
+      path: '/exam/$lessonId'
+      fullPath: '/student/exam/$lessonId'
+      preLoaderRoute: typeof AppStudentExamLessonIdRouteImport
       parentRoute: typeof AppStudentRoute
     }
-    '/_app/student/kurslar/$courseId/darslar/$lessonId': {
-      id: '/_app/student/kurslar/$courseId/darslar/$lessonId'
-      path: '/$courseId/darslar/$lessonId'
-      fullPath: '/student/kurslar/$courseId/darslar/$lessonId'
-      preLoaderRoute: typeof AppStudentKurslarCourseIdDarslarLessonIdRouteImport
-      parentRoute: typeof AppStudentKurslarRoute
+    '/_app/student/courses/$courseId/lessons/$lessonId': {
+      id: '/_app/student/courses/$courseId/lessons/$lessonId'
+      path: '/$courseId/lessons/$lessonId'
+      fullPath: '/student/courses/$courseId/lessons/$lessonId'
+      preLoaderRoute: typeof AppStudentCoursesCourseIdLessonsLessonIdRouteImport
+      parentRoute: typeof AppStudentCoursesRoute
     }
   }
 }
 
 interface AppAdminRouteChildren {
+  AppAdminAnalyticsRoute: typeof AppAdminAnalyticsRoute
+  AppAdminAnnouncementsRoute: typeof AppAdminAnnouncementsRoute
+  AppAdminAttendanceRoute: typeof AppAdminAttendanceRoute
+  AppAdminClassesRoute: typeof AppAdminClassesRoute
+  AppAdminParentsRoute: typeof AppAdminParentsRoute
+  AppAdminReportsRoute: typeof AppAdminReportsRoute
+  AppAdminSettingsRoute: typeof AppAdminSettingsRoute
+  AppAdminStudentsRoute: typeof AppAdminStudentsRoute
+  AppAdminTeachersRoute: typeof AppAdminTeachersRoute
   AppAdminIndexRoute: typeof AppAdminIndexRoute
 }
 
 const AppAdminRouteChildren: AppAdminRouteChildren = {
+  AppAdminAnalyticsRoute: AppAdminAnalyticsRoute,
+  AppAdminAnnouncementsRoute: AppAdminAnnouncementsRoute,
+  AppAdminAttendanceRoute: AppAdminAttendanceRoute,
+  AppAdminClassesRoute: AppAdminClassesRoute,
+  AppAdminParentsRoute: AppAdminParentsRoute,
+  AppAdminReportsRoute: AppAdminReportsRoute,
+  AppAdminSettingsRoute: AppAdminSettingsRoute,
+  AppAdminStudentsRoute: AppAdminStudentsRoute,
+  AppAdminTeachersRoute: AppAdminTeachersRoute,
   AppAdminIndexRoute: AppAdminIndexRoute,
 }
 
@@ -573,10 +1083,22 @@ const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
 )
 
 interface AppParentRouteChildren {
+  AppParentAiReportRoute: typeof AppParentAiReportRoute
+  AppParentAiSuggestionsRoute: typeof AppParentAiSuggestionsRoute
+  AppParentChildRoute: typeof AppParentChildRoute
+  AppParentMessagesRoute: typeof AppParentMessagesRoute
+  AppParentProgressRoute: typeof AppParentProgressRoute
+  AppParentSettingsRoute: typeof AppParentSettingsRoute
   AppParentIndexRoute: typeof AppParentIndexRoute
 }
 
 const AppParentRouteChildren: AppParentRouteChildren = {
+  AppParentAiReportRoute: AppParentAiReportRoute,
+  AppParentAiSuggestionsRoute: AppParentAiSuggestionsRoute,
+  AppParentChildRoute: AppParentChildRoute,
+  AppParentMessagesRoute: AppParentMessagesRoute,
+  AppParentProgressRoute: AppParentProgressRoute,
+  AppParentSettingsRoute: AppParentSettingsRoute,
   AppParentIndexRoute: AppParentIndexRoute,
 }
 
@@ -584,48 +1106,48 @@ const AppParentRouteWithChildren = AppParentRoute._addFileChildren(
   AppParentRouteChildren,
 )
 
-interface AppStudentKurslarRouteChildren {
-  AppStudentKurslarCourseIdDarslarLessonIdRoute: typeof AppStudentKurslarCourseIdDarslarLessonIdRoute
+interface AppStudentCoursesRouteChildren {
+  AppStudentCoursesCourseIdLessonsLessonIdRoute: typeof AppStudentCoursesCourseIdLessonsLessonIdRoute
 }
 
-const AppStudentKurslarRouteChildren: AppStudentKurslarRouteChildren = {
-  AppStudentKurslarCourseIdDarslarLessonIdRoute:
-    AppStudentKurslarCourseIdDarslarLessonIdRoute,
+const AppStudentCoursesRouteChildren: AppStudentCoursesRouteChildren = {
+  AppStudentCoursesCourseIdLessonsLessonIdRoute:
+    AppStudentCoursesCourseIdLessonsLessonIdRoute,
 }
 
-const AppStudentKurslarRouteWithChildren =
-  AppStudentKurslarRoute._addFileChildren(AppStudentKurslarRouteChildren)
+const AppStudentCoursesRouteWithChildren =
+  AppStudentCoursesRoute._addFileChildren(AppStudentCoursesRouteChildren)
 
 interface AppStudentRouteChildren {
-  AppStudentAiUstozRoute: typeof AppStudentAiUstozRoute
-  AppStudentBildirishnomalarRoute: typeof AppStudentBildirishnomalarRoute
-  AppStudentEslatmalarRoute: typeof AppStudentEslatmalarRoute
-  AppStudentImtihonlarRoute: typeof AppStudentImtihonlarRoute
-  AppStudentKasbiyYolRoute: typeof AppStudentKasbiyYolRoute
-  AppStudentKurslarRoute: typeof AppStudentKurslarRouteWithChildren
+  AppStudentAchievementsRoute: typeof AppStudentAchievementsRoute
+  AppStudentAiTutorRoute: typeof AppStudentAiTutorRoute
+  AppStudentAssignmentsRoute: typeof AppStudentAssignmentsRoute
+  AppStudentCareerRoute: typeof AppStudentCareerRoute
+  AppStudentCoursesRoute: typeof AppStudentCoursesRouteWithChildren
+  AppStudentExamsRoute: typeof AppStudentExamsRoute
   AppStudentLabsRoute: typeof AppStudentLabsRoute
-  AppStudentProfilRoute: typeof AppStudentProfilRoute
-  AppStudentSozlamalarRoute: typeof AppStudentSozlamalarRoute
-  AppStudentTopshiriqlarRoute: typeof AppStudentTopshiriqlarRoute
-  AppStudentYutuqlarRoute: typeof AppStudentYutuqlarRoute
+  AppStudentNotesRoute: typeof AppStudentNotesRoute
+  AppStudentNotificationsRoute: typeof AppStudentNotificationsRoute
+  AppStudentProfileRoute: typeof AppStudentProfileRoute
+  AppStudentSettingsRoute: typeof AppStudentSettingsRoute
   AppStudentIndexRoute: typeof AppStudentIndexRoute
-  AppStudentImtihonLessonIdRoute: typeof AppStudentImtihonLessonIdRoute
+  AppStudentExamLessonIdRoute: typeof AppStudentExamLessonIdRoute
 }
 
 const AppStudentRouteChildren: AppStudentRouteChildren = {
-  AppStudentAiUstozRoute: AppStudentAiUstozRoute,
-  AppStudentBildirishnomalarRoute: AppStudentBildirishnomalarRoute,
-  AppStudentEslatmalarRoute: AppStudentEslatmalarRoute,
-  AppStudentImtihonlarRoute: AppStudentImtihonlarRoute,
-  AppStudentKasbiyYolRoute: AppStudentKasbiyYolRoute,
-  AppStudentKurslarRoute: AppStudentKurslarRouteWithChildren,
+  AppStudentAchievementsRoute: AppStudentAchievementsRoute,
+  AppStudentAiTutorRoute: AppStudentAiTutorRoute,
+  AppStudentAssignmentsRoute: AppStudentAssignmentsRoute,
+  AppStudentCareerRoute: AppStudentCareerRoute,
+  AppStudentCoursesRoute: AppStudentCoursesRouteWithChildren,
+  AppStudentExamsRoute: AppStudentExamsRoute,
   AppStudentLabsRoute: AppStudentLabsRoute,
-  AppStudentProfilRoute: AppStudentProfilRoute,
-  AppStudentSozlamalarRoute: AppStudentSozlamalarRoute,
-  AppStudentTopshiriqlarRoute: AppStudentTopshiriqlarRoute,
-  AppStudentYutuqlarRoute: AppStudentYutuqlarRoute,
+  AppStudentNotesRoute: AppStudentNotesRoute,
+  AppStudentNotificationsRoute: AppStudentNotificationsRoute,
+  AppStudentProfileRoute: AppStudentProfileRoute,
+  AppStudentSettingsRoute: AppStudentSettingsRoute,
   AppStudentIndexRoute: AppStudentIndexRoute,
-  AppStudentImtihonLessonIdRoute: AppStudentImtihonLessonIdRoute,
+  AppStudentExamLessonIdRoute: AppStudentExamLessonIdRoute,
 }
 
 const AppStudentRouteWithChildren = AppStudentRoute._addFileChildren(
@@ -633,10 +1155,30 @@ const AppStudentRouteWithChildren = AppStudentRoute._addFileChildren(
 )
 
 interface AppTeacherRouteChildren {
+  AppTeacherAiAssistantRoute: typeof AppTeacherAiAssistantRoute
+  AppTeacherAssignmentsRoute: typeof AppTeacherAssignmentsRoute
+  AppTeacherAttendanceRoute: typeof AppTeacherAttendanceRoute
+  AppTeacherCalendarRoute: typeof AppTeacherCalendarRoute
+  AppTeacherExamsRoute: typeof AppTeacherExamsRoute
+  AppTeacherLessonDraftRoute: typeof AppTeacherLessonDraftRoute
+  AppTeacherMessagesRoute: typeof AppTeacherMessagesRoute
+  AppTeacherReportsRoute: typeof AppTeacherReportsRoute
+  AppTeacherSettingsRoute: typeof AppTeacherSettingsRoute
+  AppTeacherStudentsRoute: typeof AppTeacherStudentsRoute
   AppTeacherIndexRoute: typeof AppTeacherIndexRoute
 }
 
 const AppTeacherRouteChildren: AppTeacherRouteChildren = {
+  AppTeacherAiAssistantRoute: AppTeacherAiAssistantRoute,
+  AppTeacherAssignmentsRoute: AppTeacherAssignmentsRoute,
+  AppTeacherAttendanceRoute: AppTeacherAttendanceRoute,
+  AppTeacherCalendarRoute: AppTeacherCalendarRoute,
+  AppTeacherExamsRoute: AppTeacherExamsRoute,
+  AppTeacherLessonDraftRoute: AppTeacherLessonDraftRoute,
+  AppTeacherMessagesRoute: AppTeacherMessagesRoute,
+  AppTeacherReportsRoute: AppTeacherReportsRoute,
+  AppTeacherSettingsRoute: AppTeacherSettingsRoute,
+  AppTeacherStudentsRoute: AppTeacherStudentsRoute,
   AppTeacherIndexRoute: AppTeacherIndexRoute,
 }
 
@@ -664,6 +1206,7 @@ interface AuthRouteChildren {
   AuthForgotRoute: typeof AuthForgotRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
+  AuthResetRoute: typeof AuthResetRoute
   AuthVerifyRoute: typeof AuthVerifyRoute
 }
 
@@ -671,6 +1214,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthForgotRoute: AuthForgotRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
+  AuthResetRoute: AuthResetRoute,
   AuthVerifyRoute: AuthVerifyRoute,
 }
 

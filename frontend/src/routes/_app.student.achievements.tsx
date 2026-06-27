@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { getExamResults, getDashboard } from "@/lib/api";
 import { uzDate } from "@/lib/format/date";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
-export const Route = createFileRoute("/_app/student/yutuqlar")({
+export const Route = createFileRoute("/_app/student/achievements")({
   head: () => ({ meta: [{ title: "Yutuqlar · AcademiXAI" }] }),
   component: AchievementsPage,
 });
@@ -114,6 +115,7 @@ function deriveAchievements(
 }
 
 function AchievementsPage() {
+  const { t } = useT();
   const { data: results = [], isLoading: rLoading } = useQuery({
     queryKey: ["exam-results"],
     queryFn: getExamResults,
@@ -130,9 +132,9 @@ function AchievementsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Yutuqlar"
-        title="Sizning sertifikat va nishonlaringiz"
-        description="Har bir nishon — sizning mehnat va g'ayratingizning tasdig'i."
+        eyebrow={t.achievements.title}
+        title={t.achievements.title}
+        description={t.achievements.description}
       />
 
       {isLoading ? (
@@ -148,10 +150,10 @@ function AchievementsPage() {
           </p>
           <div className="flex gap-2 mt-1">
             <Button asChild variant="outline" size="sm">
-              <Link to="/student/imtihonlar">Imtihon boshlash</Link>
+              <Link to="/student/exams">Imtihon boshlash</Link>
             </Button>
             <Button asChild size="sm">
-              <Link to="/student/ai-ustoz">
+              <Link to="/student/ai-tutor">
                 <Sparkles className="h-3.5 w-3.5" />
                 AI Ustoz
               </Link>

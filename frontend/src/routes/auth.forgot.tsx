@@ -25,10 +25,23 @@ function ForgotPasswordPage() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    setSent(true);
-    toast.success("Tiklash havolasi pochtangizga yuborildi");
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error((err as { message?: string }).message ?? "Xatolik yuz berdi");
+      }
+      setSent(true);
+      toast.success("Tiklash havolasi yuborildi");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Xatolik yuz berdi");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -50,6 +63,7 @@ function ForgotPasswordPage() {
               <span className="font-medium">{email}</span> manziliga tiklash havolasi yuborildi.
               Pochtangizni tekshiring va havola orqali yangi parol o'rnating.
             </p>
+            <p className="text-xs text-muted-foreground">Havola 15 daqiqa amal qiladi.</p>
             <Button variant="outline" className="w-full" onClick={() => setSent(false)}>
               Boshqa pochta kiritish
             </Button>

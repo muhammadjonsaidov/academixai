@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import uz.forkbomb.academix.shared.exception.ResourceNotFoundException;
 import uz.forkbomb.academix.shared.model.*;
@@ -17,6 +18,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/student")
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Tag(name = "Student", description = "Student profile, notes, dashboard stats")
 @SecurityRequirement(name = "Bearer")
 public class StudentController {
@@ -31,36 +33,6 @@ public class StudentController {
 
     private User getCurrentUser(UserDetails ud) {
         return userRepository.findByEmail(ud.getUsername()).orElseThrow();
-    }
-
-    @GetMapping("/me")
-    public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserDetails ud) {
-        User u = getCurrentUser(ud);
-        return ResponseEntity.ok(Map.of(
-            "id", u.getId(),
-            "fullName", u.getFullName(),
-            "email", u.getEmail(),
-            "role", u.getRole().name(),
-            "subscriptionTier", u.getSubscriptionTier().name(),
-            "createdAt", u.getCreatedAt().toString()
-        ));
-    }
-
-    @PutMapping("/me")
-    public ResponseEntity<?> updateProfile(
-            @RequestBody Map<String, String> body,
-            @AuthenticationPrincipal UserDetails ud) {
-        User u = getCurrentUser(ud);
-        String name = body.get("fullName");
-        if (name != null && !name.isBlank()) {
-            u.setFullName(name.strip());
-            userRepository.save(u);
-        }
-        return ResponseEntity.ok(Map.of(
-            "id", u.getId(),
-            "fullName", u.getFullName(),
-            "email", u.getEmail()
-        ));
     }
 
     @GetMapping("/notes")
@@ -156,25 +128,6 @@ public class StudentController {
             "chatCount", chatCount,
             "recentExams", recentExams
         ));
-    }
-
-    @GetMapping("/notifications")
-    public ResponseEntity<?> getNotifications(@AuthenticationPrincipal UserDetails ud) {
-        User u = getCurrentUser(ud);
-        List<Map<String, Object>> result = notificationRepository
-                .findByUserIdOrderByCreatedAtDesc(u.getId()).stream()
-                .map(n -> {
-                    Map<String, Object> m = new LinkedHashMap<>();
-                    m.put("id", n.getId());
-                    m.put("type", n.getType());
-                    m.put("title", n.getTitle());
-                    m.put("body", n.getBody());
-                    m.put("isRead", n.getIsRead());
-                    m.put("createdAt", n.getCreatedAt().toString());
-                    return m;
-                }).toList();
-        long unread = notificationRepository.countByUserIdAndIsReadFalse(u.getId());
-        return ResponseEntity.ok(Map.of("notifications", result, "unreadCount", unread));
     }
 
     @PutMapping("/notifications/{id}/read")

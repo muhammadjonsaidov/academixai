@@ -78,10 +78,44 @@ public class TeacherController {
     }
 
     @PostMapping("/lesson-draft")
-    public ResponseEntity<?> generateLessonDraft(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<?> generateLessonDraft(
+            @RequestBody Map<String, Object> body,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        uz.forkbomb.academix.shared.model.User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        uz.forkbomb.academix.shared.model.enums.Role role = user.getRole();
+        if (role != uz.forkbomb.academix.shared.model.enums.Role.TEACHER
+                && role != uz.forkbomb.academix.shared.model.enums.Role.SCHOOL_ADMIN
+                && role != uz.forkbomb.academix.shared.model.enums.Role.SUPER_ADMIN) {
+            throw new uz.forkbomb.academix.shared.exception.ForbiddenException("Faqat o'qituvchilar uchun");
+        }
         String topic = (String) body.get("topic");
         String subject = (String) body.get("subject");
         int gradeLevel = Integer.parseInt(body.getOrDefault("gradeLevel", "9").toString());
         return ResponseEntity.ok(Map.of("draft", teacherService.generateLessonDraft(topic, subject, gradeLevel)));
+    }
+
+    @GetMapping("/students")
+    public ResponseEntity<?> allStudents(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(teacherService.getAllStudents(getTeacherId(userDetails)));
+    }
+
+    @GetMapping("/courses/{courseId}/attendance")
+    public ResponseEntity<?> getAttendance(
+            @PathVariable Long courseId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(teacherService.getCourseAttendance(courseId, getTeacherId(userDetails), date));
+    }
+
+    @GetMapping("/exam-results")
+    public ResponseEntity<?> allExamResults(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(teacherService.getAllExamResults(getTeacherId(userDetails)));
+    }
+
+    @PostMapping("/ai-chat")
+    public ResponseEntity<?> aiChat(@RequestBody Map<String, String> body,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String message = body.get("message");
+        return ResponseEntity.ok(Map.of("reply", teacherService.teacherAiChat(message, getTeacherId(userDetails))));
     }
 }

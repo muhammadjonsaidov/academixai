@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import uz.forkbomb.academix.exam.dto.ExamGenerateRequest;
 import uz.forkbomb.academix.exam.dto.ExamGradeRequest;
@@ -21,6 +22,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/exam")
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Tag(name = "AI Exam", description = "AI generates and grades exams in Uzbek")
 @SecurityRequirement(name = "Bearer")
 public class ExamController {

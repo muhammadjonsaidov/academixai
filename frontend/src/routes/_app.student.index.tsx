@@ -18,14 +18,7 @@ import { useAuth } from "@/lib/auth";
 import { getCourses, getDashboard } from "@/lib/api";
 import { uzDate, uzLongDate } from "@/lib/format/date";
 import { cn } from "@/lib/utils";
-
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 6) return "Xayrli tun";
-  if (h < 12) return "Xayrli ertalab";
-  if (h < 18) return "Xayrli kun";
-  return "Xayrli kechqurun";
-}
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_app/student/")({
   head: () => ({ meta: [{ title: "Bosh sahifa · AcademiXAI" }] }),
@@ -34,6 +27,15 @@ export const Route = createFileRoute("/_app/student/")({
 
 function StudentHome() {
   const { user } = useAuth();
+  const { t } = useT();
+
+  function greeting() {
+    const h = new Date().getHours();
+    if (h < 6) return t.student.greetingNight;
+    if (h < 12) return t.student.greetingMorning;
+    if (h < 18) return t.student.greetingDay;
+    return t.student.greetingEvening;
+  }
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["student-dashboard"],
@@ -53,13 +55,13 @@ function StudentHome() {
     <div className="space-y-6 lg:space-y-8">
       <PageHeader
         eyebrow={greeting()}
-        title={`${user?.fullName.split(" ")[0]}, ishni davom ettiramizmi?`}
-        description="Bugungi kurs darslari, AI tavsiyalari va so'nggi imtihon natijalari pastda."
+        title={`${user?.fullName.split(" ")[0]}, ${t.student.continueStudying}`}
+        description={t.student.dashboardDesc}
         actions={
           <Button asChild className="h-10">
-            <Link to="/student/ai-ustoz">
+            <Link to="/student/ai-tutor">
               <Sparkles className="h-4 w-4" />
-              AI Ustoz bilan suhbatlashish
+              {t.student.askAI}
             </Link>
           </Button>
         }
@@ -68,32 +70,28 @@ function StudentHome() {
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Yozilgan kurslar"
+          label={t.student.enrolledCourses}
           value={statsLoading ? "…" : enrolledCount}
           icon={CalendarCheck}
           accent="primary"
-          hint="Faol kurslar"
         />
         <StatCard
-          label="O'rtacha ball"
+          label={t.student.avgScore}
           value={statsLoading ? "…" : avgScore > 0 ? `${avgScore}%` : "—"}
           icon={Trophy}
           accent="secondary"
-          hint="Barcha imtihonlar bo'yicha"
         />
         <StatCard
-          label="AI muloqotlar"
+          label={t.student.aiChats}
           value={statsLoading ? "…" : chatCount}
           icon={MessageCircle}
           accent="accent"
-          hint="Jami AI savollari"
         />
         <StatCard
-          label="Imtihonlar"
+          label={t.nav.exams}
           value={statsLoading ? "…" : stats?.recentExams?.length ?? 0}
           icon={GraduationCap}
           accent="primary"
-          hint="Topshirilgan imtihonlar"
         />
       </div>
 
@@ -102,11 +100,11 @@ function StudentHome() {
         <section className="lg:col-span-2 rounded-2xl border border-border bg-card shadow-soft">
           <header className="flex items-center justify-between border-b border-border px-5 py-4">
             <div>
-              <h2 className="font-display text-lg font-semibold">Mening kurslarim</h2>
+              <h2 className="font-display text-lg font-semibold">{t.nav.courses}</h2>
               <p className="text-xs text-muted-foreground">{uzLongDate()}</p>
             </div>
             <Button asChild variant="ghost" size="sm" className="text-xs">
-              <Link to="/student/kurslar">
+              <Link to="/student/courses">
                 Barchasini ko'rish
                 <ChevronRight className="h-3.5 w-3.5" />
               </Link>
@@ -121,7 +119,7 @@ function StudentHome() {
               <BookOpen className="h-8 w-8 text-muted-foreground/40" />
               <p className="text-sm text-muted-foreground">Hali hech qanday kurslarga yozilmagan</p>
               <Button asChild size="sm" variant="outline">
-                <Link to="/student/kurslar">Kurslarga qaralsin</Link>
+                <Link to="/student/courses">Kurslarga qaralsin</Link>
               </Button>
             </div>
           ) : (
@@ -129,7 +127,7 @@ function StudentHome() {
               {courses.slice(0, 5).map((c) => (
                 <li key={c.id}>
                   <Link
-                    to="/student/kurslar"
+                    to="/student/courses"
                     className="flex items-center gap-4 px-5 py-3.5 hover:bg-muted/30 transition-colors"
                   >
                     <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary/10 text-2xl">
@@ -161,7 +159,7 @@ function StudentHome() {
             beradi va imtihonga tayyorlaydi.
           </p>
           <Button asChild variant="default" size="sm" className="mt-5">
-            <Link to="/student/ai-ustoz">
+            <Link to="/student/ai-tutor">
               Suhbatni boshlash
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
@@ -174,11 +172,11 @@ function StudentHome() {
         <section className="rounded-2xl border border-border bg-card p-5 shadow-soft">
           <header className="mb-5 flex items-center justify-between">
             <div>
-              <h2 className="font-display text-lg font-semibold">So'nggi imtihon natijalari</h2>
+              <h2 className="font-display text-lg font-semibold">{t.student.recentExams}</h2>
               <p className="text-xs text-muted-foreground">AI tomonidan baholangan</p>
             </div>
             <Button asChild variant="ghost" size="sm" className="text-xs">
-              <Link to="/student/imtihonlar">
+              <Link to="/student/exams">
                 Hammasi
                 <ChevronRight className="h-3.5 w-3.5" />
               </Link>
@@ -224,7 +222,7 @@ function StudentHome() {
             {courses.map((c) => (
               <Link
                 key={c.id}
-                to="/student/kurslar"
+                to="/student/courses"
                 className="flex items-center gap-3 rounded-xl border border-border bg-background p-3 hover:border-primary/40 transition-colors"
               >
                 <span className="text-2xl">{c.emoji ?? "📚"}</span>

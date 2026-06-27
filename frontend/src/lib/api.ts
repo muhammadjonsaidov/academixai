@@ -2,12 +2,23 @@ import { getToken } from "./auth";
 
 type RequestInit2 = Omit<RequestInit, "headers"> & { headers?: Record<string, string> };
 
+function getAcceptLanguage(): string {
+  try {
+    const stored = typeof localStorage !== "undefined"
+      ? localStorage.getItem("academix_lang")
+      : null;
+    if (stored && ["uz", "en", "ru"].includes(stored)) return stored;
+  } catch {}
+  return "uz";
+}
+
 async function request<T>(path: string, init: RequestInit2 = {}): Promise<T> {
   const token = getToken();
   const res = await fetch(path, {
     ...init,
     headers: {
       "Content-Type": "application/json",
+      "Accept-Language": getAcceptLanguage(),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...init.headers,
     },
@@ -51,13 +62,43 @@ export interface Lesson {
 }
 
 export const getCourses = () => api.get<Course[]>("/api/courses");
+export const getAllCourses = () => api.get<Course[]>("/api/courses/all").catch(() => api.get<Course[]>("/api/courses"));
 export const getCourse = (id: number) => api.get<Course>(`/api/courses/${id}`);
 export const getLesson = (courseId: number, lessonId: number) =>
   api.get<Lesson>(`/api/courses/${courseId}/lessons/${lessonId}`);
+export const enrollCourse = (courseId: number) =>
+  api.post<{ message: string }>(`/api/courses/${courseId}/enroll`, {});
 // ── Teacher ───────────────────────────────────────────────────────────────────
 export const getTeacherCourses = () => api.get<Course[]>("/api/teacher/courses");
 export const getCourseAnalytics = (courseId: number) =>
   api.get<{ studentCount: number; avgScore: number; aiInsight: string }>(`/api/teacher/courses/${courseId}/analytics`);
+export const createCourse = (data: { titleUz: string; subject: string; gradeLevel: number; descriptionUz?: string; coverEmoji?: string }) =>
+  api.post<Course>("/api/teacher/courses", data);
+export const createLesson = (courseId: number, data: { titleUz: string; contentUz?: string; phetUrl?: string; videoUrl?: string; orderNum?: number }) =>
+  api.post<Lesson>(`/api/teacher/courses/${courseId}/lessons`, data);
+export const generateLessonDraft = (topic: string, subject: string, gradeLevel: number) =>
+  api.post<{ draft: string }>("/api/teacher/lesson-draft", { topic, subject, gradeLevel });
+
+export interface TeacherStudent { id: number; fullName: string; email: string; avgScore: number; courseCount: number; }
+export const getTeacherStudents = () => api.get<TeacherStudent[]>("/api/teacher/students");
+
+export interface AttendanceRecord { id: number; studentId: number; studentName: string; date: string; present: boolean; }
+export const getCourseAttendance = (courseId: number, date?: string) =>
+  api.get<AttendanceRecord[]>(`/api/teacher/courses/${courseId}/attendance${date ? `?date=${date}` : ""}`);
+export const markAttendance = (courseId: number, studentId: number, date: string, present: boolean) =>
+  api.post<{ message: string }>(
+    `/api/teacher/courses/${courseId}/attendance?studentId=${studentId}&date=${date}&present=${present}`,
+    {}
+  );
+
+export interface TeacherExamResult { id: number; studentName: string; lessonTitle: string; courseName: string; score: number; feedbackUz?: string; takenAt: string; }
+export const getTeacherExamResults = () => api.get<TeacherExamResult[]>("/api/teacher/exam-results");
+
+export const teacherAiChat = (message: string) =>
+  api.post<{ reply: string }>("/api/teacher/ai-chat", { message });
+
+export const getParentNotifications = () =>
+  api.get<{ notifications: AppNotification[]; unreadCount: number }>("/api/parent/notifications");
 
 // ── Chat ──────────────────────────────────────────────────────────────────────
 export interface ChatMessage {
@@ -82,8 +123,32 @@ export const getChatHistory = () => api.get<ChatMessage[]>("/api/chat/history");
 export interface StudentProfile {
   id: number; fullName: string; email: string; role: string; subscriptionTier: string; createdAt: string;
 }
-export const getProfile = () => api.get<StudentProfile>("/api/student/me");
-export const updateProfile = (fullName: string) => api.put<StudentProfile>("/api/student/me", { fullName });
+export const getProfile = () => api.get<StudentProfile>("/api/user/me");
+export const updateProfile = (fullName: string) => api.put<StudentProfile>("/api/user/me", { fullName });
+export const changePassword = (currentPassword: string, newPassword: string) =>
+  api.put<{ message: string }>("/api/user/me/password", { currentPassword, newPassword });
+
+// ── Notification preferences ──────────────────────────────────────────────────
+export interface NotifPrefs {
+  emailNotif: boolean;
+  pushNotif: boolean;
+  weeklyReport: boolean;
+  aiTips: boolean;
+}
+export const getPreferences = () => api.get<NotifPrefs>("/api/user/me/preferences");
+export const updatePreferences = (prefs: Partial<NotifPrefs>) =>
+  api.put<NotifPrefs>("/api/user/me/preferences", prefs);
+
+export interface PushSubscriptionPayload {
+  endpoint: string;
+  keys?: { p256dh: string; auth: string };
+}
+export const getVapidPublicKey = () =>
+  api.get<{ publicKey: string; enabled: boolean }>("/api/user/notifications/vapid-public-key");
+export const subscribePush = (subscription: PushSubscriptionPayload) =>
+  api.post<{ message: string }>("/api/user/notifications/push-subscribe", subscription);
+export const unsubscribePush = () =>
+  api.delete<{ message: string }>("/api/user/notifications/push-subscribe");
 
 export interface StudentNote {
   id: number; content: string; lessonId?: number; lessonTitle?: string; createdAt: string;
@@ -124,9 +189,9 @@ export interface AppNotification {
   id: number; type: string; title: string; body: string; isRead: boolean; createdAt: string;
 }
 export const getNotifications = () =>
-  api.get<{ notifications: AppNotification[]; unreadCount: number }>("/api/student/notifications");
+  api.get<{ notifications: AppNotification[]; unreadCount: number }>("/api/user/notifications");
 export const markNotificationRead = (id: number) =>
-  api.put<{ message: string }>(`/api/student/notifications/${id}/read`, {});
+  api.put<{ message: string }>(`/api/user/notifications/${id}/read`, {});
 
 // ── Documents (Teacher RAG) ───────────────────────────────────────────────────
 
@@ -189,7 +254,12 @@ export const getAdminAnalytics = () =>
   api.get<{ teacherCount: number; studentCount: number; avgScore: number; totalAbsences: number; atRiskAnalysis: string }>("/api/admin/analytics");
 export const getAdminStudents = () => api.get<AdminUser[]>("/api/admin/students");
 export const getAdminTeachers = () => api.get<AdminUser[]>("/api/admin/teachers");
-export const addTeacher = (fullName: string, email: string) =>
-  api.post<AdminUser>("/api/admin/teachers", { fullName, email });
-export const addStudent = (fullName: string, email: string) =>
-  api.post<AdminUser>("/api/admin/students", { fullName, email });
+export const addTeacher = (fullName: string, email: string, password?: string) =>
+  api.post<AdminUser>("/api/admin/teachers", { fullName, email, ...(password ? { password } : {}) });
+export const addStudent = (fullName: string, email: string, password?: string) =>
+  api.post<AdminUser>("/api/admin/students", { fullName, email, ...(password ? { password } : {}) });
+export const addParent = (fullName: string, email: string, password?: string) =>
+  api.post<AdminUser>("/api/admin/parents", { fullName, email, ...(password ? { password } : {}) });
+export const getAdminParents = () => api.get<AdminUser[]>("/api/admin/parents");
+export const linkParent = (studentId: number, parentEmail: string) =>
+  api.post<{ message: string }>(`/api/admin/students/${studentId}/link-parent`, { parentEmail });

@@ -2,19 +2,19 @@ package uz.forkbomb.academix.rag;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import uz.forkbomb.academix.shared.ai.AIService;
 import uz.forkbomb.academix.shared.model.ExamResult;
 import uz.forkbomb.academix.shared.model.SentimentLog;
 import uz.forkbomb.academix.shared.repository.*;
 
-import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Transactional(readOnly = true)
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -24,7 +24,7 @@ public class ParentInsightService {
     private final ChatMessageRepository chatMessageRepository;
     private final SentimentLogRepository sentimentLogRepository;
     private final EnrollmentRepository enrollmentRepository;
-    private final ChatModel chatModel;
+    private final AIService aiService;
 
     public String askAboutChild(String parentQuestion, Long childId) {
         // Gather real data about the child
@@ -64,16 +64,11 @@ public class ParentInsightService {
                 sentimentDesc);
 
         try {
-            return ChatClient.builder(chatModel).build()
-                    .prompt()
-                    .system("""
-                            Siz AcademiXAI — ota-onalarga o'z farzandlarining ta'limi haqida ma'lumot beruvchi AI yordamchisiisz.
-                            Farzand haqidagi haqiqiy ma'lumotlar sizga beriladi. Shu asosda savolga O'ZBEK TILIDA javob bering.
-                            Javob 3-5 jumladan iborat bo'lsin, aniq va ota-ona uchun tushunarli bo'lsin.
-                            """)
-                    .user(context + "\n\nOta-ona savoli: " + parentQuestion)
-                    .call()
-                    .content();
+            return aiService.chatWithSystem(
+                    "Siz AcademiXAI — ota-onalarga o'z farzandlarining ta'limi haqida ma'lumot beruvchi AI yordamchisiisz. " +
+                    "Farzand haqidagi haqiqiy ma'lumotlar sizga beriladi. Shu asosda savolga O'ZBEK TILIDA javob bering. " +
+                    "Javob 3-5 jumladan iborat bo'lsin, aniq va ota-ona uchun tushunarli bo'lsin.",
+                    context + "\n\nOta-ona savoli: " + parentQuestion);
         } catch (Exception e) {
             log.error("Parent AI chat failed: {}", e.getMessage());
             return "Kechirasiz, hozirda javob bera olmadim. Keyinroq urinib ko'ring.";

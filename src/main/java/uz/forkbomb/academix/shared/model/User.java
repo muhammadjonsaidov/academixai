@@ -41,6 +41,28 @@ public class User {
     @Column(name = "school_id")
     private Long schoolId;
 
+    @Builder.Default
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) createdAt = LocalDateTime.now();
+    }
+
+    @Builder.Default
+    @Column(name = "email_notif")
+    private Boolean emailNotif = true;
+
+    @Builder.Default
+    @Column(name = "push_notif")
+    private Boolean pushNotif = true;
+
+    @Builder.Default
+    @Column(name = "weekly_report")
+    private Boolean weeklyReport = true;
+
+    @Builder.Default
+    @Column(name = "ai_tips")
+    private Boolean aiTips = true;
 }
