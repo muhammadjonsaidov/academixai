@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import uz.forkbomb.academix.shared.model.PushSubscription;
 import uz.forkbomb.academix.shared.model.User;
 import uz.forkbomb.academix.shared.push.WebPushService;
@@ -41,14 +42,32 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getProfile(@AuthenticationPrincipal UserDetails ud) {
         User u = current(ud);
-        return ResponseEntity.ok(Map.of(
-                "id", u.getId(),
-                "fullName", u.getFullName(),
-                "email", u.getEmail(),
-                "role", u.getRole().name(),
-                "subscriptionTier", u.getSubscriptionTier().name(),
-                "createdAt", u.getCreatedAt() != null ? u.getCreatedAt().toString() : ""
-        ));
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("id", u.getId());
+        m.put("fullName", u.getFullName());
+        m.put("email", u.getEmail());
+        m.put("role", u.getRole().name());
+        m.put("subscriptionTier", u.getSubscriptionTier().name());
+        m.put("createdAt", u.getCreatedAt() != null ? u.getCreatedAt().toString() : "");
+        m.put("avatarUrl", u.getAvatarUrl());
+        return ResponseEntity.ok(m);
+    }
+
+    @PostMapping(value = "/me/avatar", consumes = "multipart/form-data")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> uploadAvatar(
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal UserDetails ud) throws Exception {
+        if (file.isEmpty()) return ResponseEntity.badRequest().build();
+        if (file.getSize() > 3 * 1024 * 1024) return ResponseEntity.badRequest().body(Map.of("message", "Fayl hajmi 3MB dan oshmasligi kerak"));
+        String mime = file.getContentType();
+        if (mime == null || !mime.startsWith("image/")) return ResponseEntity.badRequest().body(Map.of("message", "Faqat rasm fayllari qabul qilinadi"));
+        String base64 = java.util.Base64.getEncoder().encodeToString(file.getBytes());
+        String dataUrl = "data:" + mime + ";base64," + base64;
+        User u = current(ud);
+        u.setAvatarUrl(dataUrl);
+        userRepository.save(u);
+        return ResponseEntity.ok(Map.of("avatarUrl", dataUrl));
     }
 
     @PutMapping("/me")

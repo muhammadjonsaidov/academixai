@@ -1,4 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { Logo } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
 import type { NavSection } from "@/lib/navigation";
@@ -8,6 +9,7 @@ import { useAuth } from "@/lib/auth";
 import { X, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
+import { getProfile } from "@/lib/api";
 
 interface SidebarProps {
   sections: NavSection[];
@@ -21,6 +23,8 @@ export function Sidebar({ sections, role, open, onClose }: SidebarProps) {
   const { user, logout } = useAuth();
   const { t } = useT();
   const navigate = useNavigate();
+  const { data: profile } = useQuery({ queryKey: ["profile"], queryFn: getProfile });
+  const initials = (user?.fullName ?? "U").split(" ").map(p => p[0]).slice(0, 2).join("").toUpperCase();
 
   const content = (
     <>
@@ -96,8 +100,14 @@ export function Sidebar({ sections, role, open, onClose }: SidebarProps) {
           onClick={onClose}
           className="flex items-center gap-3 px-4 py-3 hover:bg-sidebar-accent transition-colors"
         >
-          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/20 text-sm font-semibold text-primary">
-            {(user?.fullName ?? "U").charAt(0).toUpperCase()}
+          <div className="h-8 w-8 shrink-0 rounded-full overflow-hidden border border-border">
+            {profile?.avatarUrl ? (
+              <img src={profile.avatarUrl} alt="avatar" className="h-full w-full object-cover" />
+            ) : (
+              <div className="grid h-full w-full place-items-center bg-primary/20 text-sm font-semibold text-primary">
+                {initials}
+              </div>
+            )}
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-foreground">{user?.fullName ?? "—"}</p>

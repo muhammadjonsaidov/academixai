@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Camera, CheckCircle2, Mail, Save, School, Sparkles } from "lucide-react";
+import { CheckCircle2, Mail, Save, School, Sparkles } from "lucide-react";
+import { AvatarUpload } from "@/components/ui/AvatarUpload";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/shell/PageHeader";
@@ -61,18 +62,7 @@ function AdminProfilePage() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
         <aside className="rounded-2xl border border-border bg-card p-6 text-center shadow-soft">
-          <div className="relative mx-auto h-24 w-24">
-            <div className="grid h-full w-full place-items-center rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 font-display text-2xl font-semibold text-primary">
-              {initials}
-            </div>
-            <button
-              className="absolute -bottom-1 -right-1 grid h-8 w-8 place-items-center rounded-full border-2 border-card bg-primary text-primary-foreground hover:scale-105 transition-transform"
-              aria-label={t.profile.changePhoto}
-              onClick={() => toast.info(t.profile.changePhotoSoon)}
-            >
-              <Camera className="h-4 w-4" />
-            </button>
-          </div>
+          <AvatarUpload avatarUrl={profile?.avatarUrl} initials={initials} size="lg" />
 
           <h2 className="mt-4 font-display text-lg font-semibold">{displayUser.fullName}</h2>
           <p className="text-sm text-muted-foreground">

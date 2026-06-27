@@ -68,4 +68,7 @@ public class User {
     @Builder.Default
     @Column(name = "ai_tips")
     private Boolean aiTips = true;
+
+    @Column(name = "avatar_url", columnDefinition = "TEXT")
+    private String avatarUrl;
 }

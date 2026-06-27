@@ -126,10 +126,27 @@ export const getChatHistory = () => api.get<ChatMessage[]>("/api/chat/history");
 // ── Student profile, notes & dashboard ───────────────────────────────────────
 
 export interface StudentProfile {
-  id: number; fullName: string; email: string; role: string; subscriptionTier: string; createdAt: string;
+  id: number; fullName: string; email: string; role: string; subscriptionTier: string; createdAt: string; avatarUrl?: string;
 }
 export const getProfile = () => api.get<StudentProfile>("/api/user/me");
 export const updateProfile = (fullName: string) => api.put<StudentProfile>("/api/user/me", { fullName });
+
+export async function uploadAvatar(file: File): Promise<{ avatarUrl: string }> {
+  const { getToken } = await import("./auth");
+  const token = getToken();
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch("/api/user/me/avatar", {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: fd,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as { message?: string }).message ?? `HTTP ${res.status}`);
+  }
+  return res.json();
+}
 export const changePassword = (currentPassword: string, newPassword: string) =>
   api.put<{ message: string }>("/api/user/me/password", { currentPassword, newPassword });
 
