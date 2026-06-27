@@ -80,7 +80,13 @@ export function ProfileEditSection({ queryKey = "profile" }: { queryKey?: string
           <div className="space-y-1.5">
             <Label>{s.roleLabel}</Label>
             <div className="flex h-10 items-center rounded-md border border-border bg-muted/40 px-3 text-sm text-muted-foreground">
-              {profile?.role ?? "—"}
+              {profile?.role ? ({
+                SCHOOL_ADMIN: "Maktab admini",
+                TEACHER: "O'qituvchi",
+                STUDENT: "O'quvchi",
+                PARENT: "Ota-ona",
+                SUPER_ADMIN: "Super admin",
+              }[profile.role] ?? profile.role) : "—"}
             </div>
           </div>
 

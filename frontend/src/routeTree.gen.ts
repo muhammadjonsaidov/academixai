@@ -56,6 +56,7 @@ import { Route as AppAdminTeachersRouteImport } from './routes/_app.admin.teache
 import { Route as AppAdminStudentsRouteImport } from './routes/_app.admin.students'
 import { Route as AppAdminSettingsRouteImport } from './routes/_app.admin.settings'
 import { Route as AppAdminReportsRouteImport } from './routes/_app.admin.reports'
+import { Route as AppAdminProfileRouteImport } from './routes/_app.admin.profile'
 import { Route as AppAdminParentsRouteImport } from './routes/_app.admin.parents'
 import { Route as AppAdminClassesRouteImport } from './routes/_app.admin.classes'
 import { Route as AppAdminAttendanceRouteImport } from './routes/_app.admin.attendance'
@@ -298,6 +299,11 @@ const AppAdminReportsRoute = AppAdminReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminProfileRoute = AppAdminProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminParentsRoute = AppAdminParentsRouteImport.update({
   id: '/parents',
   path: '/parents',
@@ -352,6 +358,7 @@ export interface FileRoutesByFullPath {
   '/admin/attendance': typeof AppAdminAttendanceRoute
   '/admin/classes': typeof AppAdminClassesRoute
   '/admin/parents': typeof AppAdminParentsRoute
+  '/admin/profile': typeof AppAdminProfileRoute
   '/admin/reports': typeof AppAdminReportsRoute
   '/admin/settings': typeof AppAdminSettingsRoute
   '/admin/students': typeof AppAdminStudentsRoute
@@ -403,6 +410,7 @@ export interface FileRoutesByTo {
   '/admin/attendance': typeof AppAdminAttendanceRoute
   '/admin/classes': typeof AppAdminClassesRoute
   '/admin/parents': typeof AppAdminParentsRoute
+  '/admin/profile': typeof AppAdminProfileRoute
   '/admin/reports': typeof AppAdminReportsRoute
   '/admin/settings': typeof AppAdminSettingsRoute
   '/admin/students': typeof AppAdminStudentsRoute
@@ -460,6 +468,7 @@ export interface FileRoutesById {
   '/_app/admin/attendance': typeof AppAdminAttendanceRoute
   '/_app/admin/classes': typeof AppAdminClassesRoute
   '/_app/admin/parents': typeof AppAdminParentsRoute
+  '/_app/admin/profile': typeof AppAdminProfileRoute
   '/_app/admin/reports': typeof AppAdminReportsRoute
   '/_app/admin/settings': typeof AppAdminSettingsRoute
   '/_app/admin/students': typeof AppAdminStudentsRoute
@@ -517,6 +526,7 @@ export interface FileRouteTypes {
     | '/admin/attendance'
     | '/admin/classes'
     | '/admin/parents'
+    | '/admin/profile'
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/students'
@@ -568,6 +578,7 @@ export interface FileRouteTypes {
     | '/admin/attendance'
     | '/admin/classes'
     | '/admin/parents'
+    | '/admin/profile'
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/students'
@@ -624,6 +635,7 @@ export interface FileRouteTypes {
     | '/_app/admin/attendance'
     | '/_app/admin/classes'
     | '/_app/admin/parents'
+    | '/_app/admin/profile'
     | '/_app/admin/reports'
     | '/_app/admin/settings'
     | '/_app/admin/students'
@@ -1000,6 +1012,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminReportsRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/_app/admin/profile': {
+      id: '/_app/admin/profile'
+      path: '/profile'
+      fullPath: '/admin/profile'
+      preLoaderRoute: typeof AppAdminProfileRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/_app/admin/parents': {
       id: '/_app/admin/parents'
       path: '/parents'
@@ -1058,6 +1077,7 @@ interface AppAdminRouteChildren {
   AppAdminAttendanceRoute: typeof AppAdminAttendanceRoute
   AppAdminClassesRoute: typeof AppAdminClassesRoute
   AppAdminParentsRoute: typeof AppAdminParentsRoute
+  AppAdminProfileRoute: typeof AppAdminProfileRoute
   AppAdminReportsRoute: typeof AppAdminReportsRoute
   AppAdminSettingsRoute: typeof AppAdminSettingsRoute
   AppAdminStudentsRoute: typeof AppAdminStudentsRoute
@@ -1071,6 +1091,7 @@ const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminAttendanceRoute: AppAdminAttendanceRoute,
   AppAdminClassesRoute: AppAdminClassesRoute,
   AppAdminParentsRoute: AppAdminParentsRoute,
+  AppAdminProfileRoute: AppAdminProfileRoute,
   AppAdminReportsRoute: AppAdminReportsRoute,
   AppAdminSettingsRoute: AppAdminSettingsRoute,
   AppAdminStudentsRoute: AppAdminStudentsRoute,
