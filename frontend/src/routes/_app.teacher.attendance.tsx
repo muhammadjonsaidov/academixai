@@ -125,17 +125,17 @@ function AttendancePage() {
       {!attendanceLoading && attendance.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-2xl border border-border bg-card p-5 shadow-soft">
-            <p className="text-sm text-muted-foreground">Jami o'quvchilar</p>
+            <p className="text-sm text-muted-foreground">{t.teacher.totalStudentsLabel}</p>
             <p className="mt-1 text-3xl font-bold">{attendance.length}</p>
           </div>
           <div className="rounded-2xl border border-green-200 bg-green-50 dark:border-green-900/50 dark:bg-green-950/30 p-5">
-            <p className="text-sm text-green-700 dark:text-green-400">Kelgan</p>
+            <p className="text-sm text-green-700 dark:text-green-400">{t.teacher.presentLabel}</p>
             <p className="mt-1 text-3xl font-bold text-green-700 dark:text-green-400">
               {presentCount}
             </p>
           </div>
           <div className="rounded-2xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/30 p-5">
-            <p className="text-sm text-red-700 dark:text-red-400">Kelmagan</p>
+            <p className="text-sm text-red-700 dark:text-red-400">{t.teacher.absentLabel}</p>
             <p className="mt-1 text-3xl font-bold text-red-700 dark:text-red-400">
               {absentCount}
             </p>
@@ -148,7 +148,7 @@ function AttendancePage() {
         <div className="border-b border-border px-5 py-4">
           <h2 className="font-display text-base font-semibold flex items-center gap-2">
             <CalendarCheck className="h-4 w-4 text-primary" />
-            {date} — davomat ro'yxati
+            {t.teacher.attendanceListTitle(date)}
           </h2>
         </div>
 
@@ -156,8 +156,8 @@ function AttendancePage() {
           <div className="p-5">
             <EmptyState
               icon={CalendarCheck}
-              title="Kurs tanlanmagan"
-              description="Yuqoridan kurs tanlang."
+              title={t.teacher.noCourseSelected}
+              description={t.teacher.noCourseSelectedDesc}
             />
           </div>
         ) : attendanceLoading ? (
@@ -170,8 +170,8 @@ function AttendancePage() {
           <div className="p-5">
             <EmptyState
               icon={CalendarCheck}
-              title="Davomat ma'lumoti yo'q"
-              description="Bu sana uchun hali davomat belgilanmagan yoki o'quvchilar ro'yxatga olinmagan."
+              title={t.teacher.noAttendanceData}
+              description={t.teacher.noAttendanceDesc}
             />
           </div>
         ) : (
@@ -201,7 +201,7 @@ function AttendancePage() {
                     ) : (
                       <XCircle className="h-4 w-4" />
                     )}
-                    {record.present ? "Keldi" : "Kelmadi"}
+                    {record.present ? t.teacher.attendedLabel : t.teacher.notAttendedLabel}
                   </span>
                   <div className="flex gap-1">
                     <Button
@@ -212,7 +212,7 @@ function AttendancePage() {
                         markAttendance({ studentId: record.studentId, present: true })
                       }
                     >
-                      Keldi
+                      {t.teacher.attendedLabel}
                     </Button>
                     <Button
                       size="sm"
@@ -222,7 +222,7 @@ function AttendancePage() {
                         markAttendance({ studentId: record.studentId, present: false })
                       }
                     >
-                      Kelmadi
+                      {t.teacher.notAttendedLabel}
                     </Button>
                   </div>
                 </div>

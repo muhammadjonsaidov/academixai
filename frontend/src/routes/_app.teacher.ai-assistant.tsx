@@ -61,9 +61,9 @@ function saveSessions(sessions: Session[]) {
   localStorage.setItem(LS_KEY, JSON.stringify(sessions.slice(0, 30)));
 }
 
-function sessionTitle(messages: Msg[]): string {
+function sessionTitle(messages: Msg[], fallback: string): string {
   const first = messages.find((m) => m.role === "user");
-  if (!first) return "Yangi suhbat";
+  if (!first) return fallback;
   return first.content.slice(0, 40) + (first.content.length > 40 ? "…" : "");
 }
 
@@ -118,7 +118,7 @@ function KnowledgeBasePanel() {
       >
         <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           <BookOpen className="h-3 w-3" />
-          Bilim bazasi
+          {t.aiAssistant.knowledgeBase}
         </span>
         {open ? <ChevronUp className="h-3 w-3 text-muted-foreground" /> : <ChevronDown className="h-3 w-3 text-muted-foreground" />}
       </button>
@@ -135,7 +135,7 @@ function KnowledgeBasePanel() {
               ? <div className="h-3 w-3 animate-spin rounded-full border border-muted-foreground border-t-transparent" />
               : <Upload className="h-3 w-3" />
             }
-            PDF / TXT yuklash
+            {t.aiAssistant.uploadKB}
           </button>
 
           {docs.length > 0 && (
@@ -145,7 +145,7 @@ function KnowledgeBasePanel() {
                   <FileText className="h-3 w-3 shrink-0 text-primary/70" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[11px] font-medium text-foreground">{d.fileName}</p>
-                    <p className="text-[9px] text-muted-foreground">{d.chunkCount} chunk · {uzDate(d.createdAt)}</p>
+                    <p className="text-[9px] text-muted-foreground">{d.chunkCount} {t.teacher.chunks} · {uzDate(d.createdAt)}</p>
                   </div>
                   <button
                     onClick={() => remove(d.id)}
@@ -165,15 +165,9 @@ function KnowledgeBasePanel() {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-const STARTERS = [
-  "Dars rejasi yarat",
-  "O'quvchilar uchun test savollari",
-  "Mavzuni tushuntir",
-  "Baholash mezonlarini yoz",
-];
-
 export default function AiAssistantPage() {
   const { t } = useT();
+  const starters = t.aiAssistant.starters;
   const [sessions, setSessions] = useState<Session[]>(loadSessions);
   const [activeId, setActiveId] = useState<string | null>(() => loadSessions()[0]?.id ?? null);
   const [input, setInput] = useState("");
@@ -202,7 +196,7 @@ export default function AiAssistantPage() {
     const id = crypto.randomUUID();
     const session: Session = {
       id,
-      title: "Yangi suhbat",
+      title: t.aiAssistant.newSession,
       createdAt: uzTime(new Date()),
       messages: [],
     };
@@ -250,7 +244,7 @@ export default function AiAssistantPage() {
     const SR = w.SpeechRecognition ?? w.webkitSpeechRecognition;
 
     if (!SR) {
-      toast.error("Bu brauzer ovozni tanib olmaydi");
+      toast.error(t.aiAssistant.browserNoVoice);
       return;
     }
 
@@ -270,7 +264,7 @@ export default function AiAssistantPage() {
       setInput((prev) => prev ? prev + " " + text : text);
     };
     r.onend = () => setListening(false);
-    r.onerror = () => { toast.error("Ovozni tanishda xato"); setListening(false); };
+    r.onerror = () => { toast.error(t.aiAssistant.voiceError); setListening(false); };
     r.start();
     recogRef.current = r;
     setListening(true);
@@ -295,7 +289,7 @@ export default function AiAssistantPage() {
     setSessions((prev) =>
       prev.map((s) =>
         s.id === activeId
-          ? { ...s, messages: [...s.messages, userMsg], title: sessionTitle([...s.messages, userMsg]) }
+          ? { ...s, messages: [...s.messages, userMsg], title: sessionTitle([...s.messages, userMsg], t.aiAssistant.newSession) }
           : s,
       ),
     );
@@ -308,9 +302,8 @@ export default function AiAssistantPage() {
       let messageText = text;
       if (attachments.length > 0) {
         const fileNames = attachments.map((a) => a.name).join(", ");
-        messageText = text
-          ? `${text}\n\n[Biriktirilgan fayllar: ${fileNames}]`
-          : `[Biriktirilgan fayllar: ${fileNames}]`;
+        const tag = `[${t.aiAssistant.attachFile}: ${fileNames}]`;
+        messageText = text ? `${text}\n\n${tag}` : tag;
       }
 
       const data = await api.post<{ reply: string }>("/api/teacher/ai-chat", {
@@ -354,13 +347,13 @@ export default function AiAssistantPage() {
       <div className="mb-4 flex items-center justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
-            AI YORDAMCHI
+            {t.aiAssistant.eyebrow}
           </p>
-          <h1 className="font-display text-xl font-bold text-foreground">AI Pedagogik Yordamchi</h1>
+          <h1 className="font-display text-xl font-bold text-foreground">{t.aiAssistant.title}</h1>
         </div>
         <Button size="sm" onClick={newSession} className="gap-2">
           <Plus className="h-4 w-4" />
-          Yangi suhbat
+          {t.aiAssistant.newSession}
         </Button>
       </div>
 
@@ -375,7 +368,7 @@ export default function AiAssistantPage() {
         >
           <div className="flex items-center justify-between border-b border-border px-3 py-2.5">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Suhbatlar
+              {t.aiAssistant.sessions}
             </p>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -387,7 +380,7 @@ export default function AiAssistantPage() {
 
           <div className="flex-1 overflow-y-auto space-y-0.5 p-2">
             {sessions.length === 0 ? (
-              <p className="px-2 py-3 text-xs text-muted-foreground">Hali suhbat yo'q</p>
+              <p className="px-2 py-3 text-xs text-muted-foreground">{t.aiAssistant.noSessions}</p>
             ) : (
               sessions.map((s) => (
                 <button
@@ -405,7 +398,7 @@ export default function AiAssistantPage() {
                     <div className="min-w-0">
                       <p className="truncate text-xs font-medium">{s.title}</p>
                       <p className="text-[10px] text-muted-foreground">
-                        {s.messages.filter((m) => m.role === "user").length} savol · {s.createdAt}
+                        {t.aiAssistant.questionsLabel(s.messages.filter((m) => m.role === "user").length)} · {s.createdAt}
                       </p>
                     </div>
                   </div>
@@ -423,9 +416,9 @@ export default function AiAssistantPage() {
           {/* Quick starters */}
           <div className="border-t border-border p-2">
             <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Tezkor so'rovlar
+              {t.aiAssistant.quickPrompts}
             </p>
-            {STARTERS.map((s) => (
+            {starters.map((s) => (
               <button
                 key={s}
                 onClick={() => setInput(s)}
@@ -458,14 +451,14 @@ export default function AiAssistantPage() {
               </div>
               <div>
                 <p className="text-sm font-semibold">
-                  {activeSession?.title ?? "AI Pedagogik Yordamchi"}
+                  {activeSession?.title ?? t.aiAssistant.title}
                 </p>
-                <p className="text-[10px] text-muted-foreground">dars rejasi · testlar · baholash</p>
+                <p className="text-[10px] text-muted-foreground">{t.aiAssistant.subtitle}</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[11px] text-muted-foreground">Faol</span>
+              <span className="text-[11px] text-muted-foreground">{t.aiAssistant.activeStatus}</span>
             </div>
           </header>
 
@@ -476,12 +469,12 @@ export default function AiAssistantPage() {
                 <div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary">
                   <Sparkles className="h-5 w-5" />
                 </div>
-                <h3 className="mt-3 font-display text-base font-semibold">Suhbatni boshlang</h3>
+                <h3 className="mt-3 font-display text-base font-semibold">{t.aiAssistant.startChat}</h3>
                 <p className="mt-1 max-w-sm text-xs text-muted-foreground">
-                  Savol yozing, fayl yuklang yoki tezkor so'rovdan tanlang
+                  {t.aiAssistant.startDesc}
                 </p>
                 <div className="mt-4 grid w-full max-w-md gap-2 sm:grid-cols-2">
-                  {STARTERS.map((p) => (
+                  {starters.map((p) => (
                     <button
                       key={p}
                       onClick={() => setInput(p)}
@@ -598,7 +591,7 @@ export default function AiAssistantPage() {
                 type="button"
                 onClick={() => fileRef.current?.click()}
                 className="rounded-lg p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                title="Fayl biriktirish"
+                title={t.aiAssistant.attachFile}
               >
                 <Paperclip className="h-4 w-4" />
               </button>
@@ -611,7 +604,7 @@ export default function AiAssistantPage() {
                     ? "text-destructive hover:bg-destructive/10"
                     : "text-muted-foreground hover:text-primary hover:bg-primary/10"
                 )}
-                title={listening ? "To'xtatish" : "Ovoz kiritish"}
+                title={listening ? t.aiAssistant.voiceStop : t.aiAssistant.voiceStart}
               >
                 {listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
               </button>
@@ -626,7 +619,7 @@ export default function AiAssistantPage() {
                     send();
                   }
                 }}
-                placeholder={listening ? "Tinglayapman..." : t.aiTutor.placeholder}
+                placeholder={listening ? t.aiAssistant.listening : t.aiTutor.placeholder}
                 className="max-h-28 min-h-[2rem] flex-1 resize-none bg-transparent px-2 py-1 text-sm outline-none placeholder:text-muted-foreground"
               />
               <Button

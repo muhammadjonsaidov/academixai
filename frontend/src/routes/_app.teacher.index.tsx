@@ -45,6 +45,7 @@ function AnalyticsSection({ courses, analytics }: {
   courses: Course[];
   analytics: Record<number, { studentCount: number; avgScore: number }>;
 }) {
+  const { t } = useT();
   const weekData = buildWeeklyData(courses.length + 3);
   const courseBarData: CourseBar[] = courses.slice(0, 6).map((c) => ({
     name: (c.coverEmoji ?? "📚") + " " + ((c.titleUz ?? c.title ?? "").slice(0, 10)),
@@ -59,13 +60,13 @@ function AnalyticsSection({ courses, analytics }: {
         <div className="mb-4 flex items-center justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Haftalik ko'rsatkich
+              {t.teacher.weeklyTrend}
             </p>
-            <p className="font-display text-base font-semibold text-foreground">O'quvchi faolligi</p>
+            <p className="font-display text-base font-semibold text-foreground">{t.teacher.studentActivity}</p>
           </div>
           <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400">
             <TrendingUp className="h-3 w-3" />
-            +12%
+            {t.teacher.trendUp}
           </span>
         </div>
         <ResponsiveContainer width="100%" height={160}>
@@ -87,13 +88,13 @@ function AnalyticsSection({ courses, analytics }: {
               contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }}
               labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
             />
-            <Area type="monotone" dataKey="faollik" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#grad-faollik)" name="Faollik" dot={false} />
+            <Area type="monotone" dataKey="faollik" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#grad-faollik)" name={t.teacher.activity} dot={false} />
             <Area type="monotone" dataKey="davomat" stroke="hsl(var(--secondary))" strokeWidth={2} fill="url(#grad-davomat)" name="Davomat" dot={false} />
           </AreaChart>
         </ResponsiveContainer>
         <div className="mt-3 flex gap-4 text-[11px] text-muted-foreground">
-          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-primary" /> Faollik</span>
-          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-secondary" /> Davomat</span>
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-primary" /> {t.teacher.activity}</span>
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-secondary" /> {t.nav.attendance}</span>
         </div>
       </div>
 
@@ -101,13 +102,13 @@ function AnalyticsSection({ courses, analytics }: {
       <div className="rounded-2xl border border-border bg-card p-5 shadow-soft">
         <div className="mb-4">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Kurs bo'yicha
+            {t.teacher.byCourse}
           </p>
-          <p className="font-display text-base font-semibold text-foreground">O'quvchilar soni</p>
+          <p className="font-display text-base font-semibold text-foreground">{t.teacher.studentCountLabel}</p>
         </div>
         {courseBarData.length === 0 ? (
           <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
-            Kurslar mavjud emas
+            {t.teacher.noCoursesData}
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={160}>
@@ -118,7 +119,7 @@ function AnalyticsSection({ courses, analytics }: {
               <Tooltip
                 contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }}
               />
-              <Bar dataKey="talabalar" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="O'quvchilar" />
+              <Bar dataKey="talabalar" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name={t.teacher.studentCountLabel} />
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -373,7 +374,7 @@ function TeacherDashboard() {
         <StatCard label={t.teacher.totalCourses} value={loading ? "…" : courses.length} icon={BookOpen} accent="primary" />
         <StatCard label={t.teacher.totalLessons} value={loading ? "…" : totalLessons} icon={BarChart3} accent="secondary" />
         <StatCard label="Jami o'quvchilar" value={loading ? "…" : totalStudents} icon={Users} accent="accent" />
-        <StatCard label={t.teacher.aiActive} value="Faol" icon={Sparkles} accent="primary" hint={t.teacher.aiActiveHint} />
+        <StatCard label={t.teacher.aiActive} value={t.aiAssistant.activeStatus} icon={Sparkles} accent="primary" hint={t.teacher.aiActiveHint} />
       </div>
 
       {!loading && courses.length > 0 && (

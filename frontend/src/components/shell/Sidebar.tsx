@@ -7,6 +7,7 @@ import type { UserRole } from "@/lib/auth";
 import { useAuth } from "@/lib/auth";
 import { X, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 
 interface SidebarProps {
   sections: NavSection[];
@@ -18,6 +19,7 @@ interface SidebarProps {
 export function Sidebar({ sections, role, open, onClose }: SidebarProps) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, logout } = useAuth();
+  const { t } = useT();
   const navigate = useNavigate();
 
   const content = (
@@ -109,12 +111,12 @@ export function Sidebar({ sections, role, open, onClose }: SidebarProps) {
             className="flex flex-1 items-center gap-2 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
           >
             <Settings className="h-4 w-4 shrink-0" />
-            <span>Sozlamalar</span>
+            <span>{t.nav.settings}</span>
           </Link>
           <button
             onClick={() => { logout(); navigate({ to: "/auth/login" }); onClose(); }}
             className="rounded-lg p-2 text-sidebar-foreground/80 hover:bg-destructive/10 hover:text-destructive transition-colors"
-            aria-label="Chiqish"
+            aria-label={t.action.logout}
           >
             <LogOut className="h-4 w-4" />
           </button>
