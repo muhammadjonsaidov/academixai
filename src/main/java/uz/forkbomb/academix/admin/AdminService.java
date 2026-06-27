@@ -16,12 +16,15 @@ import uz.forkbomb.academix.rag.NotificationService;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Transactional(readOnly = true)
 @Service
 @RequiredArgsConstructor
 public class AdminService {
+
+    private final Map<Long, String> atRiskCache = new ConcurrentHashMap<>();
 
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
@@ -172,15 +175,25 @@ public class AdminService {
                         absencesPerStudent.getOrDefault(s.getId(), 0L)))
                 .collect(Collectors.joining(",", "[", "]"));
 
-        String atRiskJson = students.isEmpty() ? null
-                : aiService.analyzeAtRiskStudents(studentsJson);
+        // Return cached AI analysis; refresh in background
+        String cachedRisk = atRiskCache.get(schoolId);
+        if (!students.isEmpty()) {
+            final String studentsJsonFinal = studentsJson;
+            final Long schoolIdFinal = schoolId;
+            Thread.ofVirtual().start(() -> {
+                try {
+                    String fresh = aiService.analyzeAtRiskStudents(studentsJsonFinal);
+                    if (fresh != null) atRiskCache.put(schoolIdFinal, fresh);
+                } catch (Exception ignored) {}
+            });
+        }
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("teacherCount", (long) teachers.size());
         result.put("studentCount", students.size());
         result.put("avgScore", avgScore != null ? avgScore : 0.0);
         result.put("totalAbsences", totalAbsences);
-        result.put("atRiskAnalysis", atRiskJson);
+        result.put("atRiskAnalysis", cachedRisk);
         return result;
     }
 

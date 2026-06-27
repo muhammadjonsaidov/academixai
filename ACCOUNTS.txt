@@ -1,0 +1,42 @@
+=== ACADEMIXAI ACCOUNTS ===
+
+--- ADMIN ---
+Admin User | admin@test.uz | Admin123!
+
+--- TEACHERS (password: Teacher123!) ---
+Alisher Karimov   (Matematika)  | teacher.math@school.uz
+Nilufar Rashidova (Fizika)      | teacher.phys@school.uz
+Bobur Toshmatov   (Kimyo)       | teacher.chem@school.uz
+Zulfiya Yusupova  (Ingliz tili) | teacher.eng@school.uz
+Sardor Nazarov    (Tarix)       | teacher.hist@school.uz
+Malika Ergasheva  (Biologiya)   | teacher.bio@school.uz
+
+--- STUDENTS (password: Student123!) ---
+All students: s1..s28@school.uz and student1..student165@school.uz
+Each class has exactly 25 students assigned.
+
+Grade 5-A  → class id=16
+Grade 6-A  → class id=17
+Grade 7-A  → class id=18
+Grade 8-A  → class id=19
+Grade 9-A  → class id=20
+Grade 10-A → class id=21
+Grade 11-A → class id=22
+
+--- PARENTS (password: password) ---
+75 parents: p1@school.uz .. p75@school.uz
+p1@school.uz → linked to s1, s2, s3 (Hamid Karimov)
+All parent passwords reset to: password
+
+--- COURSES ---
+42 courses total: each teacher has 1 course per grade (5th-11th).
+  Matematika  5-sinf .. 11-sinf  → Alisher Karimov
+  Fizika      5-sinf .. 11-sinf  → Nilufar Rashidova
+  Kimyo       5-sinf .. 11-sinf  → Bobur Toshmatov
+  Ingliz tili 5-sinf .. 11-sinf  → Zulfiya Yusupova
+  Tarix       5-sinf .. 11-sinf  → Sardor Nazarov
+  Biologiya   5-sinf .. 11-sinf  → Malika Ergasheva
+
+--- PLATFORM ---
+Frontend: http://localhost:3000
+Backend:  http://localhost:8080

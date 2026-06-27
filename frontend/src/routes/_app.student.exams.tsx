@@ -47,7 +47,7 @@ function ExamsPage() {
       if (!completedExamLessonIds.has(lesson.id)) {
         availableLessons.push({
           courseId: course.id,
-          courseTitle: course.title,
+          courseTitle: course.title ?? "",
           lessonId: lesson.id,
           lessonTitle: (lesson as any).titleUz ?? lesson.title,
         });

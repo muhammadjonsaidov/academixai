@@ -302,3 +302,20 @@ export const removeStudentFromClass = (classId: number, studentId: number) =>
   api.delete<{ message: string }>(`/api/admin/classes/${classId}/students/${studentId}`);
 export const assignTeacherToClass = (classId: number, teacherId: number) =>
   api.post<{ message: string }>(`/api/admin/classes/${classId}/teacher/${teacherId}`, {});
+
+// ── Announcements ─────────────────────────────────────────────────────────────
+export interface Announcement {
+  id: number;
+  schoolId: number;
+  authorId: number;
+  title: string;
+  body: string;
+  target: string;
+  createdAt: string;
+}
+
+export const getAnnouncements = () => api.get<Announcement[]>("/api/announcements");
+export const createAnnouncement = (title: string, body: string, target = "ALL") =>
+  api.post<Announcement>("/api/announcements", { title, body, target });
+export const deleteAnnouncement = (id: number) =>
+  api.delete<void>(`/api/announcements/${id}`);

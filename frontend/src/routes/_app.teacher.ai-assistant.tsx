@@ -4,14 +4,16 @@ import {
 } from "react";
 import {
   Sparkles, Plus, Send, Mic, MicOff, Paperclip, X, MessageSquare,
-  FileText, ChevronLeft, ChevronDown, ChevronUp, Upload, Trash2, BookOpen,
+  FileText, ChevronLeft, ChevronDown, ChevronUp, Upload, Trash2, BookOpen, Wand2, Copy, Check,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Markdown } from "@/components/ui/Markdown";
-import { api, getTeacherDocuments, uploadTeacherDocument, deleteTeacherDocument, type TeacherDocument } from "@/lib/api";
+import { api, getTeacherDocuments, uploadTeacherDocument, deleteTeacherDocument, generateLessonDraft, type TeacherDocument } from "@/lib/api";
 import { uzTime, uzDate } from "@/lib/format/date";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
@@ -163,6 +165,93 @@ function KnowledgeBasePanel() {
   );
 }
 
+// ── Lesson Draft Panel ────────────────────────────────────────────────────────
+
+function LessonDraftPanel() {
+  const { t } = useT();
+  const [topic, setTopic] = useState("");
+  const [subject, setSubject] = useState("");
+  const [gradeLevel, setGradeLevel] = useState(7);
+  const [draft, setDraft] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: () => generateLessonDraft(topic, subject, gradeLevel),
+    onSuccess: (data: any) => setDraft(data.draft ?? data),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  async function handleCopy() {
+    await navigator.clipboard.writeText(draft);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <div className="space-y-4 h-full overflow-y-auto">
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-soft space-y-4">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="sm:col-span-2 space-y-1.5">
+            <Label>{t.teacher.lessonTopic} *</Label>
+            <Input
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder={t.teacher.lessonTopicPlaceholder}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{t.teacher.subject} *</Label>
+            <Input
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder={t.teacher.subjectPlaceholder}
+            />
+          </div>
+        </div>
+        <div className="flex items-end gap-4">
+          <div className="w-32 space-y-1.5">
+            <Label>{t.teacher.gradeLevel}</Label>
+            <Input
+              type="number"
+              min={1}
+              max={12}
+              value={gradeLevel}
+              onChange={(e) => setGradeLevel(Number(e.target.value))}
+            />
+          </div>
+          <Button
+            onClick={() => mutate()}
+            disabled={isPending || !topic.trim() || !subject.trim()}
+            className="gap-2"
+          >
+            {isPending ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+            ) : (
+              <Wand2 className="h-4 w-4" />
+            )}
+            {isPending ? t.action.generating : t.teacher.generateLesson}
+          </Button>
+        </div>
+      </div>
+
+      {draft && (
+        <div className="rounded-2xl border border-border bg-card shadow-soft">
+          <div className="flex items-center justify-between border-b border-border px-5 py-3">
+            <p className="font-semibold text-sm">{t.teacher.generatedDraft}</p>
+            <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={handleCopy}>
+              {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? t.action.copied : t.action.copy}
+            </Button>
+          </div>
+          <div className="p-5">
+            <Markdown>{draft}</Markdown>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function AiAssistantPage() {
@@ -175,6 +264,7 @@ export default function AiAssistantPage() {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [listening, setListening] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [tab, setTab] = useState<"chat" | "draft">("chat");
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -351,10 +441,32 @@ export default function AiAssistantPage() {
           </p>
           <h1 className="font-display text-xl font-bold text-foreground">{t.aiAssistant.title}</h1>
         </div>
-        <Button size="sm" onClick={newSession} className="gap-2">
-          <Plus className="h-4 w-4" />
-          {t.aiAssistant.newSession}
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center rounded-lg border border-border bg-muted/40 p-0.5 text-sm">
+            <button
+              onClick={() => setTab("chat")}
+              className={cn("flex items-center gap-1.5 rounded-md px-3 py-1 font-medium transition-colors",
+                tab === "chat" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              {t.aiAssistant.title}
+            </button>
+            <button
+              onClick={() => setTab("draft")}
+              className={cn("flex items-center gap-1.5 rounded-md px-3 py-1 font-medium transition-colors",
+                tab === "draft" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}
+            >
+              <Wand2 className="h-3.5 w-3.5" />
+              {t.teacher.lessonDraft}
+            </button>
+          </div>
+          {tab === "chat" && (
+            <Button size="sm" onClick={newSession} className="gap-2">
+              <Plus className="h-4 w-4" />
+              {t.aiAssistant.newSession}
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Main layout */}
