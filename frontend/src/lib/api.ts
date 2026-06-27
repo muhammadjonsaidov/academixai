@@ -42,12 +42,17 @@ export const api = {
 // ── Courses ──────────────────────────────────────────────────────────────────
 export interface Course {
   id: number;
-  title: string;
+  title?: string;
+  titleUz?: string;
+  titleEn?: string;
   subject: string;
-  gradeLevel: string;
+  gradeLevel: number | string;
   emoji?: string;
+  coverEmoji?: string;
   teacherName?: string;
   lessons?: Lesson[];
+  lessonCount?: number;
+  studentCount?: number;
 }
 
 export interface Lesson {

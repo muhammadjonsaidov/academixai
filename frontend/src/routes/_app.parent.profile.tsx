@@ -9,29 +9,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth";
-import { getProfile, updateProfile, getAdminAnalytics } from "@/lib/api";
+import { getProfile, updateProfile } from "@/lib/api";
 import { roleLabel } from "@/lib/navigation";
 import { uzDate } from "@/lib/format/date";
 import { useT } from "@/lib/i18n";
 
-export const Route = createFileRoute("/_app/admin/profile")({
+export const Route = createFileRoute("/_app/parent/profile")({
   head: () => ({ meta: [{ title: "Profil · AcademiXAI" }] }),
-  component: AdminProfilePage,
+  component: ParentProfilePage,
 });
 
-function AdminProfilePage() {
+function ParentProfilePage() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const { t } = useT();
 
   const { data: profile } = useQuery({
-    queryKey: ["admin-profile"],
+    queryKey: ["parent-profile"],
     queryFn: getProfile,
-  });
-
-  const { data: analytics } = useQuery({
-    queryKey: ["admin-analytics"],
-    queryFn: getAdminAnalytics,
   });
 
   const [fullName, setFullName] = useState(user?.fullName ?? "");
@@ -43,7 +38,7 @@ function AdminProfilePage() {
   const updateMutation = useMutation({
     mutationFn: () => updateProfile(fullName.trim()),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-profile"] });
+      qc.invalidateQueries({ queryKey: ["parent-profile"] });
       toast.success(t.student.profileSaved);
     },
     onError: () => toast.error(t.error.saveFailed),
@@ -76,7 +71,7 @@ function AdminProfilePage() {
 
           <h2 className="mt-4 font-display text-lg font-semibold">{displayUser.fullName}</h2>
           <p className="text-sm text-muted-foreground">
-            {roleLabel(user?.role ?? "admin")}
+            {roleLabel(user?.role ?? "parent")}
           </p>
 
           <div className="mt-4 space-y-2 text-left text-sm">
@@ -95,19 +90,6 @@ function AdminProfilePage() {
               </p>
             )}
           </div>
-
-          {analytics && (
-            <div className="mt-5 grid grid-cols-2 gap-2 rounded-xl border border-border p-3 text-center">
-              <div>
-                <p className="font-semibold text-foreground">{analytics.teacherCount}</p>
-                <p className="text-[10px] text-muted-foreground">O'qituvchi</p>
-              </div>
-              <div>
-                <p className="font-semibold text-foreground">{analytics.studentCount}</p>
-                <p className="text-[10px] text-muted-foreground">O'quvchi</p>
-              </div>
-            </div>
-          )}
         </aside>
 
         <section className="rounded-2xl border border-border bg-card p-6 shadow-soft">
@@ -144,7 +126,7 @@ function AdminProfilePage() {
               <div className="space-y-1.5">
                 <Label>{t.settings.roleLabel}</Label>
                 <div className="flex h-10 max-w-md items-center rounded-md border border-border bg-muted/50 px-3 text-sm text-muted-foreground">
-                  {roleLabel(user?.role ?? "admin")}
+                  {roleLabel(user?.role ?? "parent")}
                 </div>
               </div>
             )}

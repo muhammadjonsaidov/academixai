@@ -160,7 +160,7 @@ function ReportsPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="font-display font-semibold truncate">
-                    {course.title}
+                    {course.titleUz ?? course.title}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {course.subject} · {course.gradeLevel}

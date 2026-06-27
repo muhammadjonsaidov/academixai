@@ -74,7 +74,7 @@ function StudentsPage() {
         />
         <StatCard
           label={t.nav.courses}
-          value={isLoading ? "…" : new Set(students.flatMap(() => [])).size}
+          value={isLoading ? "…" : students.reduce((s, st) => s + (st.courseCount ?? 0), 0)}
           icon={Users}
           accent="accent"
         />

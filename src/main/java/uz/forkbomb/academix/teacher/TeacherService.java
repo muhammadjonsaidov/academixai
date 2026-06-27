@@ -44,6 +44,7 @@ public class TeacherService {
         return course;
     }
 
+    @Transactional
     public LessonResponse addLesson(Long courseId, CreateLessonRequest request, Long teacherId) {
         getOwnedCourse(courseId, teacherId);
         return courseService.addLesson(courseId, request);

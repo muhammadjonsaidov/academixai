@@ -9,29 +9,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth";
-import { getProfile, updateProfile, getAdminAnalytics } from "@/lib/api";
+import { getProfile, updateProfile, getTeacherCourses } from "@/lib/api";
 import { roleLabel } from "@/lib/navigation";
 import { uzDate } from "@/lib/format/date";
 import { useT } from "@/lib/i18n";
 
-export const Route = createFileRoute("/_app/admin/profile")({
+export const Route = createFileRoute("/_app/teacher/profile")({
   head: () => ({ meta: [{ title: "Profil · AcademiXAI" }] }),
-  component: AdminProfilePage,
+  component: TeacherProfilePage,
 });
 
-function AdminProfilePage() {
+function TeacherProfilePage() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const { t } = useT();
 
   const { data: profile } = useQuery({
-    queryKey: ["admin-profile"],
+    queryKey: ["teacher-profile"],
     queryFn: getProfile,
   });
 
-  const { data: analytics } = useQuery({
-    queryKey: ["admin-analytics"],
-    queryFn: getAdminAnalytics,
+  const { data: courses } = useQuery({
+    queryKey: ["teacher-courses"],
+    queryFn: getTeacherCourses,
   });
 
   const [fullName, setFullName] = useState(user?.fullName ?? "");
@@ -43,7 +43,7 @@ function AdminProfilePage() {
   const updateMutation = useMutation({
     mutationFn: () => updateProfile(fullName.trim()),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-profile"] });
+      qc.invalidateQueries({ queryKey: ["teacher-profile"] });
       toast.success(t.student.profileSaved);
     },
     onError: () => toast.error(t.error.saveFailed),
@@ -76,7 +76,7 @@ function AdminProfilePage() {
 
           <h2 className="mt-4 font-display text-lg font-semibold">{displayUser.fullName}</h2>
           <p className="text-sm text-muted-foreground">
-            {roleLabel(user?.role ?? "admin")}
+            {roleLabel(user?.role ?? "teacher")}
           </p>
 
           <div className="mt-4 space-y-2 text-left text-sm">
@@ -96,15 +96,17 @@ function AdminProfilePage() {
             )}
           </div>
 
-          {analytics && (
+          {courses && (
             <div className="mt-5 grid grid-cols-2 gap-2 rounded-xl border border-border p-3 text-center">
               <div>
-                <p className="font-semibold text-foreground">{analytics.teacherCount}</p>
-                <p className="text-[10px] text-muted-foreground">O'qituvchi</p>
+                <p className="font-semibold text-foreground">{courses.length}</p>
+                <p className="text-[10px] text-muted-foreground">Kurs</p>
               </div>
               <div>
-                <p className="font-semibold text-foreground">{analytics.studentCount}</p>
-                <p className="text-[10px] text-muted-foreground">O'quvchi</p>
+                <p className="font-semibold text-foreground">
+                  {courses.reduce((sum, c) => sum + (c.lessonCount ?? c.lessons?.length ?? 0), 0)}
+                </p>
+                <p className="text-[10px] text-muted-foreground">Dars</p>
               </div>
             </div>
           )}
@@ -144,7 +146,7 @@ function AdminProfilePage() {
               <div className="space-y-1.5">
                 <Label>{t.settings.roleLabel}</Label>
                 <div className="flex h-10 max-w-md items-center rounded-md border border-border bg-muted/50 px-3 text-sm text-muted-foreground">
-                  {roleLabel(user?.role ?? "admin")}
+                  {roleLabel(user?.role ?? "teacher")}
                 </div>
               </div>
             )}

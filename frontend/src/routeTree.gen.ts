@@ -28,6 +28,7 @@ import { Route as AppAdminIndexRouteImport } from './routes/_app.admin.index'
 import { Route as AppTeacherStudentsRouteImport } from './routes/_app.teacher.students'
 import { Route as AppTeacherSettingsRouteImport } from './routes/_app.teacher.settings'
 import { Route as AppTeacherReportsRouteImport } from './routes/_app.teacher.reports'
+import { Route as AppTeacherProfileRouteImport } from './routes/_app.teacher.profile'
 import { Route as AppTeacherMessagesRouteImport } from './routes/_app.teacher.messages'
 import { Route as AppTeacherLessonDraftRouteImport } from './routes/_app.teacher.lesson-draft'
 import { Route as AppTeacherExamsRouteImport } from './routes/_app.teacher.exams'
@@ -48,6 +49,7 @@ import { Route as AppStudentAiTutorRouteImport } from './routes/_app.student.ai-
 import { Route as AppStudentAchievementsRouteImport } from './routes/_app.student.achievements'
 import { Route as AppParentSettingsRouteImport } from './routes/_app.parent.settings'
 import { Route as AppParentProgressRouteImport } from './routes/_app.parent.progress'
+import { Route as AppParentProfileRouteImport } from './routes/_app.parent.profile'
 import { Route as AppParentMessagesRouteImport } from './routes/_app.parent.messages'
 import { Route as AppParentChildRouteImport } from './routes/_app.parent.child'
 import { Route as AppParentAiSuggestionsRouteImport } from './routes/_app.parent.ai-suggestions'
@@ -159,6 +161,11 @@ const AppTeacherReportsRoute = AppTeacherReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AppTeacherRoute,
 } as any)
+const AppTeacherProfileRoute = AppTeacherProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppTeacherRoute,
+} as any)
 const AppTeacherMessagesRoute = AppTeacherMessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
@@ -257,6 +264,11 @@ const AppParentSettingsRoute = AppParentSettingsRouteImport.update({
 const AppParentProgressRoute = AppParentProgressRouteImport.update({
   id: '/progress',
   path: '/progress',
+  getParentRoute: () => AppParentRoute,
+} as any)
+const AppParentProfileRoute = AppParentProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => AppParentRoute,
 } as any)
 const AppParentMessagesRoute = AppParentMessagesRouteImport.update({
@@ -367,6 +379,7 @@ export interface FileRoutesByFullPath {
   '/parent/ai-suggestions': typeof AppParentAiSuggestionsRoute
   '/parent/child': typeof AppParentChildRoute
   '/parent/messages': typeof AppParentMessagesRoute
+  '/parent/profile': typeof AppParentProfileRoute
   '/parent/progress': typeof AppParentProgressRoute
   '/parent/settings': typeof AppParentSettingsRoute
   '/student/achievements': typeof AppStudentAchievementsRoute
@@ -387,6 +400,7 @@ export interface FileRoutesByFullPath {
   '/teacher/exams': typeof AppTeacherExamsRoute
   '/teacher/lesson-draft': typeof AppTeacherLessonDraftRoute
   '/teacher/messages': typeof AppTeacherMessagesRoute
+  '/teacher/profile': typeof AppTeacherProfileRoute
   '/teacher/reports': typeof AppTeacherReportsRoute
   '/teacher/settings': typeof AppTeacherSettingsRoute
   '/teacher/students': typeof AppTeacherStudentsRoute
@@ -419,6 +433,7 @@ export interface FileRoutesByTo {
   '/parent/ai-suggestions': typeof AppParentAiSuggestionsRoute
   '/parent/child': typeof AppParentChildRoute
   '/parent/messages': typeof AppParentMessagesRoute
+  '/parent/profile': typeof AppParentProfileRoute
   '/parent/progress': typeof AppParentProgressRoute
   '/parent/settings': typeof AppParentSettingsRoute
   '/student/achievements': typeof AppStudentAchievementsRoute
@@ -439,6 +454,7 @@ export interface FileRoutesByTo {
   '/teacher/exams': typeof AppTeacherExamsRoute
   '/teacher/lesson-draft': typeof AppTeacherLessonDraftRoute
   '/teacher/messages': typeof AppTeacherMessagesRoute
+  '/teacher/profile': typeof AppTeacherProfileRoute
   '/teacher/reports': typeof AppTeacherReportsRoute
   '/teacher/settings': typeof AppTeacherSettingsRoute
   '/teacher/students': typeof AppTeacherStudentsRoute
@@ -477,6 +493,7 @@ export interface FileRoutesById {
   '/_app/parent/ai-suggestions': typeof AppParentAiSuggestionsRoute
   '/_app/parent/child': typeof AppParentChildRoute
   '/_app/parent/messages': typeof AppParentMessagesRoute
+  '/_app/parent/profile': typeof AppParentProfileRoute
   '/_app/parent/progress': typeof AppParentProgressRoute
   '/_app/parent/settings': typeof AppParentSettingsRoute
   '/_app/student/achievements': typeof AppStudentAchievementsRoute
@@ -497,6 +514,7 @@ export interface FileRoutesById {
   '/_app/teacher/exams': typeof AppTeacherExamsRoute
   '/_app/teacher/lesson-draft': typeof AppTeacherLessonDraftRoute
   '/_app/teacher/messages': typeof AppTeacherMessagesRoute
+  '/_app/teacher/profile': typeof AppTeacherProfileRoute
   '/_app/teacher/reports': typeof AppTeacherReportsRoute
   '/_app/teacher/settings': typeof AppTeacherSettingsRoute
   '/_app/teacher/students': typeof AppTeacherStudentsRoute
@@ -535,6 +553,7 @@ export interface FileRouteTypes {
     | '/parent/ai-suggestions'
     | '/parent/child'
     | '/parent/messages'
+    | '/parent/profile'
     | '/parent/progress'
     | '/parent/settings'
     | '/student/achievements'
@@ -555,6 +574,7 @@ export interface FileRouteTypes {
     | '/teacher/exams'
     | '/teacher/lesson-draft'
     | '/teacher/messages'
+    | '/teacher/profile'
     | '/teacher/reports'
     | '/teacher/settings'
     | '/teacher/students'
@@ -587,6 +607,7 @@ export interface FileRouteTypes {
     | '/parent/ai-suggestions'
     | '/parent/child'
     | '/parent/messages'
+    | '/parent/profile'
     | '/parent/progress'
     | '/parent/settings'
     | '/student/achievements'
@@ -607,6 +628,7 @@ export interface FileRouteTypes {
     | '/teacher/exams'
     | '/teacher/lesson-draft'
     | '/teacher/messages'
+    | '/teacher/profile'
     | '/teacher/reports'
     | '/teacher/settings'
     | '/teacher/students'
@@ -644,6 +666,7 @@ export interface FileRouteTypes {
     | '/_app/parent/ai-suggestions'
     | '/_app/parent/child'
     | '/_app/parent/messages'
+    | '/_app/parent/profile'
     | '/_app/parent/progress'
     | '/_app/parent/settings'
     | '/_app/student/achievements'
@@ -664,6 +687,7 @@ export interface FileRouteTypes {
     | '/_app/teacher/exams'
     | '/_app/teacher/lesson-draft'
     | '/_app/teacher/messages'
+    | '/_app/teacher/profile'
     | '/_app/teacher/reports'
     | '/_app/teacher/settings'
     | '/_app/teacher/students'
@@ -816,6 +840,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTeacherReportsRouteImport
       parentRoute: typeof AppTeacherRoute
     }
+    '/_app/teacher/profile': {
+      id: '/_app/teacher/profile'
+      path: '/profile'
+      fullPath: '/teacher/profile'
+      preLoaderRoute: typeof AppTeacherProfileRouteImport
+      parentRoute: typeof AppTeacherRoute
+    }
     '/_app/teacher/messages': {
       id: '/_app/teacher/messages'
       path: '/messages'
@@ -954,6 +985,13 @@ declare module '@tanstack/react-router' {
       path: '/progress'
       fullPath: '/parent/progress'
       preLoaderRoute: typeof AppParentProgressRouteImport
+      parentRoute: typeof AppParentRoute
+    }
+    '/_app/parent/profile': {
+      id: '/_app/parent/profile'
+      path: '/profile'
+      fullPath: '/parent/profile'
+      preLoaderRoute: typeof AppParentProfileRouteImport
       parentRoute: typeof AppParentRoute
     }
     '/_app/parent/messages': {
@@ -1108,6 +1146,7 @@ interface AppParentRouteChildren {
   AppParentAiSuggestionsRoute: typeof AppParentAiSuggestionsRoute
   AppParentChildRoute: typeof AppParentChildRoute
   AppParentMessagesRoute: typeof AppParentMessagesRoute
+  AppParentProfileRoute: typeof AppParentProfileRoute
   AppParentProgressRoute: typeof AppParentProgressRoute
   AppParentSettingsRoute: typeof AppParentSettingsRoute
   AppParentIndexRoute: typeof AppParentIndexRoute
@@ -1118,6 +1157,7 @@ const AppParentRouteChildren: AppParentRouteChildren = {
   AppParentAiSuggestionsRoute: AppParentAiSuggestionsRoute,
   AppParentChildRoute: AppParentChildRoute,
   AppParentMessagesRoute: AppParentMessagesRoute,
+  AppParentProfileRoute: AppParentProfileRoute,
   AppParentProgressRoute: AppParentProgressRoute,
   AppParentSettingsRoute: AppParentSettingsRoute,
   AppParentIndexRoute: AppParentIndexRoute,
@@ -1183,6 +1223,7 @@ interface AppTeacherRouteChildren {
   AppTeacherExamsRoute: typeof AppTeacherExamsRoute
   AppTeacherLessonDraftRoute: typeof AppTeacherLessonDraftRoute
   AppTeacherMessagesRoute: typeof AppTeacherMessagesRoute
+  AppTeacherProfileRoute: typeof AppTeacherProfileRoute
   AppTeacherReportsRoute: typeof AppTeacherReportsRoute
   AppTeacherSettingsRoute: typeof AppTeacherSettingsRoute
   AppTeacherStudentsRoute: typeof AppTeacherStudentsRoute
@@ -1197,6 +1238,7 @@ const AppTeacherRouteChildren: AppTeacherRouteChildren = {
   AppTeacherExamsRoute: AppTeacherExamsRoute,
   AppTeacherLessonDraftRoute: AppTeacherLessonDraftRoute,
   AppTeacherMessagesRoute: AppTeacherMessagesRoute,
+  AppTeacherProfileRoute: AppTeacherProfileRoute,
   AppTeacherReportsRoute: AppTeacherReportsRoute,
   AppTeacherSettingsRoute: AppTeacherSettingsRoute,
   AppTeacherStudentsRoute: AppTeacherStudentsRoute,

@@ -61,6 +61,7 @@ const breadcrumbLabelMap: Record<string, string> = {
   notifications: "Bildirishnomalar",
   courses: "Kurslar",
   lessons: "Darslar",
+  "lesson-draft": "Dars loyihasi",
 };
 
 
@@ -134,7 +135,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
       attendance: n.attendance, reports: n.reports, calendar: n.calendar,
       classes: n.classes, analytics: n.analytics, announcements: n.announcements,
       notifications: n.notifications, courses: n.courses, labs: n.labs,
-      dashboard: n.dashboard,
+      dashboard: n.dashboard, "lesson-draft": "Dars loyihasi",
     };
     const parts = pathname.split("/").filter(Boolean);
     return parts.map((p, i) => ({

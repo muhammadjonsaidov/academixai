@@ -167,10 +167,10 @@ function CourseCard({ course, onLessonAdded }: { course: Course; onLessonAdded: 
     <div className="rounded-2xl border border-border bg-card p-5 shadow-soft flex flex-col gap-3">
       <div className="flex items-start gap-3">
         <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-2xl">
-          {course.emoji ?? "📚"}
+          {course.coverEmoji ?? course.emoji ?? "📚"}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="font-display font-semibold text-foreground truncate">{course.title}</p>
+          <p className="font-display font-semibold text-foreground truncate">{course.titleUz ?? course.title}</p>
           <p className="text-xs text-muted-foreground">{course.subject} · {course.gradeLevel}</p>
         </div>
       </div>
@@ -363,7 +363,7 @@ function TeacherDashboard() {
 
   useEffect(() => { loadCourses(); }, []);
 
-  const totalLessons = courses.reduce((s, c) => s + (c.lessons?.length ?? 0), 0);
+  const totalLessons = courses.reduce((s, c) => s + (c.lessonCount ?? c.lessons?.length ?? 0), 0);
 
   return (
     <div className="space-y-6">

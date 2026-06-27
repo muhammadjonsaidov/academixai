@@ -99,7 +99,7 @@ function AttendancePage() {
               >
                 {courses.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.emoji} {c.title}
+                    {c.coverEmoji ?? c.emoji} {c.titleUz ?? c.title}
                   </option>
                 ))}
               </select>

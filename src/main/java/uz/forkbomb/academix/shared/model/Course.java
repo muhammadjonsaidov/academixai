@@ -3,7 +3,8 @@ package uz.forkbomb.academix.shared.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import uz.forkbomb.academix.shared.config.JsonbConverter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -36,12 +37,11 @@ public class Course {
     @Column(name = "cover_emoji")
     private String coverEmoji = "📚";
 
-    /** JSONB: {"uz":"...","en":"...","ru":"..."} */
-    @Convert(converter = JsonbConverter.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "title_i18n", columnDefinition = "jsonb")
     private Map<String, String> titleI18n;
 
-    @Convert(converter = JsonbConverter.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "description_i18n", columnDefinition = "jsonb")
     private Map<String, String> descriptionI18n;
 
