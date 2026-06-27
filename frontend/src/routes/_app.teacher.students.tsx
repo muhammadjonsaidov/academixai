@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api";
 import { useState } from "react";
 import { useT } from "@/lib/i18n";
+import { Pagination } from "@/components/ui/Pagination";
 
 export const Route = createFileRoute("/_app/teacher/students")({
   head: () => ({ meta: [{ title: "O'quvchilar · AcademiXAI" }] }),
@@ -32,6 +33,7 @@ function ScoreBadge({ score }: { score: number }) {
 
 function StudentsPage() {
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
   const { t } = useT();
 
   const { data: students = [], isLoading } = useQuery({
@@ -45,6 +47,7 @@ function StudentsPage() {
       s.fullName.toLowerCase().includes(search.toLowerCase()) ||
       s.email.toLowerCase().includes(search.toLowerCase()),
   );
+  const paged = filtered.slice(page * 20, (page + 1) * 20);
 
   const avgScore =
     students.length > 0
@@ -87,7 +90,7 @@ function StudentsPage() {
             placeholder={t.action.search + "..."}
 
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(0); }}
             className="border-0 bg-transparent p-0 shadow-none focus-visible:ring-0 text-sm"
           />
         </div>
@@ -126,7 +129,7 @@ function StudentsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filtered.map((student) => (
+                {paged.map((student) => (
                   <tr
                     key={student.id}
                     className="hover:bg-muted/40 transition-colors"
@@ -152,6 +155,9 @@ function StudentsPage() {
                 ))}
               </tbody>
             </table>
+            <div className="px-5 py-4 border-t border-border">
+              <Pagination page={page} total={filtered.length} onChange={setPage} />
+            </div>
           </div>
         )}
       </div>

@@ -18,6 +18,7 @@ import {
   type SchoolClass, type AdminUser,
 } from "@/lib/api";
 import { useT } from "@/lib/i18n";
+import { Pagination } from "@/components/ui/Pagination";
 
 export const Route = createFileRoute("/_app/admin/classes")({
   head: () => ({ meta: [{ title: "Sinflar · AcademiXAI" }] }),
@@ -34,6 +35,7 @@ function ClassesPage() {
   const { data: allStudents = [] } = useQuery({ queryKey: ["admin-students"], queryFn: getAdminStudents });
 
   const [expanded, setExpanded] = useState<number | null>(null);
+  const [page, setPage] = useState(0);
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState("");
   const [grade, setGrade] = useState("");
@@ -105,7 +107,7 @@ function ClassesPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {classes.map(cls => (
+          {classes.slice(page * 20, (page + 1) * 20).map(cls => (
             <ClassCard
               key={cls.id}
               cls={cls}
@@ -116,6 +118,7 @@ function ClassesPage() {
               onDelete={() => deleteMut.mutate(cls.id)}
             />
           ))}
+          <Pagination page={page} total={classes.length} onChange={p => { setPage(p); setExpanded(null); }} />
         </div>
       )}
     </div>

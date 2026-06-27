@@ -18,6 +18,7 @@ import {
 import { getAdminTeachers, addTeacher, type AdminUser } from "@/lib/api";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
+import { Pagination } from "@/components/ui/Pagination";
 
 export const Route = createFileRoute("/_app/admin/teachers")({
   head: () => ({ meta: [{ title: "O'qituvchilar · AcademiXAI" }] }),
@@ -36,6 +37,7 @@ function TeachersPage() {
   const { t } = useT();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [page, setPage] = useState(0);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -100,7 +102,7 @@ function TeachersPage() {
             </p>
           </div>
           <ul className="divide-y divide-border">
-            {teachers.map((teacher) => (
+            {teachers.slice(page * 20, (page + 1) * 20).map((teacher) => (
               <li key={teacher.id} className="flex items-center justify-between px-5 py-4 gap-4">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/10">
@@ -115,6 +117,9 @@ function TeachersPage() {
               </li>
             ))}
           </ul>
+          <div className="px-5 py-4 border-t border-border">
+            <Pagination page={page} total={teachers.length} onChange={setPage} />
+          </div>
         </div>
       )}
 

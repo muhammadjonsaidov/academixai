@@ -18,6 +18,7 @@ import {
 import { getAdminParents, addParent, type AdminUser } from "@/lib/api";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
+import { Pagination } from "@/components/ui/Pagination";
 
 export const Route = createFileRoute("/_app/admin/parents")({
   head: () => ({ meta: [{ title: "Ota-onalar · AcademiXAI" }] }),
@@ -28,6 +29,7 @@ function ParentsPage() {
   const qc = useQueryClient();
   const { t } = useT();
   const [open, setOpen] = useState(false);
+  const [page, setPage] = useState(0);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -92,7 +94,7 @@ function ParentsPage() {
             </p>
           </div>
           <ul className="divide-y divide-border">
-            {parents.map((p) => (
+            {parents.slice(page * 20, (page + 1) * 20).map((p) => (
               <li key={p.id} className="flex items-center justify-between px-5 py-4 gap-4">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-rose-500/10">
@@ -109,6 +111,9 @@ function ParentsPage() {
               </li>
             ))}
           </ul>
+          <div className="px-5 py-4 border-t border-border">
+            <Pagination page={page} total={parents.length} onChange={setPage} />
+          </div>
         </div>
       )}
 

@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/shell/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getCourses, getCourse, enrollCourse, type Course, type Lesson } from "@/lib/api";
+import { Pagination } from "@/components/ui/Pagination";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -175,6 +176,7 @@ function CourseDetail({ courseId, onBack }: { courseId: number; onBack: () => vo
 function CoursesPage() {
   const { t } = useT();
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [page, setPage] = useState(0);
   const { user } = useAuth();
   const qc = useQueryClient();
 
@@ -215,8 +217,9 @@ function CoursesPage() {
           description={t.courses.noCoursesDesc}
         />
       ) : (
+        <div className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {courses.map((course: Course) => (
+          {courses.slice(page * 20, (page + 1) * 20).map((course: Course) => (
             <button
               key={course.id}
               onClick={() => setSelectedId(course.id)}
@@ -257,6 +260,8 @@ function CoursesPage() {
               </div>
             </button>
           ))}
+        </div>
+        <Pagination page={page} total={courses.length} onChange={setPage} />
         </div>
       )}
     </div>
