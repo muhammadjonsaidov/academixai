@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Users, GraduationCap, BarChart3, AlertTriangle, Plus } from "lucide-react";
+import { Users, GraduationCap, BarChart3, AlertTriangle, Plus, ChevronDown, ChevronUp, ShieldAlert, HeartPulse, Lightbulb } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { PageHeader } from "@/components/shell/PageHeader";
@@ -137,16 +138,22 @@ function AdminDashboard() {
     }
   }
 
-  let riskStudents: { name: string; reason?: string }[] = [];
-  let riskText = "";
+  let riskStudents: { name: string; reason?: string; recommendation?: string }[] = [];
+  let overallHealth: number | null = null;
+  let riskRaw = "";
   if (analytics?.atRiskAnalysis) {
     try {
-      const parsed = JSON.parse(analytics.atRiskAnalysis);
+      // Strip markdown code fences if AI wrapped JSON in ```
+      const cleaned = analytics.atRiskAnalysis.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+      const parsed = JSON.parse(cleaned);
       riskStudents = parsed.atRiskStudents ?? [];
+      overallHealth = parsed.overallHealthPercent ?? null;
     } catch {
-      riskText = analytics.atRiskAnalysis;
+      riskRaw = analytics.atRiskAnalysis;
     }
   }
+  const [riskExpanded, setRiskExpanded] = useState(false);
+  const PREVIEW = 4;
 
   return (
     <div className="space-y-6">
@@ -163,23 +170,73 @@ function AdminDashboard() {
         <StatCard label={t.admin.totalAbsences} value={loadingAnalytics ? "…" : (analytics?.totalAbsences ?? 0)} icon={AlertTriangle} accent="default" />
       </div>
 
-      {(riskStudents.length > 0 || riskText) && (
-        <div className="rounded-2xl border border-warning/40 bg-warning/5 p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle className="h-4 w-4 text-warning" />
-            <h2 className="font-display font-semibold text-sm">{t.admin.riskAnalysis}</h2>
+      {(riskStudents.length > 0 || riskRaw) && (
+        <div className="rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/60 dark:bg-amber-950/20 overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center gap-3 px-5 py-4 border-b border-amber-200 dark:border-amber-800/40">
+            <div className="h-9 w-9 rounded-xl bg-amber-100 dark:bg-amber-900/40 grid place-items-center shrink-0">
+              <ShieldAlert className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-sm text-amber-900 dark:text-amber-200">{t.admin.riskAnalysis}</p>
+              <p className="text-xs text-amber-700/70 dark:text-amber-400/70">AI tahlili — xavf ostidagi o'quvchilar</p>
+            </div>
+            {overallHealth !== null && (
+              <div className="text-right">
+                <p className={cn("text-xl font-bold", overallHealth >= 80 ? "text-green-600" : overallHealth >= 60 ? "text-amber-600" : "text-red-600")}>
+                  {overallHealth}%
+                </p>
+                <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
+                  <HeartPulse className="h-3 w-3" /> Umumiy salomatlik
+                </p>
+              </div>
+            )}
           </div>
+
           {riskStudents.length > 0 ? (
-            <ul className="space-y-1">
-              {riskStudents.map((s, i) => (
-                <li key={i} className="text-sm text-muted-foreground flex gap-2">
-                  <span className="font-medium text-foreground">{s.name}</span>
-                  {s.reason && <span>— {s.reason}</span>}
-                </li>
-              ))}
-            </ul>
+            <>
+              <div className="divide-y divide-amber-100 dark:divide-amber-900/30">
+                {(riskExpanded ? riskStudents : riskStudents.slice(0, PREVIEW)).map((s, i) => (
+                  <div key={i} className="px-5 py-3 flex gap-3 items-start">
+                    <div className={cn("h-7 w-7 rounded-full grid place-items-center shrink-0 text-xs font-bold mt-0.5",
+                      i === 0 ? "bg-red-100 text-red-700" :
+                      i < 3 ? "bg-orange-100 text-orange-700" :
+                      "bg-amber-100 text-amber-700")}>
+                      {i + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-amber-900 dark:text-amber-100">{s.name}</p>
+                      {s.reason && (
+                        <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5 flex gap-1">
+                          <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
+                          {s.reason}
+                        </p>
+                      )}
+                      {s.recommendation && (
+                        <p className="text-xs text-muted-foreground mt-1 flex gap-1">
+                          <Lightbulb className="h-3 w-3 shrink-0 mt-0.5 text-blue-500" />
+                          {s.recommendation}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {riskStudents.length > PREVIEW && (
+                <button
+                  onClick={() => setRiskExpanded(v => !v)}
+                  className="w-full py-2.5 text-xs text-amber-700 dark:text-amber-400 hover:bg-amber-100/50 dark:hover:bg-amber-900/20 transition-colors flex items-center justify-center gap-1 border-t border-amber-200 dark:border-amber-800/40"
+                >
+                  {riskExpanded
+                    ? <><ChevronUp className="h-3.5 w-3.5" /> Kamroq ko'rsatish</>
+                    : <><ChevronDown className="h-3.5 w-3.5" /> Yana {riskStudents.length - PREVIEW} ta ko'rsatish</>}
+                </button>
+              )}
+            </>
           ) : (
-            <p className="text-xs text-muted-foreground whitespace-pre-wrap">{riskText}</p>
+            <div className="px-5 py-4">
+              <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">{riskRaw}</p>
+            </div>
           )}
         </div>
       )}
