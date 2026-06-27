@@ -42,17 +42,21 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         for (Map.Entry<String, Integer> entry : LIMITS.entrySet()) {
             if (path.startsWith(entry.getKey())) {
-                String key = "rl:" + entry.getKey() + ":" + ip;
-                Long count = redis.opsForValue().increment(key);
-                if (count == 1) {
-                    redis.expire(key, Duration.ofMinutes(1));
-                }
-                if (count > entry.getValue()) {
-                    log.warn("Rate limit exceeded: ip={} path={}", ip, path);
-                    res.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-                    res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                    res.getWriter().write("{\"error\":\"So'rovlar chegarasi oshdi. 1 daqiqadan so'ng qayta urinib ko'ring.\"}");
-                    return;
+                try {
+                    String key = "rl:" + entry.getKey() + ":" + ip;
+                    Long count = redis.opsForValue().increment(key);
+                    if (count == 1) {
+                        redis.expire(key, Duration.ofMinutes(1));
+                    }
+                    if (count > entry.getValue()) {
+                        log.warn("Rate limit exceeded: ip={} path={}", ip, path);
+                        res.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+                        res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                        res.getWriter().write("{\"error\":\"So'rovlar chegarasi oshdi. 1 daqiqadan so'ng qayta urinib ko'ring.\"}");
+                        return;
+                    }
+                } catch (Exception e) {
+                    log.warn("Rate limit check failed (Redis unavailable), allowing request: {}", e.getMessage());
                 }
                 break;
             }
