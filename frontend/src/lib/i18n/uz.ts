@@ -270,6 +270,16 @@ export const uz = {
     joined: "Qo'shilgan",
     save: "Saqlash",
     saved: "Saqlandi",
+    myProfile: "Mening profilim",
+    myProfileDesc: "Shaxsiy ma'lumotlaringizni boshqaring",
+    tierFree: "Bepul",
+    tierPremium: "Premium",
+    tierSchool: "Maktab",
+    tierSuffix: "tarif",
+    memberSinceSuffix: "dan beri",
+    savedSuccess: "Profil muvaffaqiyatli saqlandi",
+    changePhotoSoon: "Rasm yuklash tez orada qo'shiladi",
+    changePhoto: "Rasm o'zgartirish",
   },
 
   // Settings

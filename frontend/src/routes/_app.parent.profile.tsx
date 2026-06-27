@@ -52,7 +52,7 @@ function ParentProfilePage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Mening profilim" description="Shaxsiy ma'lumotlaringizni boshqaring" />
+      <PageHeader title={t.profile.myProfile} description={t.profile.myProfileDesc} />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
         <aside className="rounded-2xl border border-border bg-card p-6 text-center shadow-soft">
@@ -62,8 +62,8 @@ function ParentProfilePage() {
             </div>
             <button
               className="absolute -bottom-1 -right-1 grid h-8 w-8 place-items-center rounded-full border-2 border-card bg-primary text-primary-foreground hover:scale-105 transition-transform"
-              aria-label="Rasm o'zgartirish"
-              onClick={() => toast.info("Rasm yuklash tez orada qo'shiladi")}
+              aria-label={t.profile.changePhoto}
+              onClick={() => toast.info(t.profile.changePhotoSoon)}
             >
               <Camera className="h-4 w-4" />
             </button>
@@ -81,12 +81,12 @@ function ParentProfilePage() {
             {profile?.subscriptionTier && (
               <p className="flex items-center gap-2 text-muted-foreground">
                 <Sparkles className="h-4 w-4" />
-                {profile.subscriptionTier === "FREE" ? "Bepul" : profile.subscriptionTier === "PREMIUM" ? "Premium" : "Maktab"} tarif
+                {profile.subscriptionTier === "FREE" ? t.profile.tierFree : profile.subscriptionTier === "PREMIUM" ? t.profile.tierPremium : t.profile.tierSchool} {t.profile.tierSuffix}
               </p>
             )}
             {memberSince && (
               <p className="flex items-center gap-2 text-muted-foreground">
-                <School className="h-4 w-4" /> {memberSince} dan beri
+                <School className="h-4 w-4" /> {memberSince} {t.profile.memberSinceSuffix}
               </p>
             )}
           </div>
@@ -152,7 +152,7 @@ function ParentProfilePage() {
             {updateMutation.isSuccess && (
               <p className="flex items-center gap-1.5 text-sm text-success">
                 <CheckCircle2 className="h-4 w-4" />
-                Profil muvaffaqiyatli saqlandi
+                {t.profile.savedSuccess}
               </p>
             )}
           </form>

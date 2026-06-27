@@ -256,6 +256,16 @@ export const en: Translations = {
     joined: "Joined",
     save: "Save",
     saved: "Saved",
+    myProfile: "My Profile",
+    myProfileDesc: "Manage your personal information",
+    tierFree: "Free",
+    tierPremium: "Premium",
+    tierSchool: "School",
+    tierSuffix: "plan",
+    memberSinceSuffix: "member since",
+    savedSuccess: "Profile saved successfully",
+    changePhotoSoon: "Photo upload coming soon",
+    changePhoto: "Change photo",
   },
 
   settings: {

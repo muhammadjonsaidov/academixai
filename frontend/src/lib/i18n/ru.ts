@@ -256,6 +256,16 @@ export const ru: Translations = {
     joined: "Присоединился",
     save: "Сохранить",
     saved: "Сохранено",
+    myProfile: "Мой профиль",
+    myProfileDesc: "Управляйте личными данными",
+    tierFree: "Бесплатный",
+    tierPremium: "Премиум",
+    tierSchool: "Школьный",
+    tierSuffix: "тариф",
+    memberSinceSuffix: "с",
+    savedSuccess: "Профиль успешно сохранён",
+    changePhotoSoon: "Загрузка фото скоро будет добавлена",
+    changePhoto: "Изменить фото",
   },
 
   settings: {

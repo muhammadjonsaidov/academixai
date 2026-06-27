@@ -89,7 +89,7 @@ function AnalyticsSection({ courses, analytics }: {
               labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
             />
             <Area type="monotone" dataKey="faollik" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#grad-faollik)" name={t.teacher.activity} dot={false} />
-            <Area type="monotone" dataKey="davomat" stroke="hsl(var(--secondary))" strokeWidth={2} fill="url(#grad-davomat)" name="Davomat" dot={false} />
+            <Area type="monotone" dataKey="davomat" stroke="hsl(var(--secondary))" strokeWidth={2} fill="url(#grad-davomat)" name={t.nav.attendance} dot={false} />
           </AreaChart>
         </ResponsiveContainer>
         <div className="mt-3 flex gap-4 text-[11px] text-muted-foreground">
