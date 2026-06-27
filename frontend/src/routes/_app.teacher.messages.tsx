@@ -17,14 +17,14 @@ function MessagesPage() {
       <PageHeader
         eyebrow={t.nav.messages}
         title={t.nav.messages}
-        description="O'quvchilar va hamkasblar bilan muloqot."
+        description={t.teacher.messagesDesc}
       />
 
       <div className="rounded-2xl border border-border bg-card p-12 shadow-soft">
         <EmptyState
           icon={MessageSquare}
           title={t.nav.messages + " — " + t.settings.comingSoon}
-          description="Bu bo'limda o'quvchilar, ota-onalar va hamkasblar bilan to'g'ridan-to'g'ri muloqot qilish imkoniyati bo'ladi."
+          description={t.teacher.messagesComingSoonDesc}
         />
       </div>
     </div>

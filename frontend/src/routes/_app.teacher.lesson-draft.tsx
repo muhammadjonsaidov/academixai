@@ -52,7 +52,7 @@ function LessonDraftPage() {
             <Input
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder="Masalan: Kvadrat tenglamalar"
+              placeholder={t.teacher.lessonTopicPlaceholder}
             />
           </div>
           <div className="space-y-1.5">
@@ -60,7 +60,7 @@ function LessonDraftPage() {
             <Input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              placeholder="Matematika"
+              placeholder={t.teacher.subjectPlaceholder}
             />
           </div>
         </div>

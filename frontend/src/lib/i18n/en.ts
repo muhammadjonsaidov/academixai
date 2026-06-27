@@ -266,6 +266,7 @@ export const en: Translations = {
     savedSuccess: "Profile saved successfully",
     changePhotoSoon: "Photo upload coming soon",
     changePhoto: "Change photo",
+    editNameDesc: "Update your name",
   },
 
   settings: {
@@ -379,6 +380,16 @@ export const en: Translations = {
     studentCountLabel: "Student count",
     noCoursesData: "No courses",
     trendUp: "+12%",
+    reportsDesc: "Statistics and AI analysis across all courses.",
+    calendarDesc: "Schedule of lessons, exams and events.",
+    calendarComingSoonDesc: "In this section you'll be able to schedule lessons, exams and important events.",
+    messagesDesc: "Communication with students and colleagues.",
+    messagesComingSoonDesc: "In this section you'll be able to communicate directly with students, parents and colleagues.",
+    lessonTopicPlaceholder: "Example: Quadratic equations",
+    subjectPlaceholder: "Mathematics",
+    courseNamePlaceholder: "Example: Algebra basics",
+    courseDescPlaceholder: "Brief description of the course...",
+    lessonContentPlaceholder: "Lesson content...",
   },
 
   aiAssistant: {

@@ -17,14 +17,14 @@ function CalendarPage() {
       <PageHeader
         eyebrow={t.nav.calendar}
         title={t.nav.calendar}
-        description="Darslar, imtihonlar va tadbirlar jadvali."
+        description={t.teacher.calendarDesc}
       />
 
       <div className="rounded-2xl border border-border bg-card p-12 shadow-soft">
         <EmptyState
           icon={Calendar}
           title={t.nav.calendar + " — " + t.settings.comingSoon}
-          description="Bu bo'limda dars jadvali, imtihon sanalari va muhim tadbirlarni belgilash imkoniyati bo'ladi."
+          description={t.teacher.calendarComingSoonDesc}
         />
       </div>
     </div>

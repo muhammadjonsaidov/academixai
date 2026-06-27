@@ -280,6 +280,7 @@ export const uz = {
     savedSuccess: "Profil muvaffaqiyatli saqlandi",
     changePhotoSoon: "Rasm yuklash tez orada qo'shiladi",
     changePhoto: "Rasm o'zgartirish",
+    editNameDesc: "Ismingizni o'zgartiring",
   },
 
   // Settings
@@ -397,6 +398,16 @@ export const uz = {
     studentCountLabel: "O'quvchilar soni",
     noCoursesData: "Kurslar mavjud emas",
     trendUp: "+12%",
+    reportsDesc: "Barcha kurslar bo'yicha statistika va AI tahlillar.",
+    calendarDesc: "Darslar, imtihonlar va tadbirlar jadvali.",
+    calendarComingSoonDesc: "Bu bo'limda dars jadvali, imtihon sanalari va muhim tadbirlarni belgilash imkoniyati bo'ladi.",
+    messagesDesc: "O'quvchilar va hamkasblar bilan muloqot.",
+    messagesComingSoonDesc: "Bu bo'limda o'quvchilar, ota-onalar va hamkasblar bilan to'g'ridan-to'g'ri muloqot qilish imkoniyati bo'ladi.",
+    lessonTopicPlaceholder: "Masalan: Kvadrat tenglamalar",
+    subjectPlaceholder: "Matematika",
+    courseNamePlaceholder: "Masalan: Algebra asoslari",
+    courseDescPlaceholder: "Kurs haqida qisqacha...",
+    lessonContentPlaceholder: "Dars mazmuní...",
   },
 
   // AI Assistant (teacher)

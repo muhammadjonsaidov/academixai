@@ -108,7 +108,7 @@ function ReportsPage() {
       <PageHeader
         eyebrow={t.nav.reports}
         title={t.nav.reports}
-        description="Barcha kurslar bo'yicha statistika va AI tahlillar."
+        description={t.teacher.reportsDesc}
       />
 
       <div className="grid gap-4 sm:grid-cols-3">

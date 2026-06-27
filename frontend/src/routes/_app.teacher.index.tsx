@@ -180,12 +180,12 @@ function CreateCourseModal({ open, onClose, onCreated }: { open: boolean; onClos
           </div>
           <div className="space-y-1.5">
             <Label>{t.teacher.courseName} *</Label>
-            <Input value={form.titleUz} onChange={(e) => setForm(f => ({ ...f, titleUz: e.target.value }))} placeholder="Masalan: Algebra asoslari" />
+            <Input value={form.titleUz} onChange={(e) => setForm(f => ({ ...f, titleUz: e.target.value }))} placeholder={t.teacher.courseNamePlaceholder} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>{t.teacher.subject} *</Label>
-              <Input value={form.subject} onChange={(e) => setForm(f => ({ ...f, subject: e.target.value }))} placeholder="Matematika" />
+              <Input value={form.subject} onChange={(e) => setForm(f => ({ ...f, subject: e.target.value }))} placeholder={t.teacher.subjectPlaceholder} />
             </div>
             <div className="space-y-1.5">
               <Label>{t.teacher.gradeLevel} *</Label>
@@ -194,7 +194,7 @@ function CreateCourseModal({ open, onClose, onCreated }: { open: boolean; onClos
           </div>
           <div className="space-y-1.5">
             <Label>{t.courses.description}</Label>
-            <Textarea value={form.descriptionUz} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm(f => ({ ...f, descriptionUz: e.target.value }))} placeholder="Kurs haqida qisqacha..." rows={3} />
+            <Textarea value={form.descriptionUz} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm(f => ({ ...f, descriptionUz: e.target.value }))} placeholder={t.teacher.courseDescPlaceholder} rows={3} />
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose}>{t.action.cancel}</Button>
@@ -223,11 +223,11 @@ function AddLessonModal({ courseId, open, onClose, onAdded }: { courseId: number
         <div className="space-y-4 pt-2">
           <div className="space-y-1.5">
             <Label>{t.teacher.lessonName} *</Label>
-            <Input value={form.titleUz} onChange={(e) => setForm(f => ({ ...f, titleUz: e.target.value }))} placeholder="Masalan: Kvadrat tenglamalar" />
+            <Input value={form.titleUz} onChange={(e) => setForm(f => ({ ...f, titleUz: e.target.value }))} placeholder={t.teacher.lessonTopicPlaceholder} />
           </div>
           <div className="space-y-1.5">
             <Label>{t.teacher.lessonContent}</Label>
-            <Textarea value={form.contentUz} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm(f => ({ ...f, contentUz: e.target.value }))} rows={4} placeholder="Dars mazmuní..." />
+            <Textarea value={form.contentUz} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm(f => ({ ...f, contentUz: e.target.value }))} rows={4} placeholder={t.teacher.lessonContentPlaceholder} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -281,7 +281,7 @@ function CourseCard({ course, onLessonAdded }: { course: Course; onLessonAdded: 
         </div>
         <div className="min-w-0 flex-1">
           <p className="font-display font-semibold text-foreground truncate">{course.titleUz ?? course.title}</p>
-          <p className="text-xs text-muted-foreground">{course.subject} · {course.gradeLevel}</p>
+          <p className="text-xs text-muted-foreground">{course.gradeLevel}</p>
         </div>
       </div>
 

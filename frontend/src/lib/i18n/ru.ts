@@ -266,6 +266,7 @@ export const ru: Translations = {
     savedSuccess: "Профиль успешно сохранён",
     changePhotoSoon: "Загрузка фото скоро будет добавлена",
     changePhoto: "Изменить фото",
+    editNameDesc: "Изменить ваше имя",
   },
 
   settings: {
@@ -379,6 +380,16 @@ export const ru: Translations = {
     studentCountLabel: "Количество учеников",
     noCoursesData: "Курсов нет",
     trendUp: "+12%",
+    reportsDesc: "Статистика и AI-анализ по всем курсам.",
+    calendarDesc: "Расписание уроков, экзаменов и мероприятий.",
+    calendarComingSoonDesc: "В этом разделе можно будет планировать уроки, экзамены и важные события.",
+    messagesDesc: "Общение с учениками и коллегами.",
+    messagesComingSoonDesc: "В этом разделе можно будет общаться напрямую с учениками, родителями и коллегами.",
+    lessonTopicPlaceholder: "Например: Квадратные уравнения",
+    subjectPlaceholder: "Математика",
+    courseNamePlaceholder: "Например: Основы алгебры",
+    courseDescPlaceholder: "Краткое описание курса...",
+    lessonContentPlaceholder: "Содержание урока...",
   },
 
   aiAssistant: {

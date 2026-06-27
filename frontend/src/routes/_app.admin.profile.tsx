@@ -112,7 +112,7 @@ function AdminProfilePage() {
 
         <section className="rounded-2xl border border-border bg-card p-6 shadow-soft">
           <h3 className="font-display text-lg font-semibold">{t.settings.profileData}</h3>
-          <p className="mt-1 text-sm text-muted-foreground">Ismingizni o'zgartiring</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t.profile.editNameDesc}</p>
 
           <form
             className="mt-5 space-y-4"
