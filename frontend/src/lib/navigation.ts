@@ -54,7 +54,6 @@ export function useNavigation(): { sections: Record<UserRole, NavSection[]>; rol
           { label: n.attendance, to: "/teacher/attendance", icon: BookOpen },
           { label: n.aiAssistant, to: "/teacher/ai-assistant", icon: Sparkles },
           { label: "Dars loyihasi", to: "/teacher/lesson-draft", icon: Wand2, badge: "AI" },
-          { label: n.reports, to: "/teacher/reports", icon: FileText },
           { label: n.messages, to: "/teacher/messages", icon: MessageSquare },
           { label: n.calendar, to: "/teacher/calendar", icon: Calendar },
         ],
