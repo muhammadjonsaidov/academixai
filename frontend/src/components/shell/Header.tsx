@@ -1,4 +1,4 @@
-import { Bell, LogOut, Menu, Search, User as UserIcon, Settings as SettingsIcon, Globe } from "lucide-react";
+import { Bell, Menu, Search, Globe } from "lucide-react";
 import { useNavigate, useRouterState, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -10,8 +10,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -94,13 +92,13 @@ function LangSwitcher() {
 }
 
 export function Header({ onOpenSidebar }: HeaderProps) {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const { t } = useT();
-  const { sections: navByRole, roleLabel: roleLabelMap } = useNavigation();
+  const { sections: navByRole } = useNavigation();
 
   const { data: notifData } = useQuery({
     queryKey: ["notifications"],
@@ -151,19 +149,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
     return sections.flatMap((s: NavSection) => s.items).filter((i: NavItem) => i.label.toLowerCase().includes(q));
   }, [query, sections]);
 
-  function handleLogout() {
-    logout();
-    navigate({ to: "/auth/login" });
-  }
-
   if (!user) return null;
-
-  const initials = user.fullName
-    .split(" ")
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur-xl">
@@ -262,49 +248,6 @@ export function Header({ onOpenSidebar }: HeaderProps) {
 
           <LangSwitcher />
           <ThemeToggle />
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                className="ml-1 flex h-9 items-center gap-2 rounded-full border border-border bg-card pl-1 pr-3 transition-colors hover:bg-muted/60"
-                aria-label="Profil menyusi"
-              >
-                <span className="grid h-7 w-7 place-items-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
-                  {initials}
-                </span>
-                <span className="hidden text-sm font-medium sm:inline">
-                  {user.fullName.split(" ")[0]}
-                </span>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-60">
-              <DropdownMenuLabel className="font-normal">
-                <p className="text-sm font-semibold">{user.fullName}</p>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
-                <p className="mt-1 text-[11px] font-medium uppercase tracking-wider text-primary">
-                  {roleLabelMap[user.role]}
-                </p>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <a href={`/${user.role}/profile`} className="flex items-center gap-2">
-                  <UserIcon className="h-4 w-4" /> Profil
-                </a>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <a href={`/${user.role}/settings`} className="flex items-center gap-2">
-                  <SettingsIcon className="h-4 w-4" /> Sozlamalar
-                </a>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={handleLogout}
-                className="text-destructive focus:text-destructive"
-              >
-                <LogOut className="h-4 w-4" /> Tizimdan chiqish
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </div>
 
