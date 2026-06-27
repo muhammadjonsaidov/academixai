@@ -4,8 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.content.Media;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MimeType;
 
 @Service
 @RequiredArgsConstructor
@@ -141,6 +144,36 @@ public class AIService {
         } catch (Exception e) {
             log.error("Teacher AI chat failed: {}", e.getMessage());
             return "Kechirasiz, hozirda javob bera olmadim. Keyinroq urinib ko'ring.";
+        }
+    }
+
+    public String analyzeHomework(byte[] imageBytes, String mimeType) {
+        String system = """
+                Siz matematika o'qituvchisiiz va uy ishlarini tekshirasiz.
+                O'quvchi matematika uy ishini yozib yubordi. Rasmni tahlil qiling.
+                FAQAT quyidagi JSON formatda javob bering, boshqa hech narsa yozmasdan:
+                {"ocrText":"...","isCorrect":true,"score":85,"method":"...","errors":["..."],"feedback":"...","resubmitRequired":false,"resubmitReason":""}
+                Maydonlar:
+                - ocrText: rasmdan o'qilgan yozuv (agar o'qib bo'lmasa bo'sh qoldir)
+                - isCorrect: yechim to'g'rimi
+                - score: 0-100 ball
+                - method: qo'llanilgan yechish usuli O'zbek tilida
+                - errors: topilgan xatolar ro'yxati O'zbek tilida (bo'sh bo'lishi mumkin)
+                - feedback: o'quvchiga rag'batlantiruvchi izoh O'zbek tilida
+                - resubmitRequired: agar yozuv o'qib bo'lmasa yoki masala tushunarsiz bo'lsa true
+                - resubmitReason: qayta topshirish sababi O'zbek tilida (bo'sh bo'lishi mumkin)
+                """;
+        try {
+            Media media = new Media(MimeType.valueOf(mimeType), new ByteArrayResource(imageBytes));
+            return ChatClient.builder(chatModel).build()
+                    .prompt()
+                    .system(system)
+                    .user(u -> u.text("Ushbu rasmda o'quvchining matematika uy ishi bor. Tahlil qiling va JSON formatda javob bering.").media(media))
+                    .call()
+                    .content();
+        } catch (Exception e) {
+            log.error("Homework analysis failed: {}", e.getMessage());
+            return "{\"ocrText\":\"\",\"isCorrect\":false,\"score\":0,\"method\":\"\",\"errors\":[],\"feedback\":\"Tahlil qilishda xato yuz berdi. Qayta urinib ko'ring.\",\"resubmitRequired\":true,\"resubmitReason\":\"Texnik xato\"}";
         }
     }
 

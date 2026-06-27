@@ -186,6 +186,33 @@ export interface DashboardStats {
 }
 export const getDashboard = () => api.get<DashboardStats>("/api/student/dashboard");
 
+// ── Homework ──────────────────────────────────────────────────────────────────
+export interface HomeworkResult {
+  id?: number; subject: string; status: string;
+  ocrText: string; isCorrect: boolean; score: number;
+  method: string; errors: string[]; feedback: string;
+  resubmitRequired: boolean; resubmitReason?: string;
+  imageData?: string; aiFeedback?: string; createdAt?: string;
+}
+export const getHomeworkList = () => api.get<HomeworkResult[]>("/api/student/homework");
+export async function submitHomework(file: File, subject = "Matematika"): Promise<HomeworkResult> {
+  const { getToken } = await import("./auth");
+  const token = getToken();
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("subject", subject);
+  const res = await fetch("/api/student/homework/submit", {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: fd,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as { message?: string }).message ?? `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
 // ── Exam ──────────────────────────────────────────────────────────────────────
 
 export interface ExamQuestion {
