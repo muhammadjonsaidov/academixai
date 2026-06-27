@@ -96,4 +96,11 @@ public class AdminController {
         Long schoolId = getSchoolId(userDetails);
         return ResponseEntity.ok(adminService.getSchoolAttendance(schoolId));
     }
+
+    @GetMapping("/attendance/stats")
+    public ResponseEntity<Map<String, Object>> getAttendanceStats(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long schoolId = getSchoolId(userDetails);
+        return ResponseEntity.ok(adminService.getAttendanceStats(schoolId));
+    }
 }

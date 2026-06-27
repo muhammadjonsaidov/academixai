@@ -3,7 +3,7 @@ import { useT } from "@/lib/i18n";
 import {
   Home, Sparkles, ClipboardList, GraduationCap, NotebookPen, Trophy, Compass,
   User, Settings, Users, Calendar, MessageSquare, BarChart3, FileText,
-  Megaphone, BookOpen, Brain, HeartHandshake, School, Bell, Wand2, type LucideIcon,
+  Megaphone, BookOpen, Brain, HeartHandshake, School, Bell, Wand2, CalendarX2, type LucideIcon,
 } from "lucide-react";
 
 export interface NavItem { label: string; to: string; icon: LucideIcon; badge?: string; }
@@ -66,7 +66,7 @@ export function useNavigation(): { sections: Record<UserRole, NavSection[]>; rol
           { label: n.students, to: "/admin/students", icon: GraduationCap },
           { label: n.parents, to: "/admin/parents", icon: HeartHandshake },
           { label: n.classes, to: "/admin/classes", icon: School },
-          { label: n.attendance, to: "/admin/attendance", icon: BookOpen },
+          { label: n.adminAttendance, to: "/admin/attendance", icon: CalendarX2 },
           { label: n.reports, to: "/admin/reports", icon: FileText },
           { label: n.announcements, to: "/admin/announcements", icon: Megaphone },
         ],

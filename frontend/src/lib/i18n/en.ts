@@ -19,6 +19,7 @@ export const en: Translations = {
     settings: "Settings",
     students: "Students",
     attendance: "Attendance",
+    adminAttendance: "Missed Classes",
     aiAssistant: "AI Assistant",
     reports: "Reports",
     messages: "Messages",

@@ -19,6 +19,7 @@ export const ru: Translations = {
     settings: "Настройки",
     students: "Ученики",
     attendance: "Посещаемость",
+    adminAttendance: "Пропущенные уроки",
     aiAssistant: "AI Помощник",
     reports: "Отчёты",
     messages: "Сообщения",

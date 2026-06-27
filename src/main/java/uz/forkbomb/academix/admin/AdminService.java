@@ -197,6 +197,46 @@ public class AdminService {
         return result;
     }
 
+    public Map<String, Object> getAttendanceStats(Long schoolId) {
+        long total = attendanceRepository.countTotalBySchoolId(schoolId);
+        long present = attendanceRepository.countPresentBySchoolId(schoolId);
+        long missed = total - present;
+
+        List<Map<String, Object>> topAbsent = attendanceRepository
+                .topAbsentStudentsBySchoolId(schoolId).stream().limit(15)
+                .map(r -> { Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("name", r[0]); m.put("studentId", r[1]); m.put("missed", r[2]); return m; })
+                .toList();
+
+        List<Map<String, Object>> topCourses = attendanceRepository
+                .topAbsentCoursesBySchoolId(schoolId).stream().limit(10)
+                .map(r -> { Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("course", r[0]); m.put("courseId", r[1]); m.put("missed", r[2]); return m; })
+                .toList();
+
+        List<Map<String, Object>> recent = attendanceRepository
+                .findMissedBySchoolId(schoolId).stream().limit(50)
+                .map(a -> { Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("id", a.getId());
+                    m.put("studentName", a.getStudent().getFullName());
+                    m.put("studentEmail", a.getStudent().getEmail());
+                    m.put("courseName", a.getCourse() != null ? a.getCourse().getTitleUz() : "");
+                    m.put("date", a.getDate().toString());
+                    m.put("present", false);
+                    return m; })
+                .toList();
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("total", total);
+        result.put("present", present);
+        result.put("missed", missed);
+        result.put("attendanceRate", total > 0 ? Math.round(100.0 * present / total * 10) / 10.0 : 0.0);
+        result.put("topAbsentStudents", topAbsent);
+        result.put("topAbsentCourses", topCourses);
+        result.put("recentMissed", recent);
+        return result;
+    }
+
     public List<Map<String, Object>> getSchoolAttendance(Long schoolId) {
         return attendanceRepository.findBySchoolId(schoolId).stream()
                 .limit(200)

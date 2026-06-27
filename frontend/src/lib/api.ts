@@ -87,7 +87,7 @@ export const generateLessonDraft = (topic: string, subject: string, gradeLevel: 
 export interface TeacherStudent { id: number; fullName: string; email: string; avgScore: number; courseCount: number; }
 export const getTeacherStudents = () => api.get<TeacherStudent[]>("/api/teacher/students");
 
-export interface AttendanceRecord { id: number; studentId: number; studentName: string; date: string; present: boolean; }
+export interface AttendanceRecord { id: number; studentId?: number; studentName: string; studentEmail?: string; courseName?: string; date: string; present: boolean; }
 export const getCourseAttendance = (courseId: number, date?: string) =>
   api.get<AttendanceRecord[]>(`/api/teacher/courses/${courseId}/attendance${date ? `?date=${date}` : ""}`);
 export const markAttendance = (courseId: number, studentId: number, date: string, present: boolean) =>
@@ -269,11 +269,15 @@ export const getAdminParents = () => api.get<AdminUser[]>("/api/admin/parents");
 export const linkParent = (studentId: number, parentEmail: string) =>
   api.post<{ message: string }>(`/api/admin/students/${studentId}/link-parent`, { parentEmail });
 
-export interface AttendanceRecord {
-  id: number; studentName: string; studentEmail: string;
-  courseName: string; date: string; present: boolean;
-}
 export const getAdminAttendance = () => api.get<AttendanceRecord[]>("/api/admin/attendance");
+
+export interface AttendanceStats {
+  total: number; present: number; missed: number; attendanceRate: number;
+  topAbsentStudents: { name: string; studentId: number; missed: number }[];
+  topAbsentCourses: { course: string; courseId: number; missed: number }[];
+  recentMissed: AttendanceRecord[];
+}
+export const getAdminAttendanceStats = () => api.get<AttendanceStats>("/api/admin/attendance/stats");
 
 // ── School Classes ────────────────────────────────────────────────────────────
 export interface SchoolClass {
