@@ -2,6 +2,7 @@ package uz.forkbomb.academix.shared.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -23,6 +24,7 @@ public class ProgressSnapshot {
     @Column(name = "avg_score", columnDefinition = "numeric(5,2)")
     private Double avgScore;
 
+    @Builder.Default
     @Column(name = "chat_count")
     private Integer chatCount = 0;
 
@@ -41,6 +43,7 @@ public class ProgressSnapshot {
     @Column(name = "ai_narrative", columnDefinition = "TEXT")
     private String aiNarrative;
 
-    @Column(name = "snapshot_date")
-    private LocalDateTime snapshotDate = LocalDateTime.now();
+    @CreationTimestamp
+    @Column(name = "snapshot_date", updatable = false)
+    private LocalDateTime snapshotDate;
 }

@@ -19,11 +19,15 @@ function ReportsPage() {
     queryFn: getAdminAnalytics,
   });
 
-  let riskText = analytics?.atRiskAnalysis ?? "";
-  try {
-    riskText = JSON.stringify(JSON.parse(riskText), null, 2);
-  } catch {
-    // not JSON, use as-is
+  let riskStudents: { name: string; reason?: string }[] = [];
+  let riskText = "";
+  if (analytics?.atRiskAnalysis) {
+    try {
+      const parsed = JSON.parse(analytics.atRiskAnalysis);
+      riskStudents = parsed.atRiskStudents ?? [];
+    } catch {
+      riskText = analytics.atRiskAnalysis;
+    }
   }
 
   return (
@@ -65,7 +69,7 @@ function ReportsPage() {
         <div className="text-sm text-muted-foreground py-8 text-center">{t.action.loading}</div>
       )}
 
-      {!isLoading && riskText && (
+      {!isLoading && (riskStudents.length > 0 || riskText) && (
         <div className="rounded-2xl border border-border bg-card p-5 shadow-soft">
           <div className="flex items-center gap-2 mb-4">
             <div className="grid h-8 w-8 place-items-center rounded-xl bg-primary/10">
@@ -73,13 +77,22 @@ function ReportsPage() {
             </div>
             <h2 className="font-display font-semibold">{t.admin.aiReportTitle}</h2>
           </div>
-          <pre className="text-xs whitespace-pre-wrap text-muted-foreground leading-relaxed max-h-96 overflow-y-auto bg-muted/30 rounded-xl p-4">
-            {riskText}
-          </pre>
+          {riskStudents.length > 0 ? (
+            <ul className="space-y-2">
+              {riskStudents.map((s, i) => (
+                <li key={i} className="flex gap-2 text-sm p-2 rounded-lg bg-muted/40">
+                  <span className="font-medium">{s.name}</span>
+                  {s.reason && <span className="text-muted-foreground">— {s.reason}</span>}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs whitespace-pre-wrap text-muted-foreground leading-relaxed bg-muted/30 rounded-xl p-4">{riskText}</p>
+          )}
         </div>
       )}
 
-      {!isLoading && !riskText && (
+      {!isLoading && !riskStudents.length && !riskText && (
         <div className="rounded-2xl border border-border bg-card p-8 text-center">
           <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
           <p className="text-sm text-muted-foreground">{t.admin.riskEmpty}</p>

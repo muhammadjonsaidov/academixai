@@ -2,6 +2,7 @@ package uz.forkbomb.academix.shared.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -22,6 +23,7 @@ public class Enrollment {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    @Column(name = "enrolled_at")
-    private LocalDateTime enrolledAt = LocalDateTime.now();
+    @CreationTimestamp
+    @Column(name = "enrolled_at", updatable = false)
+    private LocalDateTime enrolledAt;
 }

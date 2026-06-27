@@ -51,6 +51,7 @@ const breadcrumbLabelMap: Record<string, string> = {
   messages: "Xabarlar",
   students: "O'quvchilar",
   teachers: "O'qituvchilar",
+  parents: "Ota-onalar",
   attendance: "Davomat",
   reports: "Hisobotlar",
   calendar: "Kalendar",

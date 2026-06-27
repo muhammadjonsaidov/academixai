@@ -1,0 +1,10 @@
+UPDATE notifications SET created_at = NOW() WHERE created_at IS NULL;
+UPDATE chat_messages SET created_at = NOW() WHERE created_at IS NULL;
+UPDATE exam_results SET taken_at = NOW() WHERE taken_at IS NULL;
+UPDATE enrollments SET enrolled_at = NOW() WHERE enrolled_at IS NULL;
+UPDATE notes SET created_at = NOW() WHERE created_at IS NULL;
+UPDATE sentiment_logs SET created_at = NOW() WHERE created_at IS NULL;
+UPDATE teacher_documents SET created_at = NOW() WHERE created_at IS NULL;
+UPDATE lessons SET created_at = NOW() WHERE created_at IS NULL;
+UPDATE courses SET created_at = NOW() WHERE created_at IS NULL;
+UPDATE progress_snapshots SET snapshot_date = NOW() WHERE snapshot_date IS NULL;

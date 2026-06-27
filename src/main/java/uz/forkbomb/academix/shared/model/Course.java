@@ -2,6 +2,7 @@ package uz.forkbomb.academix.shared.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import uz.forkbomb.academix.shared.config.JsonbConverter;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ public class Course {
     @Column(name = "description_uz", columnDefinition = "TEXT")
     private String descriptionUz;
 
+    @Builder.Default
     @Column(name = "cover_emoji")
     private String coverEmoji = "📚";
 
@@ -50,6 +52,7 @@ public class Course {
     @Column(name = "school_id")
     private Long schoolId;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 }

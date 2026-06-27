@@ -13,6 +13,7 @@ import uz.forkbomb.academix.shared.model.enums.SubscriptionTier;
 import uz.forkbomb.academix.shared.repository.*;
 import uz.forkbomb.academix.rag.NotificationService;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -171,15 +172,30 @@ public class AdminService {
                         absencesPerStudent.getOrDefault(s.getId(), 0L)))
                 .collect(Collectors.joining(",", "[", "]"));
 
-        String atRiskJson = students.isEmpty() ? "{\"atRiskStudents\":[]}"
+        String atRiskJson = students.isEmpty() ? null
                 : aiService.analyzeAtRiskStudents(studentsJson);
 
-        return Map.of(
-                "teacherCount", teachers.size(),
-                "studentCount", students.size(),
-                "avgScore", avgScore != null ? avgScore : 0.0,
-                "totalAbsences", totalAbsences,
-                "atRiskAnalysis", atRiskJson
-        );
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("teacherCount", (long) teachers.size());
+        result.put("studentCount", students.size());
+        result.put("avgScore", avgScore != null ? avgScore : 0.0);
+        result.put("totalAbsences", totalAbsences);
+        result.put("atRiskAnalysis", atRiskJson);
+        return result;
+    }
+
+    public List<Map<String, Object>> getSchoolAttendance(Long schoolId) {
+        return attendanceRepository.findBySchoolId(schoolId).stream()
+                .limit(200)
+                .map(a -> {
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("id", a.getId());
+                    m.put("studentName", a.getStudent().getFullName());
+                    m.put("studentEmail", a.getStudent().getEmail());
+                    m.put("courseName", a.getCourse() != null ? a.getCourse().getTitleUz() : "");
+                    m.put("date", a.getDate().toString());
+                    m.put("present", a.getPresent());
+                    return m;
+                }).toList();
     }
 }

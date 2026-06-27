@@ -41,6 +41,9 @@ public class User {
     @Column(name = "school_id")
     private Long schoolId;
 
+    @Column(name = "class_id")
+    private Long classId;
+
     @Builder.Default
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();

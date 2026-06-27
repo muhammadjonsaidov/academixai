@@ -3,6 +3,7 @@ package uz.forkbomb.academix.shared.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -32,6 +33,7 @@ public class ExamResult {
     @Column(name = "answers_json", columnDefinition = "TEXT")
     private String answersJson;
 
-    @Column(name = "taken_at")
-    private LocalDateTime takenAt = LocalDateTime.now();
+    @CreationTimestamp
+    @Column(name = "taken_at", updatable = false)
+    private LocalDateTime takenAt;
 }

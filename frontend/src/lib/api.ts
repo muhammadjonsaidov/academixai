@@ -263,3 +263,37 @@ export const addParent = (fullName: string, email: string, password?: string) =>
 export const getAdminParents = () => api.get<AdminUser[]>("/api/admin/parents");
 export const linkParent = (studentId: number, parentEmail: string) =>
   api.post<{ message: string }>(`/api/admin/students/${studentId}/link-parent`, { parentEmail });
+
+export interface AttendanceRecord {
+  id: number; studentName: string; studentEmail: string;
+  courseName: string; date: string; present: boolean;
+}
+export const getAdminAttendance = () => api.get<AttendanceRecord[]>("/api/admin/attendance");
+
+// ── School Classes ────────────────────────────────────────────────────────────
+export interface SchoolClass {
+  id: number;
+  name: string;
+  gradeLevel: number | null;
+  schoolId: number;
+  homeroomTeacherId: number | null;
+  homeroomTeacherName: string | null;
+  studentCount: number;
+  createdAt: string;
+}
+
+export const getClasses = () => api.get<SchoolClass[]>("/api/admin/classes");
+export const createClass = (name: string, gradeLevel?: number, homeroomTeacherId?: number) =>
+  api.post<SchoolClass>("/api/admin/classes", { name, gradeLevel, homeroomTeacherId });
+export const updateClass = (id: number, data: { name?: string; gradeLevel?: number; homeroomTeacherId?: number | null }) =>
+  api.put<SchoolClass>(`/api/admin/classes/${id}`, data);
+export const deleteClass = (id: number) =>
+  api.delete<{ message: string }>(`/api/admin/classes/${id}`);
+export const getClassStudents = (id: number) =>
+  api.get<{ id: number; fullName: string; email: string }[]>(`/api/admin/classes/${id}/students`);
+export const assignStudentToClass = (classId: number, studentId: number) =>
+  api.post<{ message: string }>(`/api/admin/classes/${classId}/students/${studentId}`, {});
+export const removeStudentFromClass = (classId: number, studentId: number) =>
+  api.delete<{ message: string }>(`/api/admin/classes/${classId}/students/${studentId}`);
+export const assignTeacherToClass = (classId: number, teacherId: number) =>
+  api.post<{ message: string }>(`/api/admin/classes/${classId}/teacher/${teacherId}`, {});

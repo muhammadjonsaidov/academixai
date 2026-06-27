@@ -2,6 +2,7 @@ package uz.forkbomb.academix.shared.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -26,6 +27,7 @@ public class SentimentLog {
     @Column(name = "sentiment_label")
     private String sentimentLabel; // frustrated, anxious, curious, confident, neutral
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 }

@@ -2,6 +2,7 @@ package uz.forkbomb.academix.shared.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -34,9 +35,11 @@ public class TeacherDocument {
     @Column(name = "raw_text", columnDefinition = "TEXT")
     private String rawText;
 
+    @Builder.Default
     @Column(name = "chunk_count")
     private Integer chunkCount = 0;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 }

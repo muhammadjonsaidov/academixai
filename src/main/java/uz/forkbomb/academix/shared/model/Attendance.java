@@ -25,6 +25,7 @@ public class Attendance {
     @Column(nullable = false)
     private LocalDate date;
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean present = true;
 }

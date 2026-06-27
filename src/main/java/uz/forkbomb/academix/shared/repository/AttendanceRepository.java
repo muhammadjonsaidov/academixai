@@ -23,4 +23,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     @Query("SELECT a.student.id, COUNT(a) FROM Attendance a WHERE a.student.schoolId = :schoolId AND a.present = false GROUP BY a.student.id")
     List<Object[]> countAbsencesPerStudentBySchoolId(Long schoolId);
+
+    @Query("SELECT a FROM Attendance a WHERE a.student.schoolId = :schoolId ORDER BY a.date DESC")
+    List<Attendance> findBySchoolId(Long schoolId);
 }

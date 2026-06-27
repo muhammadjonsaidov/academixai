@@ -137,11 +137,15 @@ function AdminDashboard() {
     }
   }
 
-  let riskText = analytics?.atRiskAnalysis ?? "";
-  try {
-    riskText = JSON.stringify(JSON.parse(riskText), null, 2);
-  } catch {
-    // not JSON, use as-is
+  let riskStudents: { name: string; reason?: string }[] = [];
+  let riskText = "";
+  if (analytics?.atRiskAnalysis) {
+    try {
+      const parsed = JSON.parse(analytics.atRiskAnalysis);
+      riskStudents = parsed.atRiskStudents ?? [];
+    } catch {
+      riskText = analytics.atRiskAnalysis;
+    }
   }
 
   return (
@@ -159,13 +163,24 @@ function AdminDashboard() {
         <StatCard label={t.admin.totalAbsences} value={loadingAnalytics ? "…" : (analytics?.totalAbsences ?? 0)} icon={AlertTriangle} accent="default" />
       </div>
 
-      {riskText && (
+      {(riskStudents.length > 0 || riskText) && (
         <div className="rounded-2xl border border-warning/40 bg-warning/5 p-5">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="h-4 w-4 text-warning" />
             <h2 className="font-display font-semibold text-sm">{t.admin.riskAnalysis}</h2>
           </div>
-          <pre className="text-xs whitespace-pre-wrap text-muted-foreground max-h-40 overflow-y-auto">{riskText}</pre>
+          {riskStudents.length > 0 ? (
+            <ul className="space-y-1">
+              {riskStudents.map((s, i) => (
+                <li key={i} className="text-sm text-muted-foreground flex gap-2">
+                  <span className="font-medium text-foreground">{s.name}</span>
+                  {s.reason && <span>— {s.reason}</span>}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs text-muted-foreground whitespace-pre-wrap">{riskText}</p>
+          )}
         </div>
       )}
 
