@@ -190,7 +190,10 @@ export const getDashboard = () => api.get<DashboardStats>("/api/student/dashboar
 export interface HomeworkResult {
   id?: number; subject: string; status: string;
   ocrText: string; isCorrect: boolean; score: number;
-  method: string; errors: string[]; feedback: string;
+  formulaUsed?: string; method: string;
+  correctSteps?: string[]; incorrectSteps?: string[];
+  finalAnswer?: string; expectedAnswer?: string;
+  errors: string[]; feedback: string;
   resubmitRequired: boolean; resubmitReason?: string;
   imageData?: string; aiFeedback?: string; createdAt?: string;
 }

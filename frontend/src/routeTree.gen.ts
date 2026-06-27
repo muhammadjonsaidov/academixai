@@ -41,6 +41,7 @@ import { Route as AppStudentProfileRouteImport } from './routes/_app.student.pro
 import { Route as AppStudentNotificationsRouteImport } from './routes/_app.student.notifications'
 import { Route as AppStudentNotesRouteImport } from './routes/_app.student.notes'
 import { Route as AppStudentLabsRouteImport } from './routes/_app.student.labs'
+import { Route as AppStudentHomeworkRouteImport } from './routes/_app.student.homework'
 import { Route as AppStudentExamsRouteImport } from './routes/_app.student.exams'
 import { Route as AppStudentCoursesRouteImport } from './routes/_app.student.courses'
 import { Route as AppStudentCareerRouteImport } from './routes/_app.student.career'
@@ -226,6 +227,11 @@ const AppStudentLabsRoute = AppStudentLabsRouteImport.update({
   path: '/labs',
   getParentRoute: () => AppStudentRoute,
 } as any)
+const AppStudentHomeworkRoute = AppStudentHomeworkRouteImport.update({
+  id: '/homework',
+  path: '/homework',
+  getParentRoute: () => AppStudentRoute,
+} as any)
 const AppStudentExamsRoute = AppStudentExamsRouteImport.update({
   id: '/exams',
   path: '/exams',
@@ -388,6 +394,7 @@ export interface FileRoutesByFullPath {
   '/student/career': typeof AppStudentCareerRoute
   '/student/courses': typeof AppStudentCoursesRouteWithChildren
   '/student/exams': typeof AppStudentExamsRoute
+  '/student/homework': typeof AppStudentHomeworkRoute
   '/student/labs': typeof AppStudentLabsRoute
   '/student/notes': typeof AppStudentNotesRoute
   '/student/notifications': typeof AppStudentNotificationsRoute
@@ -442,6 +449,7 @@ export interface FileRoutesByTo {
   '/student/career': typeof AppStudentCareerRoute
   '/student/courses': typeof AppStudentCoursesRouteWithChildren
   '/student/exams': typeof AppStudentExamsRoute
+  '/student/homework': typeof AppStudentHomeworkRoute
   '/student/labs': typeof AppStudentLabsRoute
   '/student/notes': typeof AppStudentNotesRoute
   '/student/notifications': typeof AppStudentNotificationsRoute
@@ -502,6 +510,7 @@ export interface FileRoutesById {
   '/_app/student/career': typeof AppStudentCareerRoute
   '/_app/student/courses': typeof AppStudentCoursesRouteWithChildren
   '/_app/student/exams': typeof AppStudentExamsRoute
+  '/_app/student/homework': typeof AppStudentHomeworkRoute
   '/_app/student/labs': typeof AppStudentLabsRoute
   '/_app/student/notes': typeof AppStudentNotesRoute
   '/_app/student/notifications': typeof AppStudentNotificationsRoute
@@ -562,6 +571,7 @@ export interface FileRouteTypes {
     | '/student/career'
     | '/student/courses'
     | '/student/exams'
+    | '/student/homework'
     | '/student/labs'
     | '/student/notes'
     | '/student/notifications'
@@ -616,6 +626,7 @@ export interface FileRouteTypes {
     | '/student/career'
     | '/student/courses'
     | '/student/exams'
+    | '/student/homework'
     | '/student/labs'
     | '/student/notes'
     | '/student/notifications'
@@ -675,6 +686,7 @@ export interface FileRouteTypes {
     | '/_app/student/career'
     | '/_app/student/courses'
     | '/_app/student/exams'
+    | '/_app/student/homework'
     | '/_app/student/labs'
     | '/_app/student/notes'
     | '/_app/student/notifications'
@@ -929,6 +941,13 @@ declare module '@tanstack/react-router' {
       path: '/labs'
       fullPath: '/student/labs'
       preLoaderRoute: typeof AppStudentLabsRouteImport
+      parentRoute: typeof AppStudentRoute
+    }
+    '/_app/student/homework': {
+      id: '/_app/student/homework'
+      path: '/homework'
+      fullPath: '/student/homework'
+      preLoaderRoute: typeof AppStudentHomeworkRouteImport
       parentRoute: typeof AppStudentRoute
     }
     '/_app/student/exams': {
@@ -1186,6 +1205,7 @@ interface AppStudentRouteChildren {
   AppStudentCareerRoute: typeof AppStudentCareerRoute
   AppStudentCoursesRoute: typeof AppStudentCoursesRouteWithChildren
   AppStudentExamsRoute: typeof AppStudentExamsRoute
+  AppStudentHomeworkRoute: typeof AppStudentHomeworkRoute
   AppStudentLabsRoute: typeof AppStudentLabsRoute
   AppStudentNotesRoute: typeof AppStudentNotesRoute
   AppStudentNotificationsRoute: typeof AppStudentNotificationsRoute
@@ -1202,6 +1222,7 @@ const AppStudentRouteChildren: AppStudentRouteChildren = {
   AppStudentCareerRoute: AppStudentCareerRoute,
   AppStudentCoursesRoute: AppStudentCoursesRouteWithChildren,
   AppStudentExamsRoute: AppStudentExamsRoute,
+  AppStudentHomeworkRoute: AppStudentHomeworkRoute,
   AppStudentLabsRoute: AppStudentLabsRoute,
   AppStudentNotesRoute: AppStudentNotesRoute,
   AppStudentNotificationsRoute: AppStudentNotificationsRoute,

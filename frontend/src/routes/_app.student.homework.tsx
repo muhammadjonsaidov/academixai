@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ScanLine, Upload, CheckCircle2, XCircle, AlertTriangle, RefreshCw,
   Lightbulb, BookOpen, ChevronDown, ChevronUp, Clock, ImageIcon,
+  Hash, ArrowRight, Target, Sigma,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -42,37 +43,32 @@ function ResultCard({ result }: { result: HomeworkResult }) {
   const [showOcr, setShowOcr] = useState(false);
   const [showImg, setShowImg] = useState(false);
 
-  let parsed: HomeworkResult = result;
+  let p: HomeworkResult = result;
   if (result.aiFeedback) {
     try {
       const c = result.aiFeedback.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
-      parsed = { ...result, ...JSON.parse(c) };
+      p = { ...result, ...JSON.parse(c) };
     } catch { /* use raw */ }
   }
 
-  const statusIcon = parsed.resubmitRequired ? AlertTriangle :
-    parsed.isCorrect ? CheckCircle2 : XCircle;
-  const statusColor = parsed.resubmitRequired ? "text-amber-500" :
-    parsed.isCorrect ? "text-green-500" : "text-red-500";
-  const statusText = parsed.resubmitRequired ? "Qayta topshiring" :
-    parsed.isCorrect ? "To'g'ri yechilgan" : "Xatolar bor";
-  const StatusIcon = statusIcon;
+  const isResubmit = p.resubmitRequired;
+  const isOk = !isResubmit && p.isCorrect;
+  const borderColor = isResubmit ? "border-amber-200 dark:border-amber-800/40" : isOk ? "border-green-200 dark:border-green-800/40" : "border-red-200 dark:border-red-800/40";
+  const StatusIcon = isResubmit ? AlertTriangle : isOk ? CheckCircle2 : XCircle;
+  const statusColor = isResubmit ? "text-amber-500" : isOk ? "text-green-500" : "text-red-500";
+  const statusText = isResubmit ? "Qayta topshiring" : isOk ? "To'g'ri yechilgan" : "Xatolar bor";
 
   return (
-    <div className={cn("rounded-2xl border bg-card shadow-soft overflow-hidden",
-      parsed.resubmitRequired ? "border-amber-200 dark:border-amber-800/40" :
-      parsed.isCorrect ? "border-green-200 dark:border-green-800/40" :
-      "border-red-200 dark:border-red-800/40")}>
-
+    <div className={cn("rounded-2xl border bg-card shadow-soft overflow-hidden", borderColor)}>
       {/* Header */}
       <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
         <StatusIcon className={cn("h-5 w-5 shrink-0", statusColor)} />
         <div className="flex-1">
-          <p className="font-semibold text-sm">{parsed.subject}</p>
-          <p className={cn("text-xs", statusColor)}>{statusText}</p>
+          <p className="font-semibold text-sm">{p.subject}</p>
+          <p className={cn("text-xs font-medium", statusColor)}>{statusText}</p>
         </div>
-        {!parsed.resubmitRequired && <ScoreRing score={parsed.score ?? 0} size={64} />}
-        {parsed.resubmitRequired && (
+        {!isResubmit && <ScoreRing score={p.score ?? 0} size={64} />}
+        {isResubmit && (
           <span className="text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 px-3 py-1 rounded-full font-medium">
             Qayta yuklang
           </span>
@@ -80,81 +76,144 @@ function ResultCard({ result }: { result: HomeworkResult }) {
       </div>
 
       <div className="p-5 space-y-4">
+        {/* Formula */}
+        {p.formulaUsed && p.formulaUsed !== "—" && (
+          <div className="rounded-xl bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/40 px-4 py-3 flex items-center gap-3">
+            <Sigma className="h-4 w-4 shrink-0 text-purple-600" />
+            <div>
+              <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-0.5">Ishlatilgan formula</p>
+              <p className="text-sm font-mono font-semibold text-purple-900 dark:text-purple-100">{p.formulaUsed}</p>
+            </div>
+          </div>
+        )}
+
         {/* Method */}
-        {parsed.method && (
+        {p.method && (
           <div className="flex gap-2">
             <BookOpen className="h-4 w-4 shrink-0 mt-0.5 text-blue-500" />
             <div>
               <p className="text-xs font-medium text-muted-foreground mb-0.5">Yechish usuli</p>
-              <p className="text-sm">{parsed.method}</p>
+              <p className="text-sm">{p.method}</p>
             </div>
+          </div>
+        )}
+
+        {/* Steps grid */}
+        {((p.correctSteps && p.correctSteps.length > 0) || (p.incorrectSteps && p.incorrectSteps.length > 0)) && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {p.correctSteps && p.correctSteps.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-2 flex items-center gap-1">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> To'g'ri qadamlar
+                </p>
+                <ul className="space-y-1">
+                  {p.correctSteps.map((s, i) => (
+                    <li key={i} className="text-xs bg-green-50 dark:bg-green-950/20 text-green-800 dark:text-green-200 rounded-lg px-3 py-2 flex gap-2">
+                      <Hash className="h-3 w-3 shrink-0 mt-0.5 opacity-60" />{s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {p.incorrectSteps && p.incorrectSteps.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-red-700 dark:text-red-400 mb-2 flex items-center gap-1">
+                  <XCircle className="h-3.5 w-3.5" /> Noto'g'ri qadamlar
+                </p>
+                <ul className="space-y-1">
+                  {p.incorrectSteps.map((s, i) => (
+                    <li key={i} className="text-xs bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-200 rounded-lg px-3 py-2 flex gap-2">
+                      <Hash className="h-3 w-3 shrink-0 mt-0.5 opacity-60" />{s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Answer comparison */}
+        {(p.finalAnswer || p.expectedAnswer) && (
+          <div className="flex items-center gap-2 text-sm">
+            <div className={cn("flex-1 rounded-lg px-3 py-2 text-center", p.isCorrect ? "bg-green-50 dark:bg-green-950/20" : "bg-red-50 dark:bg-red-950/20")}>
+              <p className="text-xs text-muted-foreground mb-0.5">O'quvchi javobi</p>
+              <p className="font-mono font-semibold">{p.finalAnswer || "—"}</p>
+            </div>
+            {!p.isCorrect && p.expectedAnswer && (
+              <>
+                <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                <div className="flex-1 rounded-lg px-3 py-2 text-center bg-green-50 dark:bg-green-950/20">
+                  <p className="text-xs text-muted-foreground mb-0.5">To'g'ri javob</p>
+                  <p className="font-mono font-semibold text-green-700">{p.expectedAnswer}</p>
+                </div>
+              </>
+            )}
           </div>
         )}
 
         {/* Errors */}
-        {parsed.errors && parsed.errors.length > 0 && (
-          <div className="flex gap-2">
-            <XCircle className="h-4 w-4 shrink-0 mt-0.5 text-red-500" />
-            <div>
-              <p className="text-xs font-medium text-muted-foreground mb-1">Topilgan xatolar</p>
-              <ul className="space-y-1">
-                {parsed.errors.map((e, i) => (
-                  <li key={i} className="text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/20 rounded-lg px-3 py-1.5">
-                    {e}
-                  </li>
-                ))}
-              </ul>
-            </div>
+        {p.errors && p.errors.length > 0 && (
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+              <Target className="h-3.5 w-3.5" /> Aniq xatolar
+            </p>
+            <ul className="space-y-1">
+              {p.errors.map((e, i) => (
+                <li key={i} className="text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/20 rounded-lg px-3 py-2 flex gap-2">
+                  <span className="text-red-400 shrink-0 font-bold">{i + 1}.</span>{e}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
-        {/* Resubmit reason */}
-        {parsed.resubmitRequired && parsed.resubmitReason && (
+        {/* Resubmit warning */}
+        {isResubmit && p.resubmitReason && (
           <div className="flex gap-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 p-3">
             <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-amber-500" />
-            <p className="text-sm text-amber-800 dark:text-amber-200">{parsed.resubmitReason}</p>
+            <p className="text-sm text-amber-800 dark:text-amber-200">{p.resubmitReason}</p>
           </div>
         )}
 
         {/* Feedback */}
-        {parsed.feedback && (
+        {p.feedback && (
           <div className="flex gap-2 rounded-xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/40 p-3">
             <Lightbulb className="h-4 w-4 shrink-0 mt-0.5 text-blue-500" />
-            <p className="text-sm text-blue-800 dark:text-blue-200">{parsed.feedback}</p>
+            <p className="text-sm text-blue-800 dark:text-blue-200">{p.feedback}</p>
           </div>
         )}
 
-        {/* OCR collapsible */}
-        {parsed.ocrText && (
-          <button onClick={() => setShowOcr(v => !v)}
-            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground w-full">
-            {showOcr ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-            O'qilgan matn
-          </button>
-        )}
-        {showOcr && parsed.ocrText && (
-          <pre className="text-xs bg-muted/40 rounded-xl p-3 whitespace-pre-wrap font-mono text-muted-foreground">
-            {parsed.ocrText}
-          </pre>
-        )}
-
-        {/* Image collapsible */}
-        {parsed.imageData && (
-          <button onClick={() => setShowImg(v => !v)}
-            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground w-full">
-            {showImg ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-            Yuklangan rasm
-          </button>
-        )}
-        {showImg && parsed.imageData && (
-          <img src={parsed.imageData} alt="homework" className="max-w-full rounded-xl border border-border" />
+        {/* Collapsibles */}
+        {p.ocrText && (
+          <>
+            <button onClick={() => setShowOcr(v => !v)}
+              className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground w-full">
+              {showOcr ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+              O'qilgan matn (OCR)
+            </button>
+            {showOcr && (
+              <pre className="text-xs bg-muted/40 rounded-xl p-3 whitespace-pre-wrap font-mono text-muted-foreground">
+                {p.ocrText}
+              </pre>
+            )}
+          </>
         )}
 
-        {/* Date */}
-        {parsed.createdAt && (
-          <p className="text-xs text-muted-foreground flex items-center gap-1 pt-1">
+        {p.imageData && (
+          <>
+            <button onClick={() => setShowImg(v => !v)}
+              className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground w-full">
+              {showImg ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+              Yuklangan rasm
+            </button>
+            {showImg && <img src={p.imageData} alt="homework" className="max-w-full rounded-xl border border-border" />}
+          </>
+        )}
+
+        {p.createdAt && (
+          <p className="text-xs text-muted-foreground flex items-center gap-1 pt-1 border-t border-border">
             <Clock className="h-3 w-3" />
-            {new Date(parsed.createdAt).toLocaleString("uz-Latn-UZ", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}
+            {new Date(p.createdAt).toLocaleString("uz-Latn-UZ", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}
           </p>
         )}
       </div>

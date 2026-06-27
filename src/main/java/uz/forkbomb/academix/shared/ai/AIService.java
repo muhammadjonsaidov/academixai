@@ -149,19 +149,29 @@ public class AIService {
 
     public String analyzeHomework(byte[] imageBytes, String mimeType) {
         String system = """
-                Siz matematika o'qituvchisiiz va uy ishlarini tekshirasiz.
-                O'quvchi matematika uy ishini yozib yubordi. Rasmni tahlil qiling.
-                FAQAT quyidagi JSON formatda javob bering, boshqa hech narsa yozmasdan:
-                {"ocrText":"...","isCorrect":true,"score":85,"method":"...","errors":["..."],"feedback":"...","resubmitRequired":false,"resubmitReason":""}
-                Maydonlar:
-                - ocrText: rasmdan o'qilgan yozuv (agar o'qib bo'lmasa bo'sh qoldir)
-                - isCorrect: yechim to'g'rimi
-                - score: 0-100 ball
-                - method: qo'llanilgan yechish usuli O'zbek tilida
-                - errors: topilgan xatolar ro'yxati O'zbek tilida (bo'sh bo'lishi mumkin)
-                - feedback: o'quvchiga rag'batlantiruvchi izoh O'zbek tilida
-                - resubmitRequired: agar yozuv o'qib bo'lmasa yoki masala tushunarsiz bo'lsa true
-                - resubmitReason: qayta topshirish sababi O'zbek tilida (bo'sh bo'lishi mumkin)
+                Siz tajribali matematika o'qituvchisiiz. O'quvchi uy ishini rasmda yuboryapti.
+                Rasmni diqqat bilan o'qib, FAQAT quyidagi JSON formatda javob bering. Boshqa hech narsa yozma.
+                {
+                  "ocrText": "rasmdan o'qilgan to'liq yozuv",
+                  "formulaUsed": "ishlatilgan formula yoki teorema (masalan: a²+b²=c²)",
+                  "method": "qo'llanilgan yechish usuli (qisqa, O'zbek tilida)",
+                  "correctSteps": ["to'g'ri bajarilgan 1-qadam", "to'g'ri bajarilgan 2-qadam"],
+                  "incorrectSteps": ["xato qilingan qadam va izoh"],
+                  "finalAnswer": "o'quvchi yozgan yakuniy javob",
+                  "expectedAnswer": "to'g'ri javob (agar xato bo'lsa)",
+                  "isCorrect": true,
+                  "score": 85,
+                  "errors": ["aniq xato 1", "aniq xato 2"],
+                  "feedback": "o'quvchiga rag'batlantiruvchi, aniq maslahat O'zbek tilida (2-3 jumla)",
+                  "resubmitRequired": false,
+                  "resubmitReason": ""
+                }
+                Qoidalar:
+                - score: 0-100 (to'liq to'g'ri=100, kichik xato=70-90, katta xato=30-60, umuman xato=0-30)
+                - resubmitRequired: FAQAT yozuv o'qib bo'lmasa yoki rasm sifatsiz bo'lsa true
+                - formulaUsed: agar formula ishlatilmasa "—" yoz
+                - correctSteps bo'sh bo'lishi mumkin agar hech narsa to'g'ri emas bo'lsa
+                - feedback faqat O'zbek tilida, rag'batlantiruvchi tonda
                 """;
         try {
             Media media = new Media(MimeType.valueOf(mimeType), new ByteArrayResource(imageBytes));
