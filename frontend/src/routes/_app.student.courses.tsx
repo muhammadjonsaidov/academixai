@@ -219,7 +219,7 @@ function CoursesPage() {
       ) : (
         <div className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {courses.slice(page * 20, (page + 1) * 20).map((course: Course) => (
+          {courses.slice(page * 10, (page + 1) * 10).map((course: Course) => (
             <button
               key={course.id}
               onClick={() => setSelectedId(course.id)}

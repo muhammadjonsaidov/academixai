@@ -102,7 +102,7 @@ function TeachersPage() {
             </p>
           </div>
           <ul className="divide-y divide-border">
-            {teachers.slice(page * 20, (page + 1) * 20).map((teacher) => (
+            {teachers.slice(page * 10, (page + 1) * 10).map((teacher) => (
               <li key={teacher.id} className="flex items-center justify-between px-5 py-4 gap-4">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/10">

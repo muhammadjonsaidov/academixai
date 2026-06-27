@@ -107,7 +107,7 @@ function ClassesPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {classes.slice(page * 20, (page + 1) * 20).map(cls => (
+          {classes.slice(page * 10, (page + 1) * 10).map(cls => (
             <ClassCard
               key={cls.id}
               cls={cls}

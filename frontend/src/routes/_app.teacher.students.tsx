@@ -47,7 +47,7 @@ function StudentsPage() {
       s.fullName.toLowerCase().includes(search.toLowerCase()) ||
       s.email.toLowerCase().includes(search.toLowerCase()),
   );
-  const paged = filtered.slice(page * 20, (page + 1) * 20);
+  const paged = filtered.slice(page * 10, (page + 1) * 10);
 
   const avgScore =
     students.length > 0

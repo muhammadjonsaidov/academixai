@@ -8,7 +8,7 @@ interface PaginationProps {
   onChange: (page: number) => void;
 }
 
-export function Pagination({ page, total, pageSize = 20, onChange }: PaginationProps) {
+export function Pagination({ page, total, pageSize = 10, onChange }: PaginationProps) {
   const totalPages = Math.ceil(total / pageSize);
   if (totalPages <= 1) return null;
 

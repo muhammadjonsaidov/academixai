@@ -94,7 +94,7 @@ function ParentsPage() {
             </p>
           </div>
           <ul className="divide-y divide-border">
-            {parents.slice(page * 20, (page + 1) * 20).map((p) => (
+            {parents.slice(page * 10, (page + 1) * 10).map((p) => (
               <li key={p.id} className="flex items-center justify-between px-5 py-4 gap-4">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-rose-500/10">
